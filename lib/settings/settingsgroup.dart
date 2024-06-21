@@ -573,7 +573,9 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
           }
         }
         // Обработка ошибок при регистрации
-        infoSnackBar(context, errorMessage);
+        if (mounted) {
+          infoSnackBar(context, errorMessage);
+        }
       }
     } else {
       infoSnackBar(context, 'Необходимо заполнить все поля');
@@ -589,20 +591,19 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
       );
       isAutorization = true;
       currentUser = FirebaseAuth.instance.currentUser;
-      ServiceUser? user = await getServiceUser();
-      if (user != null) {
-        setState(() {
-          serviceuser = user;
-          selectedNameGroup = serviceuser?.group;
-          nameleading.text = serviceuser!.name;
-          infoSnackBar(context, 'Вход выполнен');
-        });
+
+      if (mounted) {
+        loadServiceUser();
+        infoSnackBar(context, 'Вход не выполнен');
       }
+
       onCallbackSettingPage();
     } catch (e) {
       // Обработка ошибок при входе
       debugPrint(e.toString());
-      infoSnackBar(context, 'Вход не выполнен');
+      if (mounted) {
+        infoSnackBar(context, 'Вход не выполнен');
+      }
     }
   }
 
