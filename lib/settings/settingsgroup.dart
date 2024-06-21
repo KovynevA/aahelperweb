@@ -535,6 +535,7 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
         infoSnackBar(context, 'Регистрация НЕ успешна');
       }
       loadServiceUser();
+      setState(() {});
     } else {
       selectedNameGroup = serviceuser?.group;
       nameleading.text = serviceuser?.name ?? '';
@@ -556,6 +557,7 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
         isAutorization = true;
         currentUser = FirebaseAuth.instance.currentUser;
         onCreateUserFromFireStore();
+        setState(() {});
       } catch (e) {
         String errorMessage = '';
         if (e is FirebaseAuthException) {
@@ -594,7 +596,7 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
 
       if (mounted) {
         loadServiceUser();
-        infoSnackBar(context, 'Вход не выполнен');
+        infoSnackBar(context, 'Вход выполнен');
       }
 
       onCallbackSettingPage();
