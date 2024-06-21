@@ -502,15 +502,14 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
   }
 
   void loadServiceUser() async {
-    await getServiceUser().then((user) {
-      if (user != null) {
-        setState(() {
-          serviceuser = user;
-          selectedNameGroup = serviceuser?.group;
-          nameleading.text = serviceuser!.name;
-        });
-      }
-    });
+    ServiceUser? user = await getServiceUser();
+    if (user != null) {
+      setState(() {
+        serviceuser = user;
+        selectedNameGroup = serviceuser?.group;
+        nameleading.text = serviceuser!.name;
+      });
+    }
   }
 
   // callback
@@ -530,11 +529,16 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
       );
       ServiceUser.saveServiceUserToFirestore(serviceUser);
       onCallbackSettingPage();
-      infoSnackBar(context, 'Регистрация успешна');
+      if (currentUser != null) {
+        infoSnackBar(context, 'Регистрация успешна');
+      } else {
+        infoSnackBar(context, 'Регистрация НЕ успешна');
+      }
       loadServiceUser();
     } else {
       selectedNameGroup = serviceuser?.group;
       nameleading.text = serviceuser?.name ?? '';
+      infoSnackBar(context, 'Пользователь существует');
     }
   }
 
@@ -577,7 +581,7 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
   }
 
 // Авторизация зарегистрированного пользователя
-  Future<void> signIn() async {
+  void signIn() async {
     try {
       await _auth.signInWithEmailAndPassword(
         email: logincontroller.text,
@@ -585,11 +589,20 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
       );
       isAutorization = true;
       currentUser = FirebaseAuth.instance.currentUser;
-      loadServiceUser();
+      ServiceUser? user = await getServiceUser();
+      if (user != null) {
+        setState(() {
+          serviceuser = user;
+          selectedNameGroup = serviceuser?.group;
+          nameleading.text = serviceuser!.name;
+          infoSnackBar(context, 'Вход выполнен');
+        });
+      }
       onCallbackSettingPage();
     } catch (e) {
       // Обработка ошибок при входе
       debugPrint(e.toString());
+      infoSnackBar(context, 'Вход не выполнен');
     }
   }
 
@@ -761,12 +774,8 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
                     ),
                     TextButton(
                       onPressed: () {
-                        signIn().then((_) {
-                          setState(() {
-                            isAutorization
-                                ? infoSnackBar(context, 'Вход выполнен')
-                                : infoSnackBar(context, 'Вход не выполнен');
-                          });
+                        setState(() {
+                          signIn();
                         });
                       },
                       style: AppButtonStyle.dialogButton,
