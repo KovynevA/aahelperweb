@@ -1,0 +1,389 @@
+import 'package:aahelper/helper/stylemenu.dart';
+import 'package:aahelper/helper/utils.dart';
+import 'package:flutter/material.dart';
+import 'package:table_calendar/table_calendar.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+class Speakercard extends StatefulWidget {
+  const Speakercard({super.key});
+
+  @override
+  State<Speakercard> createState() => _SpeakercardState();
+}
+
+class _SpeakercardState extends State<Speakercard> {
+  DateTime _selectedDay = kToday;
+  DateTime _focusedDay = kToday;
+  final CalendarFormat _calendarFormat = CalendarFormat.month;
+  List<SpeakerMeeting>? listSpeakerMeeting;
+  bool showSpeakerCard = false;
+
+  @override
+  void initState() {
+    setState(() {
+      _loadSpeakerMeetings();
+      _loadEvents();
+      showSpeakerCard = false;
+    });
+
+    super.initState();
+  }
+
+// Загрузить спикерские собрания
+  void _loadSpeakerMeetings() {
+    SpeakerMeeting.loadMeetingsFromFirestore().then((value) {
+      setState(() {
+        listSpeakerMeeting = value;
+      });
+    });
+  }
+
+  // Загрузить календарь событий
+  void _loadEvents() async {
+    try {
+      await Event.loadEventsFromFirestore(
+          RepeatOptions('Не повторять', RepeatType.none));
+    } catch (e) {
+      debugPrint('Ошибка Загрузки файла событий: $e');
+    }
+  }
+
+// Вызвать календарь для выбора даты
+  void _showCalendarDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+            return SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TableCalendar<Event>(
+                    rowHeight: 40,
+                    locale: 'ru_RU',
+                    firstDay: kFirstDay,
+                    lastDay: kLastDay,
+                    focusedDay: _focusedDay,
+                    selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+                    calendarFormat: _calendarFormat,
+                    eventLoader: _getEventsForDay,
+                    startingDayOfWeek: StartingDayOfWeek.monday,
+                    availableCalendarFormats: const {
+                      CalendarFormat.month: 'Month',
+                    },
+                    headerStyle: const HeaderStyle(
+                      titleTextStyle: AppTextStyle.menutextstyle,
+                    ),
+                    daysOfWeekHeight: 20,
+                    daysOfWeekStyle: const DaysOfWeekStyle(
+                      weekdayStyle: AppTextStyle.valuesstyle,
+                      weekendStyle: AppTextStyle.valuesstyle,
+                    ),
+                    calendarStyle: CalendarStyle(
+                      defaultTextStyle: AppTextStyle.spantextstyle,
+                      weekendTextStyle: AppTextStyle.spantextstyle,
+                      selectedTextStyle: AppTextStyle.valuesstyle,
+                      todayTextStyle: AppTextStyle.valuesstyle,
+                      outsideDaysVisible: false,
+                      markerSize: 10,
+                      markerDecoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(width: 2.0, color: Colors.orange),
+                        color: Colors.black,
+                      ),
+                    ),
+                    onDaySelected: (selectedDay, focusedDay) {
+                      setState(() {
+                        _selectedDay = selectedDay;
+                        _focusedDay = focusedDay;
+                      });
+                    },
+                    onPageChanged: (focusedDay) {
+                      setState(() {
+                        _focusedDay = focusedDay;
+                      });
+                    },
+                  ),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      showSpeakerCard = false;
+                      Navigator.of(context).pop();
+                      refresh();
+                    },
+                    style: AppButtonStyle.iconButton,
+                    child: const Text(
+                      'Выбрать',
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+        );
+      },
+    );
+  }
+
+  // обновить виджеты
+  void refresh() {
+    setState(() {});
+  }
+
+  List<Event> _getEventsForDay(DateTime day) {
+    return kEvents[day] ?? [];
+  }
+
+// Получить строчку даты из DateTime
+  String getTextDate(DateTime date) {
+    final String year = date.year.toString();
+    final String month =
+        date.month > 10 ? date.month.toString() : '0${date.month}';
+    final String day = date.day > 10 ? date.day.toString() : '0${date.day}';
+    return '$year:$month:$day';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                const Text(
+                  'Дата собрания: ',
+                  style: AppTextStyle.valuesstyle,
+                ),
+                IconButton(
+                  onPressed: () {
+                    _showCalendarDialog(context);
+                  },
+                  icon: const Icon(
+                    Icons.calendar_month,
+                    color: Colors.brown,
+                  ),
+                  iconSize: 24,
+                ),
+                Text(
+                  getTextDate(_selectedDay),
+                  style: AppTextStyle.valuesstyle,
+                ),
+              ],
+            ),
+          ),
+          if (SpeakerMeeting.findSpeakerMeetingByDate(
+                  listSpeakerMeeting ?? [], _selectedDay) !=
+              null)
+            AddSpeakerForSelectedDate(
+              listSpeakerMeeting: listSpeakerMeeting ?? [],
+              selectedDay: _selectedDay,
+            ),
+          if (SpeakerMeeting.findSpeakerMeetingByDate(
+                      listSpeakerMeeting ?? [], _selectedDay) ==
+                  null &&
+              !showSpeakerCard)
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  showSpeakerCard = true;
+                });
+              },
+              style: AppButtonStyle.dialogButton,
+              child: const Text('Добавить'),
+            ),
+          if (showSpeakerCard)
+            AddSpeakerForSelectedDate(
+              listSpeakerMeeting: listSpeakerMeeting ?? [],
+              selectedDay: _selectedDay,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+// Карточка с добавлением спикера
+class AddSpeakerForSelectedDate extends StatefulWidget {
+  const AddSpeakerForSelectedDate(
+      {super.key, required this.selectedDay, required this.listSpeakerMeeting});
+  final List<SpeakerMeeting> listSpeakerMeeting;
+  final DateTime selectedDay;
+
+  @override
+  State<AddSpeakerForSelectedDate> createState() =>
+      _AddSpeakerForSelectedDateState();
+}
+
+class _AddSpeakerForSelectedDateState extends State<AddSpeakerForSelectedDate> {
+  TextEditingController? nameSpeakerController = TextEditingController();
+  TextEditingController? phoneeSpeakerController = TextEditingController();
+  TextEditingController? homegroupController = TextEditingController();
+  TextEditingController? sobrietyPeriodrController = TextEditingController();
+  TextEditingController? themeController = TextEditingController();
+  SpeakerMeeting? speakerMeeting;
+  ServiceUser? serviceuser;
+
+  @override
+  void initState() {
+    super.initState();
+    getServiceUser();
+    _updateDataForSelectedDay(widget.selectedDay);
+  }
+
+  @override
+  void didUpdateWidget(covariant AddSpeakerForSelectedDate oldWidget) {
+    if (widget.selectedDay != oldWidget.selectedDay) {
+      _updateDataForSelectedDay(widget.selectedDay);
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  void getServiceUser() async {
+    if (isAutorization) {
+      serviceuser =
+          await ServiceUser.getServiceUserFromFirestore(currentUser!.uid);
+    }
+  }
+
+  void _updateDataForSelectedDay(DateTime selectedDay) {
+    if (widget.listSpeakerMeeting.isNotEmpty) {
+      speakerMeeting = SpeakerMeeting.findSpeakerMeetingByDate(
+          widget.listSpeakerMeeting, selectedDay);
+      if (speakerMeeting != null) {
+        nameSpeakerController =
+            TextEditingController(text: speakerMeeting!.speakerName);
+        phoneeSpeakerController =
+            TextEditingController(text: speakerMeeting!.phone ?? '');
+        homegroupController =
+            TextEditingController(text: speakerMeeting!.homegroup ?? '');
+        sobrietyPeriodrController = TextEditingController(
+            text: (speakerMeeting!.sobrietyPeriod ?? 0).toString());
+        themeController =
+            TextEditingController(text: speakerMeeting!.theme ?? '');
+      } else {
+        nameSpeakerController = TextEditingController();
+        phoneeSpeakerController = TextEditingController();
+        homegroupController = TextEditingController();
+        sobrietyPeriodrController = TextEditingController();
+        themeController = TextEditingController();
+      }
+    } else {
+      nameSpeakerController = TextEditingController();
+      phoneeSpeakerController = TextEditingController();
+      homegroupController = TextEditingController();
+      sobrietyPeriodrController = TextEditingController();
+      themeController = TextEditingController();
+    }
+  }
+
+// Сохранить введенные данные спикера
+  void onSaveListSpeakermeeting() {
+    SpeakerMeeting newSpeakerMeeting = SpeakerMeeting(
+      date: widget.selectedDay,
+      speakerName: nameSpeakerController!.text,
+      phone: phoneeSpeakerController!.text,
+      homegroup: homegroupController!.text,
+      sobrietyPeriod: sobrietyPeriodrController!.text == ''
+          ? '0'
+          : sobrietyPeriodrController!.text,
+      theme: themeController!.text,
+    );
+    int index = widget.listSpeakerMeeting
+        .indexWhere((meeting) => meeting.date == widget.selectedDay);
+    // Проверяем, существует ли уже запись для выбранной даты
+    if (speakerMeeting?.date == newSpeakerMeeting.date) {
+      widget.listSpeakerMeeting[index] = newSpeakerMeeting;
+    } else {
+      widget.listSpeakerMeeting.add(newSpeakerMeeting);
+    }
+    widget.listSpeakerMeeting.sort((a, b) => a.date.compareTo(b.date));
+    SpeakerMeeting.saveMeetingsToFirestore(widget.listSpeakerMeeting);
+  }
+
+  @override
+  void dispose() {
+    nameSpeakerController?.dispose();
+    phoneeSpeakerController?.dispose();
+    homegroupController?.dispose();
+    sobrietyPeriodrController?.dispose();
+    themeController?.dispose();
+    super.dispose();
+  }
+
+  Future<void> _launchPhoneApp(String phoneNumber) async {
+    final Uri phoneLaunchUri = Uri(scheme: 'tel', path: phoneNumber);
+    if (await canLaunchUrl(phoneLaunchUri)) {
+      await launchUrl(phoneLaunchUri);
+    } else {
+      throw 'Could not launch $phoneNumber';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return  Column(
+          children: [
+        SizedBox(
+          // height: MediaQuery.of(context).size.height * 0.3,
+          width: MediaQuery.of(context).size.width * 0.97,
+          child: Card(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15.0),
+            ),
+            shadowColor: Colors.black,
+            elevation: 5.0,
+            child: Column(
+               children: [
+        AnimatedTextAndTextFieldWidget(
+      text: 'Имя:',
+      controller: nameSpeakerController!,
+    ),
+
+            GestureDetector(
+              onDoubleTap: () {
+                _launchPhoneApp(phoneeSpeakerController!.text);
+              },
+              child: AnimatedTextAndTextFieldWidget(
+                  text: 'Телефон спикера:',
+                  controller: phoneeSpeakerController!),
+            ),
+            AnimatedTextAndTextFieldWidget(
+              text: 'Домашняя группа:',
+              controller: homegroupController!,
+            ),
+            AnimatedTextAndTextFieldWidget(
+              text: 'Срок трезвости:',
+              controller: sobrietyPeriodrController!,
+            ),
+            AnimatedTextAndTextFieldWidget(
+              text: 'Тема:',
+              controller: themeController!,
+            ),
+          ],
+        ),
+      ),
+    ),
+        TextButton(
+          onPressed: () {
+            setState(() {
+              onSaveListSpeakermeeting();
+              (serviceuser!.type.contains(ServiceName.chairperson) ||
+                      serviceuser!.type.contains(ServiceName.leading))
+                  ? infoSnackBar(context, 'Спикер сохранён')
+                  : infoSnackBar(context, 'Недостаточно прав');
+            });
+          },
+          style: AppButtonStyle.dialogButton,
+          child: const Text('Сохранить'),
+        ),
+      ],
+    );
+  }
+}
