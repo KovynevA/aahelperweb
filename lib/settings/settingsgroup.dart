@@ -508,6 +508,7 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
         serviceuser = user;
         selectedNameGroup = serviceuser?.group;
         nameleading.text = serviceuser!.name;
+        infoSnackBar(context, '${serviceuser?.name}');
       });
     }
   }
@@ -594,7 +595,7 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
       isAutorization = true;
       currentUser = FirebaseAuth.instance.currentUser;
 
-      if (mounted) {
+      if (currentUser != null) {
         loadServiceUser();
         infoSnackBar(context, 'Вход выполнен');
       }
