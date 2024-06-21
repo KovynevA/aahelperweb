@@ -1104,19 +1104,18 @@ class ServiceUser {
   ServiceUser(this.group, this.name,
       {required this.uid, required this.email, required this.type});
 
-  static void saveServiceUserToFirestore(ServiceUser user) {
-    FirebaseFirestore.instance
-        .collection('service_users')
-        .doc(user.uid)
-        .set({
-          'uid': user.uid,
-          'email': user.email,
-          'type': user.type.map((e) => e.toString().split('.').last,).toList(),
-          'group': user.group,
-          'name': user.name,
-        })
-        .then((value) => debugPrint('User saved to Firestore'))
-        .catchError((error) => debugPrint('Failed to save user: $error'));
+  static void saveServiceUserToFirestore(ServiceUser user) async {
+    await FirebaseFirestore.instance.collection('service_users').doc(user.uid).set({
+      'uid': user.uid,
+      'email': user.email,
+      'type': user.type
+          .map(
+            (e) => e.toString().split('.').last,
+          )
+          .toList(),
+      'group': user.group,
+      'name': user.name,
+    });
   }
 
   static Future<ServiceUser?> getServiceUserFromFirestore(String uid) async {
@@ -1129,9 +1128,9 @@ class ServiceUser {
       if (userSnapshot.exists) {
         Map<String, dynamic> userData =
             userSnapshot.data() as Map<String, dynamic>;
-List<ServiceName> userTypes = (userData['type'] as List<dynamic>)
-            .map((e) =>
-                ServiceName.values.firstWhere((enumValue) => enumValue.toString() == 'ServiceName.$e'))
+        List<ServiceName> userTypes = (userData['type'] as List<dynamic>)
+            .map((e) => ServiceName.values.firstWhere(
+                (enumValue) => enumValue.toString() == 'ServiceName.$e'))
             .toList();
         return ServiceUser(
           userData['group'],
