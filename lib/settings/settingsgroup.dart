@@ -635,35 +635,37 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
   @override
   Widget build(BuildContext context) {
     return currentUser != null
-        ? Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(14.0),
-                child: Center(
-                  child: Text(
-                    'Группа ${serviceuser?.group}',
-                    style: AppTextStyle.menutextstyle,
-                  ),
-                ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
+        ? serviceuser == null
+            ? const RefreshProgressIndicator()
+            : Column(
                 children: [
-                  Text(
-                    'Добро пожаловать, ${serviceuser?.name}',
-                    style: AppTextStyle.valuesstyle,
+                  Padding(
+                    padding: const EdgeInsets.all(14.0),
+                    child: Center(
+                      child: Text(
+                        'Группа ${serviceuser?.group}',
+                        style: AppTextStyle.menutextstyle,
+                      ),
+                    ),
                   ),
-                  ElevatedButton(
-                    style: AppButtonStyle.dialogButton,
-                    onPressed: () {
-                      signOutUser();
-                    },
-                    child: const Text('Выйти'),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Text(
+                        'Добро пожаловать, ${serviceuser?.name}',
+                        style: AppTextStyle.valuesstyle,
+                      ),
+                      ElevatedButton(
+                        style: AppButtonStyle.dialogButton,
+                        onPressed: () {
+                          signOutUser();
+                        },
+                        child: const Text('Выйти'),
+                      ),
+                    ],
                   ),
                 ],
-              ),
-            ],
-          )
+              )
         : Column(
             children: [
               Row(
