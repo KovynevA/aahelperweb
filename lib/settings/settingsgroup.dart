@@ -635,8 +635,8 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
   @override
   Widget build(BuildContext context) {
     return currentUser != null
-        ? serviceuser == null
-            ? const RefreshProgressIndicator()
+        ? serviceuser?.group == null
+            ? const LinearProgressIndicator()
             : Column(
                 children: [
                   Padding(
