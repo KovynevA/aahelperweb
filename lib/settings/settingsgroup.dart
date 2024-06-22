@@ -508,7 +508,6 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
         serviceuser = user;
         selectedNameGroup = serviceuser?.group;
         nameleading.text = serviceuser!.name;
-        infoSnackBar(context, '${serviceuser?.name}');
       });
     }
   }
@@ -634,163 +633,181 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return currentUser != null
-        ? serviceuser?.group == null
-            ? const LinearProgressIndicator()
-            : Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(14.0),
-                    child: Center(
-                      child: Text(
-                        'Группа ${serviceuser?.group}',
-                        style: AppTextStyle.menutextstyle,
-                      ),
-                    ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+    return FutureBuilder<ServiceUser?>(
+      future: getServiceUser(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return CircularProgressIndicator(); // Показываем индикатор загрузки
+        } else {
+          if (snapshot.hasError) {
+            return Text('Ошибка загрузки данных');
+          } else {
+            ServiceUser? user = snapshot.data;
+            if (user != null) {
+              serviceuser = user;
+              selectedNameGroup = serviceuser?.group;
+              nameleading.text = serviceuser!.name;
+            }
+            return currentUser != null
+                ? Column(
                     children: [
-                      Text(
-                        'Добро пожаловать, ${serviceuser?.name}',
-                        style: AppTextStyle.valuesstyle,
+                      Padding(
+                        padding: const EdgeInsets.all(14.0),
+                        child: Center(
+                          child: Text(
+                            'Группа ${serviceuser?.group}',
+                            style: AppTextStyle.menutextstyle,
+                          ),
+                        ),
                       ),
-                      ElevatedButton(
-                        style: AppButtonStyle.dialogButton,
-                        onPressed: () {
-                          signOutUser();
-                        },
-                        child: const Text('Выйти'),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Text(
+                            'Добро пожаловать, ${serviceuser?.name}',
+                            style: AppTextStyle.valuesstyle,
+                          ),
+                          ElevatedButton(
+                            style: AppButtonStyle.dialogButton,
+                            onPressed: () {
+                              signOutUser();
+                            },
+                            child: const Text('Выйти'),
+                          ),
+                        ],
                       ),
                     ],
-                  ),
-                ],
-              )
-        : Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  const Column(
+                  )
+                : Column(
                     children: [
-                      Text(
-                        'Почта:',
-                        style: AppTextStyle.menutextstyle,
-                      ),
-                      SizedBox(
-                        height: 20.0,
-                      ),
-                      Text(
-                        'Пароль:',
-                        style: AppTextStyle.menutextstyle,
-                      ),
-                      SizedBox(
-                        height: 20.0,
-                      ),
-                      Text(
-                        'Ваше имя:',
-                        style: AppTextStyle.menutextstyle,
-                      ),
-                      SizedBox(
-                        height: 20.0,
-                      ),
-                      Text(
-                        'Группа АА:',
-                        style: AppTextStyle.menutextstyle,
-                      ),
-                    ],
-                  ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const SizedBox(
-                        height: 5.0,
-                      ),
-                      TextFieldStyleWidget(
-                        decoration: Decor.decorTextField,
-                        sizewidth: MediaQuery.of(context).size.width / 2,
-                        sizeheight: 40,
-                        controller: logincontroller,
-                        //  onChanged: (p0) => {},
-                      ),
-                      const SizedBox(
-                        height: 5.0,
-                      ),
-                      TextFieldStyleWidget(
-                        decoration: Decor.decorTextField,
-                        sizewidth: MediaQuery.of(context).size.width / 2,
-                        sizeheight: 40,
-                        controller: passwordcontroller,
-                        //  onChanged: (p0) => {},
-                      ),
-                      const SizedBox(
-                        height: 5.0,
-                      ),
-                      TextFieldStyleWidget(
-                        decoration: Decor.decorTextField,
-                        sizewidth: MediaQuery.of(context).size.width / 2,
-                        sizeheight: 40,
-                        controller: nameleading,
-                        // onChanged: (p0) => {},
-                      ),
-                      const SizedBox(
-                        height: 5.0,
-                      ),
-                      Container(
-                        padding: const EdgeInsets.fromLTRB(10, 0, 10, 2),
-                        width: MediaQuery.of(context).size.width / 2,
-                        height: 50,
-                        decoration: Decor.decorDropDownButton,
-                        child: DropdownButtonFormField(
-                          style: AppTextStyle.menutextstyle,
-                          value: selectedNameGroup,
-                          items: nameGroup.map((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(
-                                value,
-                                style: AppTextStyle.valuesstyle,
-                                textAlign: TextAlign.center,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          const Column(
+                            children: [
+                              Text(
+                                'Почта:',
+                                style: AppTextStyle.menutextstyle,
                               ),
-                            );
-                          }).toList(),
-                          onChanged: (String? value) {
-                            setState(() {
-                              selectedNameGroup = value!;
-                            });
-                          },
+                              SizedBox(
+                                height: 20.0,
+                              ),
+                              Text(
+                                'Пароль:',
+                                style: AppTextStyle.menutextstyle,
+                              ),
+                              SizedBox(
+                                height: 20.0,
+                              ),
+                              Text(
+                                'Ваше имя:',
+                                style: AppTextStyle.menutextstyle,
+                              ),
+                              SizedBox(
+                                height: 20.0,
+                              ),
+                              Text(
+                                'Группа АА:',
+                                style: AppTextStyle.menutextstyle,
+                              ),
+                            ],
+                          ),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const SizedBox(
+                                height: 5.0,
+                              ),
+                              TextFieldStyleWidget(
+                                decoration: Decor.decorTextField,
+                                sizewidth:
+                                    MediaQuery.of(context).size.width / 2,
+                                sizeheight: 40,
+                                controller: logincontroller,
+                              ),
+                              const SizedBox(
+                                height: 5.0,
+                              ),
+                              TextFieldStyleWidget(
+                                decoration: Decor.decorTextField,
+                                sizewidth:
+                                    MediaQuery.of(context).size.width / 2,
+                                sizeheight: 40,
+                                controller: passwordcontroller,
+                              ),
+                              const SizedBox(
+                                height: 5.0,
+                              ),
+                              TextFieldStyleWidget(
+                                decoration: Decor.decorTextField,
+                                sizewidth:
+                                    MediaQuery.of(context).size.width / 2,
+                                sizeheight: 40,
+                                controller: nameleading,
+                              ),
+                              const SizedBox(
+                                height: 5.0,
+                              ),
+                              Container(
+                                padding:
+                                    const EdgeInsets.fromLTRB(10, 0, 10, 2),
+                                width: MediaQuery.of(context).size.width / 2,
+                                height: 50,
+                                decoration: Decor.decorDropDownButton,
+                                child: DropdownButtonFormField(
+                                  style: AppTextStyle.menutextstyle,
+                                  value: selectedNameGroup,
+                                  items: nameGroup.map((String value) {
+                                    return DropdownMenuItem<String>(
+                                      value: value,
+                                      child: Text(
+                                        value,
+                                        style: AppTextStyle.valuesstyle,
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    );
+                                  }).toList(),
+                                  onChanged: (String? value) {
+                                    setState(() {
+                                      selectedNameGroup = value!;
+                                    });
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 18.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            TextButton(
+                              onPressed: () {
+                                createUser();
+                                setState(() {});
+                              },
+                              style: AppButtonStyle.dialogButton,
+                              child: const Text('Зарегистрироваться'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                setState(() {
+                                  signIn();
+                                });
+                              },
+                              style: AppButtonStyle.dialogButton,
+                              child: const Text('Войти'),
+                            ),
+                          ],
                         ),
                       ),
                     ],
-                  ),
-                ],
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 18.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    TextButton(
-                      onPressed: () {
-                        createUser();
-                        setState(() {});
-                      },
-                      style: AppButtonStyle.dialogButton,
-                      child: const Text('Зарегистрироваться'),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        setState(() {
-                          signIn();
-                        });
-                      },
-                      style: AppButtonStyle.dialogButton,
-                      child: const Text('Войти'),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          );
+                  );
+          }
+        }
+      },
+    );
   }
 }
