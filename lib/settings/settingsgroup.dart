@@ -634,16 +634,14 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return (currentUser != null &&
-            serviceuser?.group != null &&
-            serviceuser?.name != null)
+    return (currentUser != null)
         ? Column(
             children: [
               Padding(
                 padding: const EdgeInsets.all(14.0),
                 child: Center(
                   child: Text(
-                    'Группа Октябрь', // 'Группа ${serviceuser?.group}',
+                    'Группа ${serviceuser?.group}',
                     style: AppTextStyle.menutextstyle,
                   ),
                 ),
