@@ -634,7 +634,9 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return (currentUser != null && serviceuser != null)
+    return (currentUser != null &&
+            serviceuser?.group != null &&
+            serviceuser?.name != null)
         ? Column(
             children: [
               Padding(
