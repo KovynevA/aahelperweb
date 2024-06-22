@@ -643,7 +643,7 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
                 padding: const EdgeInsets.all(14.0),
                 child: Center(
                   child: Text(
-                    'Группа ${serviceuser?.group}',
+                    'Группа Октябрь', // 'Группа ${serviceuser?.group}',
                     style: AppTextStyle.menutextstyle,
                   ),
                 ),
