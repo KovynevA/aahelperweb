@@ -508,7 +508,6 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
         serviceuser = user;
         selectedNameGroup = serviceuser?.group;
         nameleading.text = serviceuser!.name;
-        infoSnackBar(context, '${serviceuser?.name}');
       });
     }
   }
