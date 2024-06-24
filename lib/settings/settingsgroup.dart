@@ -1,10 +1,8 @@
 // Настройки группы
 import 'package:aahelper/helper/stylemenu.dart';
 import 'package:aahelper/helper/utils.dart';
-import 'package:aahelper/main.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class SettingsGroup extends StatefulWidget {
   final String title;
@@ -39,11 +37,16 @@ class _SettingsGroupState extends State<SettingsGroup> {
   void initState() {
     getMeetingShedule();
     loadServiceuser();
+    loadprofitGroup();
     super.initState();
   }
 
   void loadServiceuser() async {
     serviceUser = await getServiceUser();
+  }
+
+  void loadprofitGroup() async {
+    profitGroup = await ProfitGroup.loadProfitGroups() ?? [];
   }
 
   void getMeetingShedule() async {
@@ -77,18 +80,13 @@ class _SettingsGroupState extends State<SettingsGroup> {
     });
   }
 
-  void loadListProFit() async {
-    await Provider.of<ServiceProvider>(context, listen: false)
-        .loadProfitGroupsFromJson();
-    listprotocolMeeting = await ProtocolMeeting.loadProtocolMeetings() ?? [];
-  }
-
 // В список событий добавить список ВСЕХ собраний группы и заполнить пустой лист
 //всех собраний
   void addMeetingEvents() {
-    profitGroup =
-        Provider.of<ServiceProvider>(context, listen: false).listProfitGroup ??
-            [];
+    // profitGroup =
+    //     Provider.of<ServiceProvider>(context, listen: false).listProfitGroup ??
+    //         [];
+    loadprofitGroup();
     kEvents.clear();
     for (var day in selectedDays) {
       DateTime date = kFirstDay;
@@ -128,8 +126,8 @@ class _SettingsGroupState extends State<SettingsGroup> {
     // Не забудьте сортировать список после добавления новых элементов
     profitGroup.sort((a, b) => a.date.compareTo(b.date));
     listprotocolMeeting.sort((a, b) => a.date.compareTo(b.date));
-    Provider.of<ServiceProvider>(context, listen: false)
-        .updateListProfit(profitGroup);
+    // Provider.of<ServiceProvider>(context, listen: false)
+    //     .updateListProfit(profitGroup);
     addEventsForWorksMeetings(); // Добавляем Новые Рабочие собрания
   }
 
@@ -334,6 +332,7 @@ class _SettingsGroupState extends State<SettingsGroup> {
                             selectedDays: selectedDays,
                             dayOfMonth: dayOfMonth,
                             checkboxstatus: numDayNumWeekCheckbox);
+                        loadprofitGroup();
                         addMeetingEvents(); // Добавляем Новые собрания группы
                         Event
                             .saveEventsToFirestore(); // Сохранем все события в файл
