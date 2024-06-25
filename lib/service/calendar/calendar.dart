@@ -430,9 +430,16 @@ class _ChairEventCalendarState extends State<ChairEventCalendar> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               CustomFloatingActionButton(
-                icon: Icons.cleaning_services,
-                onPressed: _clearCalendar,
-              ),
+                  icon: Icons.cleaning_services,
+                  onPressed: () async {
+                    final ServiceUser? serviceUser = await getServiceUser();
+                    if (serviceUser != null &&
+                        serviceUser.type.contains(ServiceName.chairperson)) {
+                      _clearCalendar;
+                    } else {
+                      infoSnackBar(context, 'Недостаточно прав');
+                    }
+                  }),
               CustomFloatingActionButton(
                 icon: Icons.add_box,
                 onPressed: _addEvent,

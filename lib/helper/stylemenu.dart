@@ -41,7 +41,7 @@ class TextFieldStyleWidget extends StatelessWidget {
         textAlign: TextAlign.center,
         decoration: const InputDecoration(
           border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(horizontal: 10.0),
+          contentPadding: EdgeInsets.symmetric(vertical: 10.0),
         ),
       ),
     );

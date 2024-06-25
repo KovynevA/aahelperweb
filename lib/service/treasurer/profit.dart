@@ -1,8 +1,6 @@
 import 'package:aahelper/helper/stylemenu.dart';
 import 'package:aahelper/helper/utils.dart';
-import 'package:aahelper/main.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class Profit extends StatefulWidget {
   const Profit({super.key});
@@ -244,6 +242,7 @@ class _FrontOfCardWidgetState extends State<FrontOfCardWidget> {
         (widget.listProfitGroup[widget.index].expensiveother ?? 0);
   }
 
+// Меню удаления дня, всех дней недели или очистка списка
   void showSelectedWeekDay(BuildContext context) {
     showDialog(
         context: context,
@@ -295,8 +294,6 @@ class _FrontOfCardWidgetState extends State<FrontOfCardWidget> {
                             }
                             ProfitGroup.saveProfitGroups(
                                 widget.listProfitGroup);
-                            Provider.of<ServiceProvider>(context, listen: false)
-                                .updateListProfit(widget.listProfitGroup);
                             infoSnackBar(context, 'Удалено');
                             Navigator.of(context).pop();
                           },

@@ -11,7 +11,7 @@ class ServiceProvider extends ChangeNotifier {
   List<String> questions = [];
   List<String> completedquetions = [];
   ProfitGroup? totalProfit;
-  List<ProfitGroup>? listProfitGroup;
+
 
   Future<void> loadData() async {
     if (isAutorization) {
@@ -96,17 +96,7 @@ class ServiceProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> loadProfitGroupsFromJson() async {
-    List<ProfitGroup> newListProfit =
-        await ProfitGroup.loadProfitGroups() ?? [];
-    updateListProfit(newListProfit);
-  }
-
-  void updateListProfit(List<ProfitGroup> newListProfit) {
-    listProfitGroup = newListProfit;
-    notifyListeners();
-  }
-}
+ }
 
 // Модель провайдера
 class TeaProvider extends ChangeNotifier {
