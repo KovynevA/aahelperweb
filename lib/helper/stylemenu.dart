@@ -41,7 +41,7 @@ class TextFieldStyleWidget extends StatelessWidget {
         textAlign: TextAlign.center,
         decoration: const InputDecoration(
           border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(vertical: 10.0),
+          contentPadding: EdgeInsets.symmetric(vertical: 2.0),
         ),
       ),
     );
@@ -182,7 +182,7 @@ class _AnimatedTextFieldStyleWidgetState
           textAlign: TextAlign.center,
           decoration: const InputDecoration(
             border: InputBorder.none,
-            contentPadding: EdgeInsets.symmetric(vertical: 6.0),
+            contentPadding: EdgeInsets.symmetric(vertical: 2.0),
           ),
         ),
       ),
