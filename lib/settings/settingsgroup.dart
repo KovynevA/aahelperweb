@@ -613,6 +613,7 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
       await _auth.signOut();
       setState(() {
         currentUser = null;
+        serviceuser = null;
         isAutorization = false;
         infoSnackBar(context, 'Вы вышли из аккаунта');
         onCallbackSettingPage();

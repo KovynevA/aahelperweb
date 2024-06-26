@@ -29,7 +29,11 @@ class _WorkMeetingState extends State<WorkMeeting> {
   }
 
   void loadProfit() async {
-    loadedData = await ProfitGroup.loadProfitGroups();
+     loadedData = await ProfitGroup.loadProfitGroups();
+    if (loadedData != null) {
+    loadProfitData(_startDate!, dates[dates.indexOf(_startDate!) - 1]);
+  }
+   
   }
 
 // Лист со всеми рабочками
@@ -72,17 +76,19 @@ class _WorkMeetingState extends State<WorkMeeting> {
 
 // Загрузить отчет по запрошенным датам
   void loadProfitData(DateTime date2, DateTime date1) {
-    setState(() {
-      listProfitGroup = loadedData!.where((profitGroup) {
-        return profitGroup.date.isAfter(date1) &&
-                profitGroup.date.isBefore(date2) ||
-            profitGroup.date.isAtSameMomentAs(date1) ||
-            profitGroup.date.isAtSameMomentAs(date2);
-      }).toList();
-    });
+    if (loadedData != null) {
+      setState(() {
+        listProfitGroup = loadedData!.where((profitGroup) {
+          return profitGroup.date.isAfter(date1) &&
+                  profitGroup.date.isBefore(date2) ||
+              profitGroup.date.isAtSameMomentAs(date1) ||
+              profitGroup.date.isAtSameMomentAs(date2);
+        }).toList();
+      });
 
-    totalProfit = ProfitGroup.totalProfit(listProfitGroup);
-    _totalFreeCash();
+      totalProfit = ProfitGroup.totalProfit(listProfitGroup);
+      _totalFreeCash();
+    }
   }
 
   String _formatDate(DateTime date) {

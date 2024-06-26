@@ -30,7 +30,7 @@ final kLastDay = DateTime(kToday.year, kToday.month + 3, kToday.day);
 
 Future<ServiceUser?> getServiceUser() async {
   if (isAutorization) {
-    return await ServiceUser.getServiceUserFromFirestore(currentUser!.uid);
+    return await ServiceUser.getServiceUserFromFirestore(currentUser!.email!);
   } else {
     return null;
   }
@@ -493,14 +493,14 @@ class Deductions {
   factory Deductions.fromMap(Map<String, dynamic> map) {
     return Deductions(
       date: map['date'].toDate(),
-      reserve: map['reserve'],
-      anniversary: map['anniversary'],
-      rent: map['rent'],
-      rc: map['rc'],
-      rso: map['rso'],
-      mosfond: map['mosfond'],
-      fivetradition: map['fivetradition'],
-      balance: map['balance'],
+      reserve: map['reserve']?.toDouble(),
+      anniversary: map['anniversary']?.toDouble(),
+      rent: map['rent']?.toDouble(),
+      rc: map['rc']?.toDouble(),
+      rso: map['rso']?.toDouble(),
+      mosfond: map['mosfond']?.toDouble(),
+      fivetradition: map['fivetradition']?.toDouble(),
+      balance: map['balance']?.toDouble(),
     );
   }
 
@@ -1105,7 +1105,10 @@ class ServiceUser {
       {required this.uid, required this.email, required this.type});
 
   static void saveServiceUserToFirestore(ServiceUser user) async {
-    await FirebaseFirestore.instance.collection('service_users').doc(user.uid).set({
+    await FirebaseFirestore.instance
+        .collection('service_users')
+        .doc(user.email)
+        .set({
       'uid': user.uid,
       'email': user.email,
       'type': user.type
@@ -1118,11 +1121,11 @@ class ServiceUser {
     });
   }
 
-  static Future<ServiceUser?> getServiceUserFromFirestore(String uid) async {
+  static Future<ServiceUser?> getServiceUserFromFirestore(String email) async {
     if (isAutorization) {
       DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
           .collection('service_users')
-          .doc(uid)
+          .doc(email)
           .get();
 
       if (userSnapshot.exists) {
