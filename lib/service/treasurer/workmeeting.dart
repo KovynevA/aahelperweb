@@ -29,11 +29,10 @@ class _WorkMeetingState extends State<WorkMeeting> {
   }
 
   void loadProfit() async {
-     loadedData = await ProfitGroup.loadProfitGroups();
+    loadedData = await ProfitGroup.loadProfitGroups();
     if (loadedData != null) {
-    loadProfitData(_startDate!, dates[dates.indexOf(_startDate!) - 1]);
-  }
-   
+      loadProfitData(_startDate!, dates[dates.indexOf(_startDate!) - 1]);
+    }
   }
 
 // Лист со всеми рабочками
@@ -307,7 +306,7 @@ class _GetWorkMeetingWidgetState extends State<GetWorkMeetingWidget> {
   void getServiceUser() async {
     if (isAutorization) {
       serviceuser =
-          await ServiceUser.getServiceUserFromFirestore(currentUser!.uid);
+          await ServiceUser.getServiceUserFromFirestore(currentUser!.email!);
     }
   }
 

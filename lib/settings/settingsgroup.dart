@@ -106,7 +106,7 @@ class _SettingsGroupState extends State<SettingsGroup> {
             ServiceUser? user;
             currentUser = FirebaseAuth.instance.currentUser;
             if (currentUser != null) {
-              ServiceUser.getServiceUserFromFirestore(currentUser!.uid)
+              ServiceUser.getServiceUserFromFirestore(currentUser!.email!)
                   .then((onValue) {
                 user = onValue;
               });

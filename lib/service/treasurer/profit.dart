@@ -222,7 +222,7 @@ class _FrontOfCardWidgetState extends State<FrontOfCardWidget> {
   void getServiceUser() async {
     if (isAutorization) {
       serviceuser =
-          await ServiceUser.getServiceUserFromFirestore(currentUser!.uid);
+          await ServiceUser.getServiceUserFromFirestore(currentUser!.email!);
     }
   }
 
@@ -443,7 +443,7 @@ class _BackOfCardWidgetState extends State<BackOfCardWidget> {
   void getServiceUser() async {
     if (isAutorization) {
       serviceuser =
-          await ServiceUser.getServiceUserFromFirestore(currentUser!.uid);
+          await ServiceUser.getServiceUserFromFirestore(currentUser!.email!);
     }
   }
 
@@ -665,7 +665,8 @@ class _BackOfCardWidgetState extends State<BackOfCardWidget> {
                         ProfitGroup.saveProfitGroups(listProfitGroup);
                         updateData();
                         (serviceuser!.type.contains(ServiceName.chairperson) ||
-                                serviceuser!.type.contains(ServiceName.treasurer))
+                                serviceuser!.type
+                                    .contains(ServiceName.treasurer))
                             ? infoSnackBar(context, 'Сохранено')
                             : infoSnackBar(context, 'Недостаточно прав');
                         Navigator.of(context).pop();

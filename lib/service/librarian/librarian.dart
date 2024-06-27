@@ -54,7 +54,7 @@ class _LibrarianWidgetState extends State<LibrarianWidget> {
   void getServiceUser() async {
     if (isAutorization) {
       serviceuser =
-          await ServiceUser.getServiceUserFromFirestore(currentUser!.uid);
+          await ServiceUser.getServiceUserFromFirestore(currentUser!.email!);
     }
   }
 
