@@ -1,8 +1,10 @@
 // Настройки группы
 import 'package:aahelper/helper/stylemenu.dart';
 import 'package:aahelper/helper/utils.dart';
+import 'package:aahelper/main.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class SettingsGroup extends StatefulWidget {
   final String title;
@@ -160,20 +162,37 @@ class _SettingsGroupState extends State<SettingsGroup> {
       DateTime nextDate =
           kFirstDay.add(const Duration(days: 1)); // Начинаем с следующего дня
       while (nextDate.isBefore(kLastDay)) {
-        int nextWeekNumber = (nextDate.day + 6) ~/ 7;
-        int nextDayOfWeek = nextDate.weekday;
-        if (nextWeekNumber == weekNumber && nextDayOfWeek == dayOfWeek) {
-          final eventsForNextDate = kEvents[nextDate] ?? <Event>[];
-          eventsForNextDate.add(
-            Event(
-              'Рабочее собрание',
-              // RepeatOptions('Еженедельно', RepeatType.weekly),
-              RepeatOptions('Ежемесячно', RepeatType.monthly),
-            ),
-          );
+        // Особый случай - Если выбранная нелделя (numWeekOfMonth) "Последняя"
+        if (weekNumber == 6) {
+          if (nextDate.weekday == dayOfWeek &&
+              (nextDate.month < nextDate.add(Duration(days: 7)).month ||
+                  nextDate.add(Duration(days: 7)).year > nextDate.year)) {
+            final eventsForNextDate = kEvents[nextDate] ?? <Event>[];
+            eventsForNextDate.add(
+              Event(
+                'Рабочее собрание',
+                RepeatOptions('Ежемесячно', RepeatType.monthly),
+              ),
+            );
 
-          kEvents[nextDate] = List.from(eventsForNextDate);
-          listdeductions.add(Deductions(date: nextDate));
+            kEvents[nextDate] = List.from(eventsForNextDate);
+            listdeductions.add(Deductions(date: nextDate));
+          }
+        } else {
+          int nextWeekNumber = (nextDate.day + 6) ~/ 7;
+          int nextDayOfWeek = nextDate.weekday;
+          if (nextWeekNumber == weekNumber && nextDayOfWeek == dayOfWeek) {
+            final eventsForNextDate = kEvents[nextDate] ?? <Event>[];
+            eventsForNextDate.add(
+              Event(
+                'Рабочее собрание',
+                RepeatOptions('Ежемесячно', RepeatType.monthly),
+              ),
+            );
+
+            kEvents[nextDate] = List.from(eventsForNextDate);
+            listdeductions.add(Deductions(date: nextDate));
+          }
         }
         nextDate =
             nextDate.add(const Duration(days: 1)); // Переходим к следующему дню
@@ -433,13 +452,15 @@ class WeekSelectorDropdown extends StatelessWidget {
           'Каждый ',
           style: AppTextStyle.valuesstyle,
         ),
+        // Номер недели в месяце
         DropdownButton<int>(
           value: numWeekOfMonth,
           items: List<DropdownMenuItem<int>>.generate(
-            5,
+            6,
             (index) => DropdownMenuItem(
               value: index + 1,
-              child: Text((index + 1).toString()),
+              child:
+                  index == 5 ? Text('Последний') : Text((index + 1).toString()),
             ),
           ),
           onChanged: (int? value) {
@@ -596,6 +617,7 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
       if (currentUser != null) {
         loadServiceUser();
         infoSnackBar(context, 'Вход выполнен');
+        loadQuestionsForWorkMeeting();
       }
 
       onCallbackSettingPage();
@@ -606,6 +628,10 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
         infoSnackBar(context, 'Вход не выполнен');
       }
     }
+  }
+
+  void loadQuestionsForWorkMeeting() async {
+    Provider.of<ServiceProvider>(context, listen: false).loadData();
   }
 
   void signOutUser() async {

@@ -296,15 +296,25 @@ class _AddSpeakerForSelectedDateState extends State<AddSpeakerForSelectedDate> {
       theme: themeController!.text,
     );
     int index = widget.listSpeakerMeeting
-        .indexWhere((meeting) => meeting.date == widget.selectedDay);
+        .indexWhere((meeting) => compareDate(meeting.date, widget.selectedDay));
     // Проверяем, существует ли уже запись для выбранной даты
-    if (speakerMeeting?.date == newSpeakerMeeting.date) {
+    if (compareDate(speakerMeeting!.date, newSpeakerMeeting.date)) {
       widget.listSpeakerMeeting[index] = newSpeakerMeeting;
     } else {
       widget.listSpeakerMeeting.add(newSpeakerMeeting);
     }
     widget.listSpeakerMeeting.sort((a, b) => a.date.compareTo(b.date));
     SpeakerMeeting.saveMeetingsToFirestore(widget.listSpeakerMeeting);
+    final eventsForSelectedDay = kEvents[widget.selectedDay] ?? <Event>[];
+    final textevent = 'Сикерская. Спикер: ${newSpeakerMeeting.speakerName}, \n'
+        'Дом. группа: ${newSpeakerMeeting.homegroup}, \n'
+        'Срок трезвости: ${newSpeakerMeeting.sobrietyPeriod}, \n'
+        'Тема: ${newSpeakerMeeting.theme}';
+    kEvents[widget.selectedDay] = [
+      ...eventsForSelectedDay,
+      Event(textevent, RepeatOptions('Не повторять', RepeatType.none)),
+    ];
+    Event.saveEventsToFirestore();
   }
 
   @override
@@ -317,7 +327,7 @@ class _AddSpeakerForSelectedDateState extends State<AddSpeakerForSelectedDate> {
     super.dispose();
   }
 
-  Future<void> _launchPhoneApp(String phoneNumber) async {
+  void _launchPhoneApp(String phoneNumber) async {
     final Uri phoneLaunchUri = Uri(scheme: 'tel', path: phoneNumber);
     if (await canLaunchUrl(phoneLaunchUri)) {
       await launchUrl(phoneLaunchUri);
@@ -328,8 +338,8 @@ class _AddSpeakerForSelectedDateState extends State<AddSpeakerForSelectedDate> {
 
   @override
   Widget build(BuildContext context) {
-    return  Column(
-          children: [
+    return Column(
+      children: [
         SizedBox(
           // height: MediaQuery.of(context).size.height * 0.3,
           width: MediaQuery.of(context).size.width * 0.97,
@@ -340,36 +350,35 @@ class _AddSpeakerForSelectedDateState extends State<AddSpeakerForSelectedDate> {
             shadowColor: Colors.black,
             elevation: 5.0,
             child: Column(
-               children: [
-        AnimatedTextAndTextFieldWidget(
-      text: 'Имя:',
-      controller: nameSpeakerController!,
-    ),
-
-            GestureDetector(
-              onDoubleTap: () {
-                _launchPhoneApp(phoneeSpeakerController!.text);
-              },
-              child: AnimatedTextAndTextFieldWidget(
-                  text: 'Телефон спикера:',
-                  controller: phoneeSpeakerController!),
+              children: [
+                AnimatedTextAndTextFieldWidget(
+                  text: 'Имя:',
+                  controller: nameSpeakerController!,
+                ),
+                GestureDetector(
+                  onDoubleTap: () {
+                    _launchPhoneApp(phoneeSpeakerController!.text);
+                  },
+                  child: AnimatedTextAndTextFieldWidget(
+                      text: 'Телефон спикера:',
+                      controller: phoneeSpeakerController!),
+                ),
+                AnimatedTextAndTextFieldWidget(
+                  text: 'Домашняя группа:',
+                  controller: homegroupController!,
+                ),
+                AnimatedTextAndTextFieldWidget(
+                  text: 'Срок трезвости:',
+                  controller: sobrietyPeriodrController!,
+                ),
+                AnimatedTextAndTextFieldWidget(
+                  text: 'Тема:',
+                  controller: themeController!,
+                ),
+              ],
             ),
-            AnimatedTextAndTextFieldWidget(
-              text: 'Домашняя группа:',
-              controller: homegroupController!,
-            ),
-            AnimatedTextAndTextFieldWidget(
-              text: 'Срок трезвости:',
-              controller: sobrietyPeriodrController!,
-            ),
-            AnimatedTextAndTextFieldWidget(
-              text: 'Тема:',
-              controller: themeController!,
-            ),
-          ],
+          ),
         ),
-      ),
-    ),
         TextButton(
           onPressed: () {
             setState(() {

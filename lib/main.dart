@@ -12,22 +12,22 @@ class ServiceProvider extends ChangeNotifier {
   List<String> completedquetions = [];
   ProfitGroup? totalProfit;
 
-
   Future<void> loadData() async {
     if (isAutorization) {
-         ServiceUser? serviceUser = await getServiceUser();
-    final String nameGroupCollection = serviceUser!.group;
+      ServiceUser? serviceUser = await getServiceUser();
+      final String nameGroupCollection = serviceUser!.group;
       try {
-        DocumentSnapshot questionsDoc = await FirebaseFirestore.instance
+        DocumentSnapshot? questionsDoc = await FirebaseFirestore.instance
             .collection(nameGroupCollection)
             .doc('namegroup_id')
             .collection('questions')
             .doc('questions')
             .get();
         questions = (questionsDoc.data() as Map<String, dynamic>)['question']
-            .cast<String>();
+                .cast<String>() ??
+            [];
 
-        DocumentSnapshot completedQuestionsDoc = await FirebaseFirestore
+        DocumentSnapshot? completedQuestionsDoc = await FirebaseFirestore
             .instance
             .collection(nameGroupCollection)
             .doc('namegroup_id')
@@ -35,19 +35,22 @@ class ServiceProvider extends ChangeNotifier {
             .doc('completedQuestions')
             .get();
         completedquetions = (completedQuestionsDoc.data()
-                as Map<String, dynamic>)['completedQuestion']
-            .cast<String>();
+                    as Map<String, dynamic>)['completedQuestion']
+                .cast<String>() ??
+            [];
 
         notifyListeners();
       } catch (e) {
         // Обработка ошибок при чтении данных
         debugPrint('Ошибка при загрузке вопросов на рабочку: $e');
+        questions = [];
+        completedquetions = [];
       }
     }
   }
 
   Future<void> saveData() async {
-       ServiceUser? serviceUser = await getServiceUser();
+    ServiceUser? serviceUser = await getServiceUser();
     final String nameGroupCollection = serviceUser!.group;
     if (serviceUser.type.contains(ServiceName.chairperson)) {
       try {
@@ -95,8 +98,7 @@ class ServiceProvider extends ChangeNotifier {
     totalProfit = newtotalProfit;
     notifyListeners();
   }
-
- }
+}
 
 // Модель провайдера
 class TeaProvider extends ChangeNotifier {
@@ -105,38 +107,44 @@ class TeaProvider extends ChangeNotifier {
 
   Future<void> loadTeaData() async {
     if (isAutorization) {
-         ServiceUser? serviceUser = await getServiceUser();
-    final String nameGroupCollection = serviceUser!.group;
+      ServiceUser? serviceUser = await getServiceUser();
+      final String nameGroupCollection = serviceUser!.group;
       try {
-        DocumentSnapshot shopDoc = await FirebaseFirestore.instance
+        DocumentSnapshot? shopDoc = await FirebaseFirestore.instance
             .collection(nameGroupCollection)
             .doc('namegroup_id')
             .collection('shop')
             .doc('shop')
             .get();
-        shop = (shopDoc.data() as Map<String, dynamic>)['item'].cast<String>();
+        shop =
+            (shopDoc.data() as Map<String, dynamic>)['item'].cast<String>() ??
+                [];
 
-        DocumentSnapshot completeDoc = await FirebaseFirestore.instance
+        DocumentSnapshot? completeDoc = await FirebaseFirestore.instance
             .collection(nameGroupCollection)
             .doc('namegroup_id')
             .collection('complete')
             .doc('complete')
             .get();
         complete = (completeDoc.data() as Map<String, dynamic>)['completeItem']
-            .cast<String>();
+                .cast<String>() ??
+            [];
 
         notifyListeners();
       } catch (e) {
         // Обработка ошибок при чтении данных
         debugPrint('Ошибка при загрузке чайханщика: $e');
+        shop = [];
+        complete = [];
       }
     }
   }
 
   Future<void> saveTeaData() async {
-       ServiceUser? serviceUser = await getServiceUser();
+    ServiceUser? serviceUser = await getServiceUser();
     final String nameGroupCollection = serviceUser!.group;
-    if (serviceUser.type.contains(ServiceName.chairperson) || serviceUser.type.contains(ServiceName.tea)) {
+    if (serviceUser.type.contains(ServiceName.chairperson) ||
+        serviceUser.type.contains(ServiceName.tea)) {
       try {
         await FirebaseFirestore.instance
             .collection(nameGroupCollection)

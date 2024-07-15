@@ -19,7 +19,8 @@ List<String> nameGroup = [
   'Сентябрь',
   'Новый день',
   'Родник',
-  'Вешняки'
+  'Вешняки',
+  'Жулебино'
 ];
 
 User? currentUser = FirebaseAuth.instance.currentUser;
