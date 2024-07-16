@@ -22,21 +22,23 @@ class _WorkMeetingState extends State<WorkMeeting> {
 
   @override
   void initState() {
-    loadProfit();
+    _startDate = kFirstDay;
+    //  loadProfit();
     loadDeductions();
 
     super.initState();
   }
 
-  void loadProfit() async {
-    loadedData = await ProfitGroup.loadProfitGroups();
-    if (loadedData != null) {
-      loadProfitData(_startDate!, dates[dates.indexOf(_startDate!) - 1]);
-    }
-  }
+  // void loadProfit() async {
+  //   loadedData = await ProfitGroup.loadProfitGroups();
+  //   if (loadedData != null) {
+  //     loadProfitData(_startDate!, dates[dates.indexOf(_startDate!) - 1]);
+  //   }
+  // }
 
 // Лист со всеми рабочками
   void loadDeductions() async {
+    loadedData = await ProfitGroup.loadProfitGroups();
     listDeductions = await Deductions.loadDeductions();
     if (listDeductions.isNotEmpty) {
       setState(() {
