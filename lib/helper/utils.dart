@@ -76,18 +76,15 @@ class Event {
 
   // Удалить  события "рабочее собрание"
   static void removeOldWorkMeetingsSchedule() async {
-    ServiceUser? serviceUser = await getServiceUser();
-    if (serviceUser!.type.contains(ServiceName.chairperson)) {
-      DateTime currentDate = kFirstDay;
-      while (currentDate.isBefore(kLastDay)) {
-        if (kEvents[currentDate] != null) {
-          kEvents[currentDate]
-              ?.removeWhere((event) => event.title == 'Рабочее собрание');
-        }
-        currentDate = currentDate.add(const Duration(days: 1));
+    DateTime currentDate = kFirstDay;
+    while (currentDate.isBefore(kLastDay)) {
+      if (kEvents[currentDate] != null) {
+        kEvents[currentDate]
+            ?.removeWhere((event) => event.title == 'Рабочее собрание');
       }
-      saveEventsToFirestore();
+      currentDate = currentDate.add(const Duration(days: 1));
     }
+    saveEventsToFirestore();
   }
 
 // Номер дня недели
@@ -97,14 +94,17 @@ class Event {
 
 // Удалить событие "Собрание группы" для одного дня (снимаем галку)
   static void removeMeetingEvents(String day) async {
-    ServiceUser? serviceUser = await getServiceUser();
-    if (serviceUser!.type.contains(ServiceName.chairperson)) {
-      kEvents.forEach((key, value) {
-        value.removeWhere((event) =>
-            event.title == 'Собрание группы' &&
-            key.weekday == getWeekdayIndex(day));
-      });
-    }
+    kEvents.forEach((key, value) {
+      value.removeWhere((event) =>
+          event.title == 'Собрание группы' &&
+          key.weekday == getWeekdayIndex(day));
+    });
+    saveEventsToFirestore();
+  }
+
+// Удалить событие "Спикерская" для одного дня (снимаем галку)
+  static void removeSpeakerEvent(DateTime date) {
+    kEvents[date]?.removeWhere((event) => event.title.startsWith('Спикерская'));
     saveEventsToFirestore();
   }
 
@@ -992,6 +992,42 @@ class SpeakerMeeting {
           .collection('speakerMeetings')
           .doc('all_meetings')
           .set({'meetings': data});
+    }
+  }
+
+  static Future<void> deleteSpeakerMeetingFromFirestore(
+      SpeakerMeeting meeting) async {
+    if (isAutorization) {
+      ServiceUser? serviceUser = await getServiceUser();
+      final String nameGroupCollection = serviceUser!.group;
+      final firestore = FirebaseFirestore.instance
+          .collection(nameGroupCollection)
+          .doc('namegroup_id');
+
+      if (serviceUser.type.contains(ServiceName.chairperson) ||
+          serviceUser.type.contains(ServiceName.speaker)) {
+        final snapshot = await firestore
+            .collection('speakerMeetings')
+            .doc('all_meetings')
+            .get();
+
+        if (snapshot.exists) {
+          final data = snapshot.data()!['meetings'];
+          List<SpeakerMeeting> meetings =
+              listFromJson(List<Map<String, dynamic>>.from(data));
+
+          meetings.removeWhere((element) =>
+              element.date == meeting.date &&
+              element.speakerName == meeting.speakerName);
+
+          final updatedData = listToJson(meetings);
+
+          await firestore
+              .collection('speakerMeetings')
+              .doc('all_meetings')
+              .set({'meetings': updatedData});
+        }
+      }
     }
   }
 

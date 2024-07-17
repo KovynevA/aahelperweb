@@ -1,6 +1,10 @@
+import 'dart:math';
+
 import 'package:aahelper/helper/stylemenu.dart';
 import 'package:aahelper/helper/utils.dart';
+import 'package:aahelper/main.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -284,7 +288,7 @@ class _AddSpeakerForSelectedDateState extends State<AddSpeakerForSelectedDate> {
   }
 
 // Сохранить введенные данные спикера
-  void onSaveListSpeakermeeting() {
+  void onSaveListSpeakermeeting(int index) {
     SpeakerMeeting newSpeakerMeeting = SpeakerMeeting(
       date: widget.selectedDay,
       speakerName: nameSpeakerController!.text,
@@ -295,18 +299,19 @@ class _AddSpeakerForSelectedDateState extends State<AddSpeakerForSelectedDate> {
           : sobrietyPeriodrController!.text,
       theme: themeController!.text,
     );
-    int index = widget.listSpeakerMeeting
-        .indexWhere((meeting) => compareDate(meeting.date, widget.selectedDay));
+
     // Проверяем, существует ли уже запись для выбранной даты
-    if (compareDate(speakerMeeting!.date, newSpeakerMeeting.date)) {
+    if (index != -1) {
       widget.listSpeakerMeeting[index] = newSpeakerMeeting;
     } else {
       widget.listSpeakerMeeting.add(newSpeakerMeeting);
     }
     widget.listSpeakerMeeting.sort((a, b) => a.date.compareTo(b.date));
     SpeakerMeeting.saveMeetingsToFirestore(widget.listSpeakerMeeting);
+// Удаляем событие Спикерская и затем добавляем новое или отредактированное
+    Event.removeSpeakerEvent(widget.selectedDay);
     final eventsForSelectedDay = kEvents[widget.selectedDay] ?? <Event>[];
-    final textevent = 'Сикерская. Спикер: ${newSpeakerMeeting.speakerName}, \n'
+    final textevent = 'Спикерская. Спикер: ${newSpeakerMeeting.speakerName}, \n'
         'Дом. группа: ${newSpeakerMeeting.homegroup}, \n'
         'Срок трезвости: ${newSpeakerMeeting.sobrietyPeriod}, \n'
         'Тема: ${newSpeakerMeeting.theme}';
@@ -314,7 +319,21 @@ class _AddSpeakerForSelectedDateState extends State<AddSpeakerForSelectedDate> {
       ...eventsForSelectedDay,
       Event(textevent, RepeatOptions('Не повторять', RepeatType.none)),
     ];
+    Provider.of<ServiceProvider>(context, listen: false)
+        .updateSpeakerData(Random().toString());
     Event.saveEventsToFirestore();
+  }
+
+// Удалить спикера
+  void onDeleteListSpeakermeeting(int index) {
+    SpeakerMeeting.deleteSpeakerMeetingFromFirestore(
+        widget.listSpeakerMeeting[index]);
+    widget.listSpeakerMeeting.removeAt(index);
+    _updateDataForSelectedDay(widget.selectedDay);
+    Provider.of<ServiceProvider>(context, listen: false)
+        .updateSpeakerData(Random().toString());
+    // Удаляем из Событий
+    Event.removeSpeakerEvent(widget.selectedDay);
   }
 
   @override
@@ -338,6 +357,8 @@ class _AddSpeakerForSelectedDateState extends State<AddSpeakerForSelectedDate> {
 
   @override
   Widget build(BuildContext context) {
+    int index = widget.listSpeakerMeeting
+        .indexWhere((meeting) => compareDate(meeting.date, widget.selectedDay));
     return Column(
       children: [
         SizedBox(
@@ -379,18 +400,38 @@ class _AddSpeakerForSelectedDateState extends State<AddSpeakerForSelectedDate> {
             ),
           ),
         ),
-        TextButton(
-          onPressed: () {
-            setState(() {
-              onSaveListSpeakermeeting();
-              (serviceuser!.type.contains(ServiceName.chairperson) ||
-                      serviceuser!.type.contains(ServiceName.leading))
-                  ? infoSnackBar(context, 'Спикер сохранён')
-                  : infoSnackBar(context, 'Недостаточно прав');
-            });
-          },
-          style: AppButtonStyle.dialogButton,
-          child: const Text('Сохранить'),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  onSaveListSpeakermeeting(index);
+                  (serviceuser!.type.contains(ServiceName.chairperson) ||
+                          serviceuser!.type.contains(ServiceName.leading))
+                      ? infoSnackBar(context, 'Спикер сохранён')
+                      : infoSnackBar(context, 'Недостаточно прав');
+                });
+              },
+              style: AppButtonStyle.dialogButton,
+              child: const Text('Сохранить'),
+            ),
+            index != -1
+                ? TextButton(
+                    onPressed: () {
+                      setState(() {
+                        onDeleteListSpeakermeeting(index);
+                        (serviceuser!.type.contains(ServiceName.chairperson) ||
+                                serviceuser!.type.contains(ServiceName.leading))
+                            ? infoSnackBar(context, 'Спикер Удалён')
+                            : infoSnackBar(context, 'Недостаточно прав');
+                      });
+                    },
+                    style: AppButtonStyle.dialogButton,
+                    child: const Text('Удалить'),
+                  )
+                : Container(),
+          ],
         ),
       ],
     );

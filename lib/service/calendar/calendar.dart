@@ -1,7 +1,9 @@
 import 'dart:collection';
 
 import 'package:aahelper/helper/stylemenu.dart';
+import 'package:aahelper/main.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../../helper/utils.dart';
 
@@ -43,6 +45,7 @@ class _ChairEventCalendarState extends State<ChairEventCalendar> {
   }
 
   void updateCalendar() {
+    _selectedEvents.value = _getEventsForDay(_selectedDay!);
     setState(() {});
   }
 
@@ -250,7 +253,7 @@ class _ChairEventCalendarState extends State<ChairEventCalendar> {
     Event.saveEventsToFirestore();
   }
 
-  // Добавьте метод для редактирования событий
+  // Метод для редактирования событий
   void _editEvent(Event event) {
     TextEditingController editEventController =
         TextEditingController(text: event.title);
@@ -316,6 +319,8 @@ class _ChairEventCalendarState extends State<ChairEventCalendar> {
 
   @override
   Widget build(BuildContext context) {
+    Provider.of<ServiceProvider>(context, listen: true);
+    _selectedEvents.value = _getEventsForDay(_selectedDay!);
     return Column(
       children: [
         Container(
