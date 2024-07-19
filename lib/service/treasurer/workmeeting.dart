@@ -23,18 +23,10 @@ class _WorkMeetingState extends State<WorkMeeting> {
   @override
   void initState() {
     _startDate = kFirstDay;
-    //  loadProfit();
     loadDeductions();
 
     super.initState();
   }
-
-  // void loadProfit() async {
-  //   loadedData = await ProfitGroup.loadProfitGroups();
-  //   if (loadedData != null) {
-  //     loadProfitData(_startDate!, dates[dates.indexOf(_startDate!) - 1]);
-  //   }
-  // }
 
 // Лист со всеми рабочками
   void loadDeductions() async {
@@ -180,7 +172,7 @@ class _WorkMeetingState extends State<WorkMeeting> {
                   child: Column(
                     children: [
                       Text(
-                        'Остаток = ${listDeductions[dates.indexOf(_startDate!) - 1].balance ?? 0}',
+                        'Остаток = ${(listDeductions[dates.indexOf(_startDate!) - 1].balance ?? 0).toStringAsFixed(2)}',
                         style: AppTextStyle.valuesstyle,
                       ),
                       Text(
@@ -197,7 +189,7 @@ class _WorkMeetingState extends State<WorkMeeting> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 18.0),
                   child: Text(
-                    'ИТОГО свободные средства: ${(totalfreecash ?? 0)}',
+                    'ИТОГО свободные средства: ${(totalfreecash ?? 0).toStringAsFixed(2)}',
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       color: Colors.red,
@@ -257,13 +249,14 @@ class _GetWorkMeetingWidgetState extends State<GetWorkMeetingWidget> {
             .toString());
     rentController = TextEditingController(
         text: (deduction.rent ?? prevdeduction.rent ?? 0).toString());
-    rcController = TextEditingController(text: (deduction.rc ?? 0).toString());
+    rcController =
+        TextEditingController(text: (deduction.rc ?? 0).toStringAsFixed(2));
     rsoController =
-        TextEditingController(text: (deduction.rso ?? 0).toString());
-    mosfondController =
-        TextEditingController(text: (deduction.mosfond ?? 0).toString());
-    fivetraditionController =
-        TextEditingController(text: (deduction.fivetradition ?? 0).toString());
+        TextEditingController(text: (deduction.rso ?? 0).toStringAsFixed(2));
+    mosfondController = TextEditingController(
+        text: (deduction.mosfond ?? 0).toStringAsFixed(2));
+    fivetraditionController = TextEditingController(
+        text: (deduction.fivetradition ?? 0).toStringAsFixed(2));
     getServiceUser();
   }
 
@@ -293,13 +286,13 @@ class _GetWorkMeetingWidgetState extends State<GetWorkMeetingWidget> {
         rentController = TextEditingController(
             text: (deduction.rent ?? prevdeduction.rent ?? 0).toString());
         rcController =
-            TextEditingController(text: (deduction.rc ?? 0).toString());
-        rsoController =
-            TextEditingController(text: (deduction.rso ?? 0).toString());
-        mosfondController =
-            TextEditingController(text: (deduction.mosfond ?? 0).toString());
+            TextEditingController(text: (deduction.rc ?? 0).toStringAsFixed(2));
+        rsoController = TextEditingController(
+            text: (deduction.rso ?? 0).toStringAsFixed(2));
+        mosfondController = TextEditingController(
+            text: (deduction.mosfond ?? 0).toStringAsFixed(2));
         fivetraditionController = TextEditingController(
-            text: (deduction.fivetradition ?? 0).toString());
+            text: (deduction.fivetradition ?? 0).toStringAsFixed(2));
       });
     }
     super.didUpdateWidget(oldWidget);
@@ -326,8 +319,10 @@ class _GetWorkMeetingWidgetState extends State<GetWorkMeetingWidget> {
         ? (deduction.reserve ?? 0) - (prevdeduction.reserve ?? 0)
         : 0; // иначе разница ноль
 
-    final total =
-        (widget.totalfreecash) - (deduction.rent ?? 0) - differencereserv;
+    final total = (widget.totalfreecash) -
+        (deduction.rent ?? 0) -
+        differencereserv -
+        (deduction.anniversary ?? 0);
 
     // Если считать не в процентах
     if (!checkboxpercent) {
@@ -490,7 +485,7 @@ class _GetWorkMeetingWidgetState extends State<GetWorkMeetingWidget> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 18.0),
           child: Text(
-            'Остаток на следующий месяц: ${(deduction.balance ?? 0)}',
+            'Остаток на следующий месяц: ${(deduction.balance ?? 0).toStringAsFixed(2)}',
             textAlign: TextAlign.center,
             style: const TextStyle(
               color: Colors.red,

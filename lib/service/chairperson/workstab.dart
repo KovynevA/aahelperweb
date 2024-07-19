@@ -16,11 +16,49 @@ class _WorksWidgetState extends State<WorksWidget> {
   List<String> questions = [];
   List<String> complitedquetions = [];
   ServiceUser? serviceUser;
+  DateTime? _startDate;
+  List<DateTime>? dates;
 
   @override
   void initState() {
     loadServiceuser();
+    loadDeductions();
     super.initState();
+  }
+
+  // Лист со всеми рабочками
+  void loadDeductions() async {
+    List<Deductions> listDeductions = await Deductions.loadDeductions();
+    if (listDeductions.isNotEmpty) {
+      setState(() {
+        // даты для комбобокса со всеми рабочками до сегодня
+        dates = getDatesFromDeductions(listDeductions);
+        _startDate = dates?.last;
+      });
+    }
+  }
+
+// Получить даты рабочек с фильтром, ограничивающим список до ближайшей рабочки
+  List<DateTime> getDatesFromDeductions(List<Deductions> listdeductions) {
+    DateTime currentDate = kToday;
+    List<DateTime> dates = [];
+    for (var deduction in listdeductions) {
+      dates.add(deduction.date);
+    }
+    DateTime targetDate = dates.firstWhere((date) => date.isAfter(currentDate),
+        orElse: () => dates.last);
+
+    int startIndex = dates.indexOf(dates.first);
+    int endIndex = dates.indexOf(targetDate);
+
+    // Проверем, если текущая дата совпадает с датой списка, то кончная дата - текущая.
+    if (compareDate(dates[endIndex - 1], currentDate)) {
+      endIndex = endIndex - 1;
+    }
+
+    List<DateTime> filteredDates = dates.sublist(startIndex, endIndex + 1);
+
+    return filteredDates;
   }
 
   void loadServiceuser() async {
@@ -65,6 +103,10 @@ class _WorksWidgetState extends State<WorksWidget> {
     );
   }
 
+  String _formatDate(DateTime date) {
+    return date.toLocal().toIso8601String().split('T')[0];
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<ServiceProvider>(
@@ -103,22 +145,39 @@ class _WorksWidgetState extends State<WorksWidget> {
               ),
             ),
             const Spacer(),
-            Align(
-              alignment: Alignment.bottomRight,
-              child: Padding(
-                padding: const EdgeInsets.all(14.0),
-                child: CustomFloatingActionButton(
-                  onPressed: () {
-                    //  getServiceUser();
-                    if (isAutorization &&
-                        serviceUser!.type.contains(ServiceName.chairperson)) {
-                      _showInputDialog(context, serviceProvider);
-                    } else {
-                      infoSnackBar(context, 'Недостаточно прав');
-                    }
-                  },
-                  icon: Icons.add_box,
-                ),
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  DropdownButton<DateTime>(
+                    hint: Text(_formatDate(_startDate!)),
+                    value: _startDate,
+                    onChanged: (DateTime? newValue) {
+                      setState(() {
+                        _startDate = newValue!;
+                      });
+                    },
+                    items: dates?.map((DateTime date) {
+                      return DropdownMenuItem<DateTime>(
+                        value: date,
+                        child: Text(_formatDate(date)),
+                      );
+                    }).toList(),
+                  ),
+                  CustomFloatingActionButton(
+                    onPressed: () {
+                      //  getServiceUser();
+                      if (isAutorization &&
+                          serviceUser!.type.contains(ServiceName.chairperson)) {
+                        _showInputDialog(context, serviceProvider);
+                      } else {
+                        infoSnackBar(context, 'Недостаточно прав');
+                      }
+                    },
+                    icon: Icons.add_box,
+                  ),
+                ],
               ),
             ),
           ],
