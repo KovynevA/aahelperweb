@@ -406,9 +406,6 @@ class ProfitGroup {
 // суммирование всех доходов и расходов за выбранный период
   static ProfitGroup? totalProfit(List<ProfitGroup> listProfitGroup) {
     if (listProfitGroup.isNotEmpty) {
-      // listProfitGroup.remove(
-      //     listProfitGroup.last); // не суммировать последнюю дату, т.к. она идет
-      // // в зачет следующего периода
       return ProfitGroup(
         date: listProfitGroup.last.date,
         sevenTraditioncash: listProfitGroup.fold(
@@ -548,14 +545,8 @@ class Deductions {
               jsonData.map((json) => Deductions.fromMap(json)).toList();
         }
       }
-      // } else {
-      //   return null;
-      // }
     }
     return deductionsList;
-    // } else {
-    //   return null;
-    // }
   }
 }
 
@@ -632,6 +623,165 @@ class WorkMeetingSchedule {
     } else {
       return null;
     }
+  }
+}
+
+///////// ************Класс Протокол РАБОЧЕГО собрания*************////////////////
+class ProtocolWorkMeeting {
+  DateTime date;
+  int quorum;
+  List<Map<String, Answers>> vote;
+  String? text;
+
+  ProtocolWorkMeeting({
+    required this.date,
+    required this.quorum,
+    required this.vote,
+    this.text,
+  });
+
+  factory ProtocolWorkMeeting.fromJson(Map<String, dynamic> json) {
+    List<Map<String, dynamic>> votesJson =
+        json['vote'].cast<Map<String, dynamic>>();
+    List<Map<String, Answers>> votes = votesJson.map((vote) {
+      return {
+        for (var key in vote.keys) key: Answers.fromJson(vote[key]),
+      };
+    }).toList();
+
+    return ProtocolWorkMeeting(
+      date: DateTime.parse(json['date']),
+      quorum: json['quorum'],
+      vote: votes,
+      text: json['text'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    List<Map<String, dynamic>> votesJson = vote.map((vote) {
+      return {
+        for (var key in vote.keys) key: vote[key]!.toJson(),
+      };
+    }).toList();
+
+    return {
+      'date': date.toIso8601String(),
+      'quorum': quorum,
+      'vote': votesJson,
+      'text': text,
+    };
+  }
+
+  static Future<void> saveProtocolWorkMeeting(ProtocolWorkMeeting protocol) async {
+  ServiceUser? serviceUser = await getServiceUser();
+  final String nameGroupCollection = serviceUser!.group;
+  if (serviceUser.type.contains(ServiceName.chairperson)) {
+    final collection = FirebaseFirestore.instance
+        .collection(nameGroupCollection)
+        .doc('namegroup_id')
+        .collection('protocolWorkMeeting')
+        .doc('protocolData');
+
+    final doc = await collection.get();
+    if (doc.exists && doc.data() != null) {
+      List<dynamic> protocolJson = doc.data()!['protocols'];
+      
+      // Находим индекс протокола по дате
+      int index = -1;
+      for (int i = 0; i < protocolJson.length; i++) {
+        if (compareDate(DateTime.parse(protocolJson[i]['date']), protocol.date)) {
+          index = i;
+          break;
+        }
+      }
+
+      if (index != -1) {
+        protocolJson[index] = protocol.toJson();
+      } else {
+        protocolJson.add(protocol.toJson());
+      }
+      
+      await collection.set({'protocols': protocolJson});
+    } else {
+      await collection.set({'protocols': [protocol.toJson()]});
+    }
+  }
+}
+
+  static Future<List<ProtocolWorkMeeting>?> loadProtocolWorkMeeting() async {
+    if (isAutorization) {
+      ServiceUser? serviceUser = await getServiceUser();
+      final String nameGroupCollection = serviceUser!.group;
+      final doc = await FirebaseFirestore.instance
+          .collection(nameGroupCollection)
+          .doc('namegroup_id')
+          .collection('protocolWorkMeeting')
+          .doc('protocolData')
+          .get();
+
+      if (doc.exists && doc.data() != null) {
+        List<dynamic> protocolJson = doc.data()!['protocols'];
+        // Преобразуем список Map в список ProtocolWorkMeeting
+        return protocolJson
+            .map((protocol) => ProtocolWorkMeeting.fromJson(protocol))
+            .toList();
+      } else {
+        return [];
+      }
+    } else {
+      return null;
+    }
+  }
+
+  // Удаление из Firestore
+  static Future<void> deleteProtocolWorkMeeting(
+      ProtocolWorkMeeting protocol) async {
+    ServiceUser? serviceUser = await getServiceUser();
+    final String nameGroupCollection = serviceUser!.group;
+    if (serviceUser.type.contains(ServiceName.chairperson)) {
+      final docRef = FirebaseFirestore.instance
+          .collection(nameGroupCollection)
+          .doc('namegroup_id')
+          .collection('protocolWorkMeeting')
+          .doc('protocolData');
+
+      final doc = await docRef.get();
+      if (doc.exists && doc.data() != null) {
+        List<dynamic> protocolJson = doc.data()!['protocols'];
+        // Удаляем карту из списка
+        protocolJson.removeWhere(
+            (protocols) => compareDate(protocols['date'], protocol.date));
+        await docRef.set({'protocols': protocolJson});
+      }
+    }
+  }
+}
+
+class Answers {
+  int support = 0;
+  int against = 0;
+  int abstained = 0;
+
+  Answers({
+    required this.support,
+    required this.against,
+    required this.abstained,
+  });
+
+  factory Answers.fromJson(Map<String, dynamic> json) {
+    return Answers(
+      support: json['support'],
+      against: json['against'],
+      abstained: json['abstained'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'support': support,
+      'against': against,
+      'abstained': abstained,
+    };
   }
 }
 
@@ -753,7 +903,7 @@ class ServiceCard {
       if (doc.exists && doc.data() != null) {
         List<dynamic> cardsJson = doc.data()!['cards'];
         // Удаляем карту из списка
-        cardsJson.removeWhere((card) => card['id'] == card.id);
+        cardsJson.removeWhere((cards) => cards['id'] == card.id);
         await docRef.set({'cards': cardsJson});
       }
     }

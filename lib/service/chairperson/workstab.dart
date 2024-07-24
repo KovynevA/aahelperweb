@@ -16,8 +16,10 @@ class _WorksWidgetState extends State<WorksWidget> {
   List<String> questions = [];
   List<String> complitedquetions = [];
   ServiceUser? serviceUser;
-  DateTime? _startDate;
+  DateTime? selectedDate;
   List<DateTime>? dates;
+  List<ProtocolWorkMeeting> protocols = [];
+  String? otherQuestion;
 
   @override
   void initState() {
@@ -33,7 +35,7 @@ class _WorksWidgetState extends State<WorksWidget> {
       setState(() {
         // даты для комбобокса со всеми рабочками до сегодня
         dates = getDatesFromDeductions(listDeductions);
-        _startDate = dates?.last;
+        //selectedDate = dates?.last ?? kToday;
       });
     }
   }
@@ -103,6 +105,15 @@ class _WorksWidgetState extends State<WorksWidget> {
     );
   }
 
+  Future<void> showProtocol(context) {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return MeetingDialog(selectedDate: selectedDate!);
+      },
+    );
+  }
+
   String _formatDate(DateTime date) {
     return date.toLocal().toIso8601String().split('T')[0];
   }
@@ -111,8 +122,8 @@ class _WorksWidgetState extends State<WorksWidget> {
   Widget build(BuildContext context) {
     return Consumer<ServiceProvider>(
       builder: (context, serviceProvider, child) {
-        List<String> questions = serviceProvider.questions;
-        List<String> complitedquetions = serviceProvider.completedquetions;
+        List<String>? questions = serviceProvider.questions;
+        List<String>? complitedquetions = serviceProvider.completedquetions;
 
         return Column(
           children: [
@@ -150,21 +161,46 @@ class _WorksWidgetState extends State<WorksWidget> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  DropdownButton<DateTime>(
-                    hint: Text(_formatDate(_startDate!)),
-                    value: _startDate,
-                    onChanged: (DateTime? newValue) {
-                      setState(() {
-                        _startDate = newValue!;
-                      });
-                    },
-                    items: dates?.map((DateTime date) {
-                      return DropdownMenuItem<DateTime>(
-                        value: date,
-                        child: Text(_formatDate(date)),
-                      );
-                    }).toList(),
-                  ),
+                  dates == null
+                      ? Container()
+                      : DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: AppColor.defaultColor,
+                            border: Border.all(color: Colors.black38, width: 3),
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: <BoxShadow>[
+                              //apply shadow on Dropdown button
+                              BoxShadow(
+                                  color: Color.fromRGBO(
+                                      0, 0, 0, 0.57), //shadow for button
+                                  blurRadius: 5) //blur radius of shadow
+                            ],
+                          ),
+                          child: Padding(
+                            padding: EdgeInsets.only(left: 30, right: 30),
+                            child: DropdownButton<DateTime>(
+                              underline: Container(),
+                              style: AppTextStyle.valuesstyle,
+                              hint: Text(
+                                'Протоколы',
+                                style: AppTextStyle.valuesstyle,
+                              ),
+                              value: selectedDate,
+                              onChanged: (DateTime? newValue) {
+                                setState(() {
+                                  selectedDate = newValue!;
+                                });
+                                showProtocol(context);
+                              },
+                              items: dates?.map((DateTime date) {
+                                return DropdownMenuItem<DateTime>(
+                                  value: date,
+                                  child: Text(_formatDate(date)),
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                        ),
                   CustomFloatingActionButton(
                     onPressed: () {
                       //  getServiceUser();
@@ -183,6 +219,307 @@ class _WorksWidgetState extends State<WorksWidget> {
           ],
         );
       },
+    );
+  }
+}
+
+// Диалоговое окно с рабочкой
+class MeetingDialog extends StatefulWidget {
+  final DateTime selectedDate;
+
+  MeetingDialog({required this.selectedDate});
+
+  @override
+  _MeetingDialogState createState() => _MeetingDialogState();
+}
+
+class _MeetingDialogState extends State<MeetingDialog> {
+  List<ProtocolWorkMeeting>? protocols;
+  ProtocolWorkMeeting? protocol;
+  List<Map<String, Answers>> votes = [{}];
+  TextEditingController quorumController = TextEditingController();
+  List<TextEditingController> questionControllers = [TextEditingController()];
+  List<TextEditingController> supportControllers = [TextEditingController()];
+  List<TextEditingController> againstControllers = [TextEditingController()];
+  List<TextEditingController> abstainedControllers = [TextEditingController()];
+  TextEditingController additionalInfoController = TextEditingController();
+
+  @override
+  void initState() {
+    loadProtocolsWorkMeeting();
+
+    super.initState();
+  }
+
+  void loadProtocolsWorkMeeting() async {
+    protocols = await ProtocolWorkMeeting.loadProtocolWorkMeeting();
+    if (protocols != null) {
+      ProtocolWorkMeeting? foundProtocol =
+          findProtocolWorkMeetingByDate(widget.selectedDate);
+      setState(() {
+        protocol = foundProtocol;
+        quorumController =
+            TextEditingController(text: protocol?.quorum.toString());
+        questionControllers.clear();
+        supportControllers.clear();
+        againstControllers.clear();
+        abstainedControllers.clear();
+        additionalInfoController = TextEditingController(text: protocol?.text);
+
+        if (protocol != null) {
+          for (int i = 0; i < protocol!.vote.length; i++) {
+            questionControllers
+                .add(TextEditingController(text: protocol!.vote[i].keys.first));
+            supportControllers.add(TextEditingController(
+                text: protocol!.vote[i].values.first.support.toString()));
+            againstControllers.add(TextEditingController(
+                text: protocol!.vote[i].values.first.against.toString()));
+            abstainedControllers.add(TextEditingController(
+                text: protocol!.vote[i].values.first.abstained.toString()));
+          }
+        }
+      });
+    }
+  }
+
+// Поиск протокола по дате
+  ProtocolWorkMeeting? findProtocolWorkMeetingByDate(DateTime date) {
+    for (ProtocolWorkMeeting protocol in protocols!) {
+      if (compareDate(protocol.date, date)) {
+        return protocol;
+      }
+    }
+    return null; // Возвращаем null, если не найдено совпадений
+  }
+
+  void addVote() {
+    setState(() {
+      votes.add({});
+      questionControllers.add(TextEditingController(text: ''));
+      supportControllers.add(TextEditingController(text: ''));
+      againstControllers.add(TextEditingController(text: ''));
+      abstainedControllers.add(TextEditingController(text: ''));
+    });
+  }
+
+  void removeVote() {
+    setState(() {
+      // if (questionControllers.length > 1) {
+      votes.removeLast();
+      questionControllers.removeLast();
+      supportControllers.removeLast();
+      againstControllers.removeLast();
+      abstainedControllers.removeLast();
+      //   }
+    });
+  }
+
+  @override
+  void dispose() {
+    quorumController.dispose();
+    for (var controller in questionControllers) {
+      controller.dispose();
+    }
+    for (var controller in supportControllers) {
+      controller.dispose();
+    }
+    for (var controller in againstControllers) {
+      controller.dispose();
+    }
+    for (var controller in abstainedControllers) {
+      controller.dispose();
+    }
+    additionalInfoController.dispose();
+    super.dispose();
+  }
+
+  String _formatDate(DateTime date) {
+    return date.toLocal().toIso8601String().split('T')[0];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: AppColor.backgroundColor,
+      shadowColor: Colors.black,
+      elevation: 8.0,
+      insetPadding: EdgeInsets.all(20.0),
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Дата собрания: ${_formatDate(widget.selectedDate)}',
+                style: AppTextStyle.menutextstyle,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  TextAndTextFieldWidget(
+                    text: 'Кворум:',
+                    controller: quorumController,
+                    sizewidth: 50,
+                  ),
+                  IconButton(
+                    onPressed: addVote,
+                    icon: const Icon(Icons.add_box),
+                  ),
+                  IconButton(
+                    onPressed: removeVote,
+                    icon: const Icon(Icons.remove_circle),
+                  ),
+                ],
+              ),
+              SizedBox(height: 10),
+              ListView.builder(
+                shrinkWrap: true,
+                itemCount: questionControllers.length,
+                itemBuilder: (context, index) {
+                  int support = supportControllers[index].text.isNotEmpty
+                      ? int.parse(supportControllers[index].text)
+                      : 0;
+                  int against = againstControllers[index].text.isNotEmpty
+                      ? int.parse(againstControllers[index].text)
+                      : 0;
+                  int abstained = abstainedControllers[index].text.isNotEmpty
+                      ? int.parse(abstainedControllers[index].text)
+                      : 0;
+                  String isDecisionMade = 'Не принято';
+                  if (abstained >= support) {
+                    isDecisionMade = 'Не принято';
+                  } else if (support > against) {
+                    isDecisionMade = 'Принято';
+                  } else
+                    isDecisionMade = 'Не принято';
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Center(
+                        child: Text(
+                          'Вопрос на голосование № ${index + 1}',
+                          style: AppTextStyle.menutextstyle,
+                        ),
+                      ),
+                      TextFieldStyleWidget(
+                        // text: 'Вопрос на голосование № ${index + 1}',
+                        controller: questionControllers[index],
+                        decoration: Decor.decorTextField,
+                        sizewidth: double.infinity,
+                      ),
+                      SizedBox(height: 15),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            children: [
+                              Text(
+                                'За',
+                                style: AppTextStyle.valuesstyle,
+                              ),
+                              TextFieldStyleWidget(
+                                decoration: Decor.decorTextField,
+                                controller: supportControllers[index],
+                                sizewidth: 50,
+                              ),
+                            ],
+                          ),
+                          Column(
+                            children: [
+                              Text(
+                                'Против',
+                                style: AppTextStyle.valuesstyle,
+                              ),
+                              TextFieldStyleWidget(
+                                decoration: Decor.decorTextField,
+                                controller: againstControllers[index],
+                                sizewidth: 50,
+                              ),
+                            ],
+                          ),
+                          Column(
+                            children: [
+                              Text(
+                                'Воздержался',
+                                style: AppTextStyle.valuesstyle,
+                              ),
+                              TextFieldStyleWidget(
+                                decoration: Decor.decorTextField,
+                                controller: abstainedControllers[index],
+                                sizewidth: 50,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        'Решение: $isDecisionMade',
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+              Center(
+                child: Text(
+                  'Дополнительная информация',
+                  style: AppTextStyle.menutextstyle,
+                ),
+              ),
+              TextFieldStyleWidget(
+                decoration: Decor.decorTextField,
+                controller: additionalInfoController,
+                sizewidth: double.infinity,
+              ),
+              TextButton(
+                onPressed: () {
+                  // Сохранение данных в переменную ProtocolWorkMeeting protocol
+                  List<Map<String, Answers>> votesData = [];
+                  for (int i = 0; i < questionControllers.length; i++) {
+                    Answers answers = Answers(
+                      support: supportControllers[i].text.isNotEmpty
+                          ? int.parse(supportControllers[i].text)
+                          : 0,
+                      against: againstControllers[i].text.isNotEmpty
+                          ? int.parse(againstControllers[i].text)
+                          : 0,
+                      abstained: abstainedControllers[i].text.isNotEmpty
+                          ? int.parse(abstainedControllers[i].text)
+                          : 0,
+                    );
+
+                    Map<String, Answers> voteData = {
+                      questionControllers[i].text: answers,
+                    };
+                    votesData.add(voteData);
+                  }
+
+                  ProtocolWorkMeeting updatedProtocol = ProtocolWorkMeeting(
+                    date: widget.selectedDate,
+                    quorum: quorumController.text.isNotEmpty
+                        ? int.parse(quorumController.text)
+                        : 0,
+                    vote: votesData,
+                    text: additionalInfoController.text,
+                  );
+
+                  // Вызов метода для сохранения данных в Firestore
+                  ProtocolWorkMeeting.saveProtocolWorkMeeting(updatedProtocol);
+                  Navigator.of(context).pop();
+                },
+                child: Text('Сохранить'),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

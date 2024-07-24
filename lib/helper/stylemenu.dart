@@ -233,8 +233,14 @@ class TreasureDropdownButton extends StatelessWidget {
 class TextAndTextFieldWidget extends StatelessWidget {
   final String text;
   final TextEditingController controller;
+  final double? sizeheight;
+  final double? sizewidth;
   const TextAndTextFieldWidget(
-      {super.key, required this.text, required this.controller});
+      {super.key,
+      required this.text,
+      required this.controller,
+      this.sizeheight,
+      this.sizewidth});
 
   @override
   Widget build(BuildContext context) {
@@ -243,17 +249,20 @@ class TextAndTextFieldWidget extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Expanded(
+          SizedBox(
+            width: MediaQuery.of(context).size.width * 0.3,
             child: Text(
               text,
               style: AppTextStyle.menutextstyle,
             ),
           ),
-          Expanded(
+          SizedBox(
+            width: sizewidth ?? MediaQuery.of(context).size.width * 0.5,
             child: TextFieldStyleWidget(
               decoration: Decor.decorTextField,
-              sizeheight: MediaQuery.of(context).size.height * 0.05,
-              sizewidth: double.infinity,
+              sizeheight:
+                  sizeheight ?? MediaQuery.of(context).size.height * 0.05,
+              sizewidth: sizewidth ?? MediaQuery.of(context).size.width * 0.3,
               controller: controller,
             ),
           ),
