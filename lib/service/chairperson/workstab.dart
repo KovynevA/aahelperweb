@@ -478,7 +478,9 @@ class _MeetingDialogState extends State<MeetingDialog> {
                 controller: additionalInfoController,
                 sizewidth: double.infinity,
               ),
+              SizedBox(height: 10),
               TextButton(
+                style: AppButtonStyle.iconButton,
                 onPressed: () {
                   // Сохранение данных в переменную ProtocolWorkMeeting protocol
                   List<Map<String, Answers>> votesData = [];
