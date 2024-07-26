@@ -20,7 +20,8 @@ List<String> nameGroup = [
   'Новый день',
   'Родник',
   'Вешняки',
-  'Жулебино'
+  'Жулебино',
+  'Околица'
 ];
 
 User? currentUser = FirebaseAuth.instance.currentUser;
@@ -672,41 +673,45 @@ class ProtocolWorkMeeting {
     };
   }
 
-  static Future<void> saveProtocolWorkMeeting(ProtocolWorkMeeting protocol) async {
-  ServiceUser? serviceUser = await getServiceUser();
-  final String nameGroupCollection = serviceUser!.group;
-  if (serviceUser.type.contains(ServiceName.chairperson)) {
-    final collection = FirebaseFirestore.instance
-        .collection(nameGroupCollection)
-        .doc('namegroup_id')
-        .collection('protocolWorkMeeting')
-        .doc('protocolData');
+  static Future<void> saveProtocolWorkMeeting(
+      ProtocolWorkMeeting protocol) async {
+    ServiceUser? serviceUser = await getServiceUser();
+    final String nameGroupCollection = serviceUser!.group;
+    if (serviceUser.type.contains(ServiceName.chairperson)) {
+      final collection = FirebaseFirestore.instance
+          .collection(nameGroupCollection)
+          .doc('namegroup_id')
+          .collection('protocolWorkMeeting')
+          .doc('protocolData');
 
-    final doc = await collection.get();
-    if (doc.exists && doc.data() != null) {
-      List<dynamic> protocolJson = doc.data()!['protocols'];
-      
-      // Находим индекс протокола по дате
-      int index = -1;
-      for (int i = 0; i < protocolJson.length; i++) {
-        if (compareDate(DateTime.parse(protocolJson[i]['date']), protocol.date)) {
-          index = i;
-          break;
+      final doc = await collection.get();
+      if (doc.exists && doc.data() != null) {
+        List<dynamic> protocolJson = doc.data()!['protocols'];
+
+        // Находим индекс протокола по дате
+        int index = -1;
+        for (int i = 0; i < protocolJson.length; i++) {
+          if (compareDate(
+              DateTime.parse(protocolJson[i]['date']), protocol.date)) {
+            index = i;
+            break;
+          }
         }
-      }
 
-      if (index != -1) {
-        protocolJson[index] = protocol.toJson();
+        if (index != -1) {
+          protocolJson[index] = protocol.toJson();
+        } else {
+          protocolJson.add(protocol.toJson());
+        }
+
+        await collection.set({'protocols': protocolJson});
       } else {
-        protocolJson.add(protocol.toJson());
+        await collection.set({
+          'protocols': [protocol.toJson()]
+        });
       }
-      
-      await collection.set({'protocols': protocolJson});
-    } else {
-      await collection.set({'protocols': [protocol.toJson()]});
     }
   }
-}
 
   static Future<List<ProtocolWorkMeeting>?> loadProtocolWorkMeeting() async {
     if (isAutorization) {
