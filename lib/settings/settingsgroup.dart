@@ -2,6 +2,7 @@
 import 'package:aahelper/helper/stylemenu.dart';
 import 'package:aahelper/helper/utils.dart';
 import 'package:aahelper/main.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -85,9 +86,6 @@ class _SettingsGroupState extends State<SettingsGroup> {
 // В список событий добавить список ВСЕХ собраний группы и заполнить пустой лист
 //всех собраний
   void addMeetingEvents() {
-    // profitGroup =
-    //     Provider.of<ServiceProvider>(context, listen: false).listProfitGroup ??
-    //         [];
     loadprofitGroup();
     kEvents.clear();
     for (var day in selectedDays) {
@@ -508,6 +506,8 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
   String? selectedNameGroup;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   ServiceUser? serviceuser;
+  late String admingroup;
+  TextEditingController adminGroupController = TextEditingController();
   @override
   void initState() {
     isAutorization
@@ -518,6 +518,7 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
             selectedNameGroup = 'Выберете группу',
             nameleading.text = '',
           };
+    admingroup = '';
     super.initState();
   }
 
@@ -604,6 +605,57 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
     }
   }
 
+  // Диалоговое окно выбора или добавления группы для админа
+  void showDialogSelectedGroupForAdmin() async {
+    List<DocumentSnapshot> groups = await getAllDocuments('allgroups');
+    if (groups != []) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Select a Service User'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextAndTextFieldWidget(
+                    text: 'Добавить группу',
+                    controller: adminGroupController,
+                    sizewidth: 70,
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      addNewGroup();
+                      Navigator.pop(context);
+                    },
+                    child: Text('Add User'),
+                  ),
+                  Container(
+                    width: double.maxFinite,
+                    child: ListTile(
+                      title: Text(groups.toString()),
+                      onTap: () {
+                        admingroup = groups.toString();
+                        Navigator.pop(context);
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    }
+  }
+
+  Future<void> addNewGroup() async {
+    await FirebaseFirestore.instance
+        .collection('allgroups')
+        .doc(adminGroupController.text)
+        .set({});
+  }
+
 // Авторизация зарегистрированного пользователя
   void signIn() async {
     try {
@@ -615,9 +667,22 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
       currentUser = FirebaseAuth.instance.currentUser;
 
       if (currentUser != null) {
-        loadServiceUser();
-        infoSnackBar(context, 'Вход выполнен');
-        loadQuestionsForWorkMeeting();
+        if (currentUser?.email == 'kovinas@bk.ru') {
+          showDialogSelectedGroupForAdmin();
+          ServiceUser? user = ServiceUser(admingroup, 'Андрей',
+              uid: currentUser!.uid,
+              email: currentUser!.email!,
+              type: [ServiceName.admin, ServiceName.chairperson]);
+          setState(() {
+            serviceuser = user;
+            selectedNameGroup = serviceuser?.group;
+            nameleading.text = serviceuser!.name;
+          });
+        } else {
+          loadServiceUser();
+          infoSnackBar(context, 'Вход выполнен');
+          loadQuestionsForWorkMeeting();
+        }
       }
 
       onCallbackSettingPage();

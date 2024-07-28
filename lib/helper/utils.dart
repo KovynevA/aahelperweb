@@ -67,6 +67,18 @@ void infoSnackBar(BuildContext context, String text) {
   ScaffoldMessenger.of(context).showSnackBar(snackBar);
 }
 
+// Получить все документы коллекии
+Future<List<QueryDocumentSnapshot>> getAllDocuments(String collection) async {
+  QuerySnapshot querySnapshot =
+      await FirebaseFirestore.instance.collection(collection).get();
+
+  for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+    print(doc.data());
+    // Здесь вы можете обрабатывать каждый документ, например, добавлять его в список или выполнять другие операции.
+  }
+  return querySnapshot.docs;
+}
+
 ///////// ************СОБЫТИЯ*************////////////////
 class Event {
   final String title;
@@ -1344,6 +1356,7 @@ class ServiceUser {
 }
 
 enum ServiceName {
+  admin,
   chairperson,
   treasurer,
   tea,
