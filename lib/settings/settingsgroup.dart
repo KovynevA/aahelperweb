@@ -506,8 +506,9 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
   String? selectedNameGroup;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   ServiceUser? serviceuser;
-  late String admingroup;
+  String admingroup = '';
   TextEditingController adminGroupController = TextEditingController();
+  List<String> groups = [];
   @override
   void initState() {
     isAutorization
@@ -518,7 +519,6 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
             selectedNameGroup = 'Выберете группу',
             nameleading.text = '',
           };
-    admingroup = '';
     super.initState();
   }
 
@@ -605,48 +605,74 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
     }
   }
 
-  // Диалоговое окно выбора или добавления группы для админа
-  void showDialogSelectedGroupForAdmin() async {
-    List<DocumentSnapshot> groups = await getAllDocuments('allgroups');
-    if (groups != []) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Select a Service User'),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextAndTextFieldWidget(
-                    text: 'Добавить группу',
-                    controller: adminGroupController,
-                    sizewidth: 70,
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      addNewGroup();
-                      Navigator.pop(context);
-                    },
-                    child: Text('Add User'),
-                  ),
-                  Container(
-                    width: double.maxFinite,
-                    child: ListTile(
-                      title: Text(groups.toString()),
-                      onTap: () {
-                        admingroup = groups.toString();
-                        Navigator.pop(context);
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      );
+  Future<void> fetchGroups() async {
+    try {
+      final QuerySnapshot snapshot =
+          await FirebaseFirestore.instance.collection('allgroups').get();
+
+      if (snapshot.docs.isNotEmpty) {
+        List<String> loadedGroups = snapshot.docs.map((doc) => doc.id).toList();
+        setState(() {
+          groups = loadedGroups;
+          admingroup = groups.last;
+        });
+      } else {
+        print('No groups found in Firestore');
+      }
+    } catch (e) {
+      print('Error fetching groups: $e');
     }
+  }
+
+  // Диалоговое окно выбора или добавления группы для админа
+  void showDialogSelectedGroupForAdmin(context) async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Select a Group'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              DropdownButton<String>(
+                value: admingroup,
+                items: groups.map((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+                onChanged: (String? value) {
+                  setState(() {
+                    admingroup = value!;
+                  });
+                },
+              ),
+              TextField(
+                controller: adminGroupController,
+                decoration: InputDecoration(labelText: 'Enter group name'),
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                addNewGroup();
+              },
+              child: Text('Add Group'),
+            ),
+            TextButton(
+              onPressed: () {
+                // Perform action with selectedGroup
+                onCallbackSettingPage();
+                Navigator.of(context).pop();
+              },
+              child: Text('Select Group'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<void> addNewGroup() async {
@@ -654,6 +680,10 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
         .collection('allgroups')
         .doc(adminGroupController.text)
         .set({});
+    setState(() {
+      groups.add(adminGroupController.text);
+    });
+    adminGroupController.clear();
   }
 
 // Авторизация зарегистрированного пользователя
@@ -668,7 +698,9 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
 
       if (currentUser != null) {
         if (currentUser?.email == 'kovinas@bk.ru') {
-          showDialogSelectedGroupForAdmin();
+          await fetchGroups();
+
+          showDialogSelectedGroupForAdmin(context);
           ServiceUser? user = ServiceUser(admingroup, 'Андрей',
               uid: currentUser!.uid,
               email: currentUser!.email!,
@@ -682,10 +714,11 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
           loadServiceUser();
           infoSnackBar(context, 'Вход выполнен');
           loadQuestionsForWorkMeeting();
+          onCallbackSettingPage();
         }
       }
 
-      onCallbackSettingPage();
+      //onCallbackSettingPage();
     } catch (e) {
       // Обработка ошибок при входе
       debugPrint(e.toString());
