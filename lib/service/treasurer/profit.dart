@@ -375,7 +375,7 @@ class _FrontOfCardWidgetState extends State<FrontOfCardWidget> {
                   ),
                   Expanded(
                     child: Text(
-                      'Всего: ${(profit ?? 0) - (expensive ?? 0)}',
+                      'Всего за день: ${(profit ?? 0) - (expensive ?? 0)}',
                       style: AppTextStyle.valuesstyle,
                     ),
                   ),

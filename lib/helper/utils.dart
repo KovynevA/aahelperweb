@@ -13,18 +13,28 @@ int getHashCode(DateTime key) {
   return key.day * 1000000 + key.month * 10000 + key.year;
 }
 
-List<String> nameGroup = [
-  'Выберете группу',
-  'Время жить',
-  'Сентябрь',
-  'Новый день',
-  'Родник',
-  'Вешняки',
-  'Жулебино',
-  'Околица'
-];
+// List<String> nameGroup = [
+//   'Выберете группу',
+//   'Время жить',
+//   'Сентябрь',
+//   'Новый день',
+//   'Родник',
+//   'Вешняки',
+//   'Жулебино',
+//   'Околица'
+// ];
 
 User? currentUser = FirebaseAuth.instance.currentUser;
+// ServiceUser? adminUser = ServiceUser(
+//   'Время жить',
+//   'Андрей',
+//   uid: currentUser?.uid ?? '',
+//   email: 'kovinas@bk.ru',
+//   type: [
+//     ServiceName.admin,
+//     ServiceName.chairperson,
+//   ],
+// );
 bool isAutorization = currentUser == null ? false : true;
 final kToday = DateTime.now();
 final kFirstDay = DateTime(kToday.year, kToday.month - 6, kToday.day);

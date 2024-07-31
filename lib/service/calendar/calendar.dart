@@ -126,7 +126,7 @@ class _ChairEventCalendarState extends State<ChairEventCalendar> {
                             onPressed: () {
                               onPressEvent(setState, newEventController);
                               updateCalendar();
-                              infoSnackBar(context, 'Событие сохранено');
+
                               Navigator.of(context).pop();
                             },
                             child: const Text('OK'),
@@ -203,8 +203,12 @@ class _ChairEventCalendarState extends State<ChairEventCalendar> {
       }
     }
     _selectedEvents.value = _getEventsForDay(_selectedDay!);
-
-    Event.saveEventsToFirestore();
+    isAutorization
+        ? {
+            Event.saveEventsToFirestore(),
+            infoSnackBar(context, 'Событие сохранено')
+          }
+        : infoSnackBar(context, 'Не сохранено. Вы не авторизованы');
   }
 
 // Удалить все связанные события

@@ -506,9 +506,11 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
   String? selectedNameGroup;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   ServiceUser? serviceuser;
-  String admingroup = '';
+  String admingroup = 'Вешняки';
   TextEditingController adminGroupController = TextEditingController();
   List<String> groups = [];
+  StateSetter? dialogStateSetter;
+
   @override
   void initState() {
     isAutorization
@@ -516,8 +518,12 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
             loadServiceUser(),
           }
         : {
-            selectedNameGroup = 'Выберете группу',
-            nameleading.text = '',
+            fetchGroups().then((onValue) {
+              setState(() {
+                selectedNameGroup = 'Выберите группу';
+                nameleading.text = '';
+              });
+            })
           };
     super.initState();
   }
@@ -612,10 +618,8 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
 
       if (snapshot.docs.isNotEmpty) {
         List<String> loadedGroups = snapshot.docs.map((doc) => doc.id).toList();
-        setState(() {
-          groups = loadedGroups;
-          admingroup = groups.last;
-        });
+
+        groups = loadedGroups;
       } else {
         print('No groups found in Firestore');
       }
@@ -625,52 +629,99 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
   }
 
   // Диалоговое окно выбора или добавления группы для админа
-  void showDialogSelectedGroupForAdmin(context) async {
+  void showDialogSelectedGroupForAdmin() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Select a Group'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              DropdownButton<String>(
-                value: admingroup,
-                items: groups.map((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-                onChanged: (String? value) {
-                  setState(() {
-                    admingroup = value!;
-                  });
-                },
-              ),
-              TextField(
-                controller: adminGroupController,
-                decoration: InputDecoration(labelText: 'Enter group name'),
+        return StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+          dialogStateSetter = setState;
+          return AlertDialog(
+            backgroundColor: AppColor.backgroundColor,
+            title: Text(
+              'Меню выбора групп Администратором',
+              style: AppTextStyle.valuesstyle,
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Выберете \n группу',
+                      style: AppTextStyle.menutextstyle,
+                    ),
+                    Container(
+                      padding: const EdgeInsets.fromLTRB(10, 0, 10, 2),
+                      decoration: Decor.decorDropDownButton,
+                      child: DropdownButton<String>(
+                        value: admingroup,
+                        items: groups.map((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(
+                              value,
+                              style: AppTextStyle.valuesstyle,
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (String? newvalue) {
+                          setState(() {
+                            admingroup = newvalue!;
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 15,
+                ),
+                Center(
+                  child: TextButton(
+                    style: AppButtonStyle.dialogButton,
+                    onPressed: () {
+                      // Perform action with selectedGroup
+                      ServiceUser? user = ServiceUser(admingroup, 'Андрей',
+                          uid: currentUser!.uid,
+                          email: currentUser!.email!,
+                          type: [ServiceName.admin, ServiceName.chairperson]);
+                      serviceuser = user;
+                      selectedNameGroup = serviceuser?.group;
+                      nameleading.text = serviceuser!.name;
+                      ServiceUser.saveServiceUserToFirestore(serviceuser!);
+                      Navigator.of(context).pop();
+                      onCallbackSettingPage();
+                    },
+                    child: Text('Выбрать группу'),
+                  ),
+                ),
+                SizedBox(
+                  height: 15,
+                ),
+                TextAndTextFieldWidget(
+                    sizewidth: MediaQuery.of(context).size.width * 0.3,
+                    text: 'Новая группа',
+                    controller: adminGroupController),
+              ],
+            ),
+            actions: <Widget>[
+              Center(
+                child: TextButton(
+                  style: AppButtonStyle.dialogButton,
+                  onPressed: () {
+                    setState(() {
+                      addNewGroup();
+                      // onCallbackSettingPage();
+                    });
+                  },
+                  child: Text('Добавить группу'),
+                ),
               ),
             ],
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                addNewGroup();
-              },
-              child: Text('Add Group'),
-            ),
-            TextButton(
-              onPressed: () {
-                // Perform action with selectedGroup
-                onCallbackSettingPage();
-                Navigator.of(context).pop();
-              },
-              child: Text('Select Group'),
-            ),
-          ],
-        );
+          );
+        });
       },
     );
   }
@@ -680,10 +731,10 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
         .collection('allgroups')
         .doc(adminGroupController.text)
         .set({});
-    setState(() {
-      groups.add(adminGroupController.text);
-    });
+
+    groups.add(adminGroupController.text);
     adminGroupController.clear();
+    dialogStateSetter!(() {}); // Вызываем StateSetter для обновления виджета
   }
 
 // Авторизация зарегистрированного пользователя
@@ -698,27 +749,17 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
 
       if (currentUser != null) {
         if (currentUser?.email == 'kovinas@bk.ru') {
-          await fetchGroups();
+          // await fetchGroups();
 
-          showDialogSelectedGroupForAdmin(context);
-          ServiceUser? user = ServiceUser(admingroup, 'Андрей',
-              uid: currentUser!.uid,
-              email: currentUser!.email!,
-              type: [ServiceName.admin, ServiceName.chairperson]);
-          setState(() {
-            serviceuser = user;
-            selectedNameGroup = serviceuser?.group;
-            nameleading.text = serviceuser!.name;
-          });
+          showDialogSelectedGroupForAdmin();
         } else {
           loadServiceUser();
           infoSnackBar(context, 'Вход выполнен');
-          loadQuestionsForWorkMeeting();
+
           onCallbackSettingPage();
         }
       }
-
-      //onCallbackSettingPage();
+      loadQuestionsForWorkMeeting();
     } catch (e) {
       // Обработка ошибок при входе
       debugPrint(e.toString());
@@ -735,6 +776,7 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
   void signOutUser() async {
     try {
       await _auth.signOut();
+      await fetchGroups();
       setState(() {
         currentUser = null;
         serviceuser = null;
@@ -865,7 +907,7 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
                         child: DropdownButtonFormField(
                           style: AppTextStyle.menutextstyle,
                           value: selectedNameGroup,
-                          items: nameGroup.map((String value) {
+                          items: groups.map((String value) {
                             return DropdownMenuItem<String>(
                               value: value,
                               child: Text(
