@@ -15,13 +15,14 @@ class _ProfitState extends State<Profit> {
   int flippedCardIndex = -1;
   int? initialIndex;
   final ScrollController _scrollController = ScrollController();
-
+  List<Deductions> listDeductions = [];
   late double heightCard;
   late double widthCard;
 
   @override
   void initState() {
     loadProfitJsonFile();
+    loadDeductions();
     super.initState();
   }
 
@@ -66,6 +67,11 @@ class _ProfitState extends State<Profit> {
       //скроллим список до ближайшей даты
       _scrollToInitialIndex();
     });
+  }
+
+// Загрузить рабочки для ограничения датами итоговой суммы.
+  void loadDeductions() async {
+    listDeductions = await Deductions.loadDeductions();
   }
 
 // Функция скроллинга
@@ -160,6 +166,7 @@ class _ProfitState extends State<Profit> {
                           : FrontOfCardWidget(
                               index: index,
                               listProfitGroup: listProfitGroup,
+                              listDeductions: listDeductions,
                               onRemove:
                                   removeProfitGroup, // Для удаления одного элемента
                               onRemoveForDay:
@@ -181,6 +188,7 @@ class _ProfitState extends State<Profit> {
 class FrontOfCardWidget extends StatefulWidget {
   final int index;
   final List<ProfitGroup> listProfitGroup;
+  final List<Deductions> listDeductions;
   final Function(int) onRemove; // Для удаления одного элемента
   final Function(int)
       onRemoveForDay; // Для удаления всех элементов определенного дня
@@ -190,6 +198,7 @@ class FrontOfCardWidget extends StatefulWidget {
     required this.listProfitGroup,
     required this.onRemove,
     required this.onRemoveForDay,
+    required this.listDeductions,
   });
 
   @override
@@ -210,12 +219,17 @@ class _FrontOfCardWidgetState extends State<FrontOfCardWidget> {
   ];
   String? deleteOption;
   ServiceUser? serviceuser;
+  ProfitGroup? totalProfit;
+  double? totalplus;
+  double? totalminus;
+  double? balance;
 
   @override
   void initState() {
     deleteOption = listdeleteOption[0];
     calculateMoney();
     getServiceUser();
+    getFirstDate();
     super.initState();
   }
 
@@ -329,6 +343,50 @@ class _FrontOfCardWidgetState extends State<FrontOfCardWidget> {
     );
   }
 
+  void calculateTotalofPeriod() {
+    totalplus = totalProfit?.sevenTraditioncash ??
+        0 +
+            (totalProfit?.sevenTraditioncard ?? 0) +
+            (totalProfit?.profitliteratura ?? 0) +
+            (totalProfit?.profitother ?? 0);
+    totalminus = (totalProfit?.tea ?? 0) +
+        (totalProfit?.expensiveliteratura ?? 0) +
+        (totalProfit?.medal ?? 0) +
+        (totalProfit?.postmail ?? 0) +
+        (totalProfit?.expensiveother ?? 0);
+  }
+
+// Поиск первой ближайшей даты из списка к заданной дате
+  void getFirstDate() {
+    DateTime currentDate = widget.listProfitGroup[widget.index].date;
+    Deductions? nearestDeduction;
+    for (Deductions deduction in widget.listDeductions) {
+      if (deduction.date.isBefore(currentDate) ||
+          deduction.date.isAtSameMomentAs(currentDate)) {
+        if (nearestDeduction == null ||
+            deduction.date.isAfter(nearestDeduction.date)) {
+          nearestDeduction = deduction;
+        }
+      }
+    }
+    balance = nearestDeduction?.balance;
+    DateTime startDate = nearestDeduction?.date ?? currentDate;
+    getTotalProfit(startDate, currentDate);
+  }
+
+  // Загрузить отчет по запрошенным датам
+  void getTotalProfit(DateTime date1, DateTime date2) {
+    List<ProfitGroup> listtotal = widget.listProfitGroup.where((profitGroup) {
+      return profitGroup.date.isAfter(date1) &&
+              profitGroup.date.isBefore(date2) ||
+          profitGroup.date.isAtSameMomentAs(date1) ||
+          profitGroup.date.isAtSameMomentAs(date2);
+    }).toList();
+
+    totalProfit = ProfitGroup.totalProfit(listtotal);
+    calculateTotalofPeriod();
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -376,6 +434,12 @@ class _FrontOfCardWidgetState extends State<FrontOfCardWidget> {
                   Expanded(
                     child: Text(
                       'Всего за день: ${(profit ?? 0) - (expensive ?? 0)}',
+                      style: AppTextStyle.valuesstyle,
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      'Итого в кассе: ${(totalplus ?? 0) + (balance ?? 0) - (totalminus ?? 0)}',
                       style: AppTextStyle.valuesstyle,
                     ),
                   ),
