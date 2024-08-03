@@ -210,9 +210,9 @@ class _TotalProfitCardState extends State<TotalProfitCard> {
   @override
   void initState() {
     _listdeductions = widget.listDeductions;
-    balance = _listdeductions[_listdeductions.length - 2].balance ?? 0;
-    reserve = _listdeductions[_listdeductions.length - 2].reserve ?? 0;
-    anniversary = _listdeductions[_listdeductions.length - 2].anniversary ?? 0;
+    balance = _listdeductions[_listdeductions.length - 3].balance ?? 0;
+    reserve = _listdeductions[_listdeductions.length - 3].reserve ?? 0;
+    anniversary = _listdeductions[_listdeductions.length - 3].anniversary ?? 0;
 
     super.initState();
   }
@@ -265,7 +265,7 @@ class _TotalProfitCardState extends State<TotalProfitCard> {
                 title: Column(
                   children: [
                     Text(
-                      'Остаток с прошлой рабочки: $balance',
+                      'Остаток с прошлой рабочки: ${(balance?? 0).toStringAsFixed(2)}',
                       style: AppTextStyle.valuesstyle,
                     ),
                     Text(
@@ -330,7 +330,7 @@ class _TotalProfitCardState extends State<TotalProfitCard> {
             Padding(
               padding: const EdgeInsets.only(left: 14.0),
               child: Text(
-                'ИТОГО в казне группы: ${(_calculateProfit() + balance! - _calculateConsumption())}',
+                'ИТОГО в казне группы: ${(_calculateProfit() + balance! - _calculateConsumption()).toStringAsFixed(2)}',
                 style: const TextStyle(
                   color: Colors.red,
                   fontWeight: FontWeight.bold,

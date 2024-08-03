@@ -439,7 +439,7 @@ class _FrontOfCardWidgetState extends State<FrontOfCardWidget> {
                   ),
                   Expanded(
                     child: Text(
-                      'Итого в кассе: ${(totalplus ?? 0) + (balance ?? 0) - (totalminus ?? 0)}',
+                      'Итого в кассе: ${((totalplus ?? 0) + (balance ?? 0) - (totalminus ?? 0)).toStringAsFixed(2)}',
                       style: AppTextStyle.valuesstyle,
                     ),
                   ),
