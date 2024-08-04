@@ -349,6 +349,9 @@ class _FrontOfCardWidgetState extends State<FrontOfCardWidget> {
             (totalProfit?.sevenTraditioncard ?? 0) +
             (totalProfit?.profitliteratura ?? 0) +
             (totalProfit?.profitother ?? 0);
+    // if (compareDate((totalProfit?.date ?? kToday), widget.listProfitGroup[widget.index].date)) {
+    //   balance
+    // }
     totalminus = (totalProfit?.tea ?? 0) +
         (totalProfit?.expensiveliteratura ?? 0) +
         (totalProfit?.medal ?? 0) +
@@ -360,7 +363,8 @@ class _FrontOfCardWidgetState extends State<FrontOfCardWidget> {
   void getFirstDate() {
     DateTime currentDate = widget.listProfitGroup[widget.index].date;
     Deductions? nearestDeduction;
-    for (Deductions deduction in widget.listDeductions) {
+    for (var i = 0; i < widget.listDeductions.length - 1; i++) {
+      Deductions deduction = widget.listDeductions[i];
       if (deduction.date.isBefore(currentDate) ||
           deduction.date.isAtSameMomentAs(currentDate)) {
         if (nearestDeduction == null ||
@@ -370,6 +374,7 @@ class _FrontOfCardWidgetState extends State<FrontOfCardWidget> {
       }
     }
     balance = nearestDeduction?.balance;
+
     DateTime startDate = nearestDeduction?.date ?? currentDate;
     getTotalProfit(startDate, currentDate);
   }
@@ -440,6 +445,7 @@ class _FrontOfCardWidgetState extends State<FrontOfCardWidget> {
                   Expanded(
                     child: Text(
                       'Итого в кассе: ${((totalplus ?? 0) + (balance ?? 0) - (totalminus ?? 0)).toStringAsFixed(2)}',
+                      //' ${(balance)?.toStringAsFixed(2)}',
                       style: AppTextStyle.valuesstyle,
                     ),
                   ),
