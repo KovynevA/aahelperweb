@@ -344,11 +344,10 @@ class _FrontOfCardWidgetState extends State<FrontOfCardWidget> {
   }
 
   void calculateTotalofPeriod() {
-    totalplus = totalProfit?.sevenTraditioncash ??
-        0 +
-            (totalProfit?.sevenTraditioncard ?? 0) +
-            (totalProfit?.profitliteratura ?? 0) +
-            (totalProfit?.profitother ?? 0);
+    totalplus = (totalProfit?.sevenTraditioncash ?? 0) +
+        (totalProfit?.sevenTraditioncard ?? 0) +
+        (totalProfit?.profitliteratura ?? 0) +
+        (totalProfit?.profitother ?? 0);
     // if (compareDate((totalProfit?.date ?? kToday), widget.listProfitGroup[widget.index].date)) {
     //   balance
     // }
