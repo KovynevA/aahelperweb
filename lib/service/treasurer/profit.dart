@@ -1,8 +1,6 @@
 import 'package:aahelper/helper/stylemenu.dart';
 import 'package:aahelper/helper/utils.dart';
-import 'package:aahelper/main.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class Profit extends StatefulWidget {
   const Profit({super.key});
