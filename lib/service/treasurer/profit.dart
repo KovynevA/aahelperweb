@@ -1,6 +1,8 @@
 import 'package:aahelper/helper/stylemenu.dart';
 import 'package:aahelper/helper/utils.dart';
+import 'package:aahelper/main.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class Profit extends StatefulWidget {
   const Profit({super.key});
@@ -348,9 +350,7 @@ class _FrontOfCardWidgetState extends State<FrontOfCardWidget> {
         (totalProfit?.sevenTraditioncard ?? 0) +
         (totalProfit?.profitliteratura ?? 0) +
         (totalProfit?.profitother ?? 0);
-    // if (compareDate((totalProfit?.date ?? kToday), widget.listProfitGroup[widget.index].date)) {
-    //   balance
-    // }
+
     totalminus = (totalProfit?.tea ?? 0) +
         (totalProfit?.expensiveliteratura ?? 0) +
         (totalProfit?.medal ?? 0) +
@@ -388,6 +388,7 @@ class _FrontOfCardWidgetState extends State<FrontOfCardWidget> {
     }).toList();
 
     totalProfit = ProfitGroup.totalProfit(listtotal);
+
     calculateTotalofPeriod();
   }
 

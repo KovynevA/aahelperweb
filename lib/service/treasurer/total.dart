@@ -50,7 +50,7 @@ class _TotalState extends State<Total> {
             profitGroup.date.isAtSameMomentAs(date1) ||
             profitGroup.date.isAtSameMomentAs(date2);
       }).toList();
-
+      listProfitGroup.removeLast();
       totalProfit = ProfitGroup.totalProfit(listProfitGroup);
       Provider.of<ServiceProvider>(context, listen: false)
           .updateDates(totalProfit);
@@ -203,16 +203,16 @@ class _TotalProfitCardState extends State<TotalProfitCard> {
   double? expensiveother;
 
   late List<Deductions> _listdeductions;
-  double? balance;
-  double? reserve;
+  // double? balance;
+  // double? reserve;
   double? anniversary;
 
   @override
   void initState() {
     _listdeductions = widget.listDeductions;
-    balance = _listdeductions[_listdeductions.length - 3].balance ?? 0;
-    reserve = _listdeductions[_listdeductions.length - 3].reserve ?? 0;
-    anniversary = _listdeductions[_listdeductions.length - 3].anniversary ?? 0;
+    // balance = _listdeductions[_listdeductions.length - 1].balance ?? 0;
+    // reserve = _listdeductions[_listdeductions.length - 1].reserve ?? 0;
+    anniversary = _listdeductions[_listdeductions.length - 1].anniversary ?? 0;
 
     super.initState();
   }
@@ -221,7 +221,6 @@ class _TotalProfitCardState extends State<TotalProfitCard> {
   void didChangeDependencies() {
     _totalProfit =
         Provider.of<ServiceProvider>(context, listen: true).totalProfit!;
-    setState(() {});
     super.didChangeDependencies();
   }
 
@@ -264,20 +263,20 @@ class _TotalProfitCardState extends State<TotalProfitCard> {
               child: ListTile(
                 title: Column(
                   children: [
-                    Text(
-                      'Остаток с прошлой рабочки: ${(balance?? 0).toStringAsFixed(2)}',
-                      style: AppTextStyle.valuesstyle,
-                    ),
-                    Text(
-                      'Резерв: $reserve',
-                      style: AppTextStyle.valuesstyle,
-                    ),
-                    anniversary != 0.0
-                        ? Text(
-                            'Юбилей: $anniversary',
-                            style: AppTextStyle.valuesstyle,
-                          )
-                        : Container(),
+                    // Text(
+                    //   'Остаток с прошлой рабочки: ${(balance ?? 0).toStringAsFixed(2)}',
+                    //   style: AppTextStyle.valuesstyle,
+                    // ),
+                    // Text(
+                    //   'Резерв: $reserve',
+                    //   style: AppTextStyle.valuesstyle,
+                    // ),
+                    // anniversary != 0.0
+                    //     ? Text(
+                    //         'Юбилей: $anniversary',
+                    //         style: AppTextStyle.valuesstyle,
+                    //       )
+                    //     : Container(),
                     Text(
                       'Собрано за период: ${_calculateProfit()}',
                       style: AppTextStyle.valuesstyle,
@@ -330,7 +329,7 @@ class _TotalProfitCardState extends State<TotalProfitCard> {
             Padding(
               padding: const EdgeInsets.only(left: 14.0),
               child: Text(
-                'ИТОГО в казне группы: ${(_calculateProfit() + balance! - _calculateConsumption()).toStringAsFixed(2)}',
+                'ИТОГО за выбранный период: ${(_calculateProfit() - _calculateConsumption()).toStringAsFixed(2)}', // + balance
                 style: const TextStyle(
                   color: Colors.red,
                   fontWeight: FontWeight.bold,

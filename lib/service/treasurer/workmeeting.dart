@@ -1,8 +1,6 @@
 import 'package:aahelper/helper/stylemenu.dart';
 import 'package:aahelper/helper/utils.dart';
-import 'package:aahelper/main.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class WorkMeeting extends StatefulWidget {
   const WorkMeeting({super.key});
@@ -78,7 +76,7 @@ class _WorkMeetingState extends State<WorkMeeting> {
               profitGroup.date.isAtSameMomentAs(date2);
         }).toList();
       });
-
+      listProfitGroup.removeLast();
       totalProfit = ProfitGroup.totalProfit(listProfitGroup);
       _totalFreeCash();
     }
@@ -140,9 +138,6 @@ class _WorkMeetingState extends State<WorkMeeting> {
                           _startDate = newValue!;
                           loadProfitData(_startDate!,
                               dates[dates.indexOf(_startDate!) - 1]);
-                          Provider.of<ServiceProvider>(context, listen: false)
-                              .updateDates(
-                                  totalProfit); // обновить данные общей суммы дохода и расхода
                         });
                       },
                       items: dates.map((DateTime date) {
