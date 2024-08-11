@@ -1,4 +1,5 @@
 import 'package:aahelper/service/chairperson/chairperson.dart';
+import 'package:aahelper/service/findgroup/findgroup.dart';
 import 'package:aahelper/service/leading/leading.dart';
 import 'package:aahelper/service/librarian/librarian.dart';
 import 'package:aahelper/service/speaker/speaker.dart';
@@ -48,6 +49,10 @@ class TabBarPage extends StatelessWidget {
     }
     if (tabWidget is TeaMan) {
       title = (tabWidget as TeaMan)
+          .title; // Получаем параметр title из виджета TeaMan
+    }
+    if (tabWidget is FindGroup) {
+      title = (tabWidget as FindGroup)
           .title; // Получаем параметр title из виджета TeaMan
     }
     return ListTile(

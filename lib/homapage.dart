@@ -1,6 +1,7 @@
 import 'package:aahelper/helper/stylemenu.dart';
 import 'package:aahelper/service/calendar/calendar.dart';
 import 'package:aahelper/service/chairperson/chairperson.dart';
+import 'package:aahelper/service/findgroup/findgroup.dart';
 import 'package:aahelper/service/leading/leading.dart';
 import 'package:aahelper/service/librarian/librarian.dart';
 import 'package:aahelper/service/speaker/speaker.dart';
@@ -67,6 +68,7 @@ class _MyHomePageState extends State<MyHomePage> {
             const TabBarPage(tabWidget: Speaker(title: 'Спикерхантер')),
             const TabBarPage(tabWidget: Librarian(title: 'Библиотекарь')),
             const TabBarPage(tabWidget: TeaMan(title: 'Чайханщик')),
+            const TabBarPage(tabWidget: FindGroup(title: 'Найти группу')),
           ],
         ),
       ),

@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'package:aahelper/service/leading/clockpicker/clockpicker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -546,7 +547,7 @@ class WorkMeetingSchedule {
   int? numOfDay; // номер дня недели РАБОЧЕГО собрания
   List<String> selectedDays; // список выбранных дней собрания группы
   int?
-      dayOfMonth; // омер недели в месяце РАБОЧЕГО собрания, если собрание определенного числа месяца
+      dayOfMonth; // номер недели в месяце РАБОЧЕГО собрания, если собрание определенного числа месяца
   bool? checkboxstatus;
 
   WorkMeetingSchedule({
@@ -1363,6 +1364,70 @@ String getServiceNameTranslation(ServiceName serviceName) {
       return '';
   }
 }
+
+
+////////// Класс групп ///////////////////////
+
+class GroupsAA {
+  final String name;
+  final String city;
+  final String area;
+  final String? metro;
+  final List<Map<String, String>>? timing;
+  final List<Map<String, String>>? workmeeting;
+  final List<Map<String, String>>? speaker;
+  final String adress;
+  final String? phone;
+  final String? email;
+  final String url;
+
+  GroupsAA({
+    required this.name,
+    required this.city,
+    required this.area,
+    required this.adress,
+    required this.url,
+    this.metro,
+    this.phone,
+    this.email,
+    this.timing,
+    this.workmeeting,
+    this.speaker,
+  });
+
+  factory GroupsAA.fromJson(Map<String, dynamic> json) {
+    return GroupsAA(
+      name: json['name'],
+      city: json['city'],
+      area: json['area'],
+      adress: json['adress'],
+      url: json['url'],
+      metro: json['metro'],
+      phone: json['phone'],
+      email: json['email'],
+      timing: List<Map<String, String>>.from(json['timing']),
+      workmeeting: List<Map<String, String>>.from(json['workmeeting']),
+      speaker: List<Map<String, String>>.from(json['speaker']),
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'city': city,
+      'area': area,
+      'metro': metro,
+      'timing': timing,
+      'workmeeting': workmeeting,
+      'speaker': speaker,
+      'adress': adress,
+      'phone': phone,
+      'email': email,
+      'url': url,
+    };
+  }
+}
+
 
 // Функция транслитерации русских букв в латинские
 // String transliterate(String input) {
