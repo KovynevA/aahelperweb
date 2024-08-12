@@ -223,6 +223,40 @@ class _SettingsGroupState extends State<SettingsGroup> {
     super.dispose();
   }
 
+  void moveData() async {
+    ServiceUser? serviceUser = await getServiceUser();
+    final String nameGroupCollection = serviceUser!.group;
+    final firestore = FirebaseFirestore.instance;
+
+    // Получаем данные документа с идентификатором 'namegroup_id'
+    DocumentSnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore
+        .instance
+        .collection(nameGroupCollection)
+        .doc('namegroup_id')
+        .collection('events')
+        .doc('eventsData')
+        .get();
+
+    // Дожидаемся загрузки данных
+    await snapshot.reference.get();
+
+    // Проверяем, что данные были загружены
+    if (snapshot.exists) {
+      // Создаем копию данных из документа 'namegroup_id'
+      Map<String, dynamic>? data = snapshot.data();
+
+      // Создаем новый документ с идентификатором 'nameGroupCollection' и скопированными данными
+      await firestore
+          .collection('allgroups')
+          .doc(nameGroupCollection)
+          .collection('events')
+          .doc('eventsData')
+          .set(data!);
+    } else {
+      print('Данные для документа namegroup_id не были загружены.');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -375,6 +409,10 @@ class _SettingsGroupState extends State<SettingsGroup> {
                     style: AppButtonStyle.dialogButton,
                   ),
                 ),
+              ),
+              TextButton(
+                onPressed: moveData,
+                child: Text('data'),
               ),
             ],
           ),
