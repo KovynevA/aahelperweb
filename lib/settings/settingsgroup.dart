@@ -223,39 +223,51 @@ class _SettingsGroupState extends State<SettingsGroup> {
     super.dispose();
   }
 
+// Временная функция переноса
   void moveData() async {
     ServiceUser? serviceUser = await getServiceUser();
     final String nameGroupCollection = serviceUser!.group;
     final firestore = FirebaseFirestore.instance;
+    DocumentReference namegroupDocRef =
+        firestore.collection(nameGroupCollection).doc('namegroup_id');
 
-    // Получаем данные документа с идентификатором 'namegroup_id'
-    DocumentSnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore
-        .instance
-        .collection(nameGroupCollection)
-        .doc('namegroup_id')
-        .collection('events')
-        .doc('eventsData')
-        .get();
+    List<String> collectionNames = [
+      'books',
+      'complete',
+      'completedQuestions',
+      'deductions',
+      'events',
+      'profitGroups',
+      'protocolMeetings',
+      'protocolWorkMeeting',
+      'questions',
+      'serviceCard',
+      'shop',
+      'speakerMeetings',
+      'workMeetingSchedule',
+    ]; // Добавьте сюда остальные названия вложенных коллекций
 
-    // Дожидаемся загрузки данных
-    await snapshot.reference.get();
+    for (String collectionName in collectionNames) {
+      CollectionReference collectionRef =
+          namegroupDocRef.collection(collectionName);
+      QuerySnapshot snapshot = await collectionRef.get();
 
-    // Проверяем, что данные были загружены
-    if (snapshot.exists) {
-      // Создаем копию данных из документа 'namegroup_id'
-      Map<String, dynamic>? data = snapshot.data();
+      if (snapshot.docs.isNotEmpty) {
+        for (QueryDocumentSnapshot doc in snapshot.docs) {
 
-      // Создаем новый документ с идентификатором 'nameGroupCollection' и скопированными данными
-      await firestore
-          .collection('allgroups')
-          .doc(nameGroupCollection)
-          .collection('events')
-          .doc('eventsData')
-          .set(data!);
-    } else {
-      print('Данные для документа namegroup_id не были загружены.');
+          firestore
+              .collection('allgroups')
+              .doc(nameGroupCollection)
+              .collection(collectionName)
+              .doc(doc.id)
+              .set(doc.data() as Map<String, dynamic>);
+        }
+      } else {
+        print('No documents found in collection $collectionName');
+      }
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

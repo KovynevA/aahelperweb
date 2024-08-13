@@ -74,6 +74,7 @@ class _AdminpanelWidgetState extends State<AdminpanelWidget> {
               .map((e) => ServiceName.values.firstWhere(
                   (enumValue) => enumValue.toString() == 'ServiceName.$e'))
               .toList();
+
           return ServiceUser(
             data['group'],
             data['name'],
@@ -136,7 +137,10 @@ class _AdminpanelWidgetState extends State<AdminpanelWidget> {
                 ),
                 Wrap(
                   spacing: 8.0,
-                  children: ServiceName.values.map((serviceName) {
+                  // игорируем admin, чтоб не попал в кнопки назначения прав
+                  children: ServiceName.values
+                      .where((serviceName) => serviceName != ServiceName.admin)
+                      .map((serviceName) {
                     return FilterChip(
                       label: Text(
                         getServiceNameTranslation(serviceName),

@@ -124,8 +124,8 @@ class Event {
       try {
         DocumentSnapshot<Map<String, dynamic>> snapshot =
             await FirebaseFirestore.instance
-                .collection(nameGroupCollection)
-                .doc('namegroup_id')
+                .collection('allgroups')
+                .doc(nameGroupCollection)
                 .collection('events')
                 .doc('eventsData')
                 .get();
@@ -161,8 +161,8 @@ class Event {
       try {
         // очищаем прошлые события из базы
         await FirebaseFirestore.instance
-            .collection(nameGroupCollection)
-            .doc('namegroup_id')
+            .collection('allgroups')
+            .doc(nameGroupCollection)
             .collection('events')
             .doc('eventsData')
             .delete();
@@ -174,8 +174,8 @@ class Event {
         });
 
         await FirebaseFirestore.instance
-            .collection(nameGroupCollection)
-            .doc('namegroup_id')
+            .collection('allgroups')
+            .doc(nameGroupCollection)
             .collection('events')
             .doc('eventsData')
             .set(eventsMap);
@@ -296,8 +296,8 @@ class ProfitGroup {
           profitGroups.map((group) => group.toJson()).toList();
 
       FirebaseFirestore.instance
-          .collection(nameGroupCollection)
-          .doc('namegroup_id')
+          .collection('allgroups')
+          .doc(nameGroupCollection)
           .collection('profitGroups')
           .doc('profitData')
           .set({
@@ -313,8 +313,8 @@ class ProfitGroup {
     List<ProfitGroup> groups = [];
     if (isAutorization) {
       DocumentSnapshot doc = await FirebaseFirestore.instance
-          .collection(nameGroupCollection!)
-          .doc('namegroup_id')
+          .collection('allgroups')
+          .doc(nameGroupCollection)
           .collection('profitGroups')
           .doc('profitData')
           .get();
@@ -370,8 +370,8 @@ class ProfitGroup {
     if (serviceUser.type.contains(ServiceName.chairperson) ||
         serviceUser.type.contains(ServiceName.treasurer)) {
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-          .collection(nameGroupCollection)
-          .doc('namegroup_id')
+          .collection('allgroups')
+          .doc(nameGroupCollection)
           .collection('profitGroups')
           .get();
       for (QueryDocumentSnapshot doc in querySnapshot.docs) {
@@ -502,8 +502,8 @@ class Deductions {
           deductionsList.map((deductions) => deductions.toJson()).toList();
 
       FirebaseFirestore.instance
-          .collection(nameGroupCollection)
-          .doc('namegroup_id')
+          .collection('allgroups')
+          .doc(nameGroupCollection)
           .collection('deductions')
           .doc('deductionsData')
           .set({
@@ -519,8 +519,8 @@ class Deductions {
     List<Deductions> deductionsList = [];
     if (isAutorization) {
       DocumentSnapshot doc = await FirebaseFirestore.instance
-          .collection(nameGroupCollection!)
-          .doc('namegroup_id')
+          .collection('allgroups')
+          .doc(nameGroupCollection)
           .collection('deductions')
           .doc('deductionsData')
           .get();
@@ -583,8 +583,8 @@ class WorkMeetingSchedule {
     final String nameGroupCollection = serviceUser!.group;
     if (serviceUser.type.contains(ServiceName.chairperson)) {
       FirebaseFirestore.instance
-          .collection(nameGroupCollection)
-          .doc('namegroup_id')
+          .collection('allgroups')
+          .doc(nameGroupCollection)
           .collection('workMeetingSchedule')
           .doc('schedule')
           .set(schedule.toJson());
@@ -597,8 +597,8 @@ class WorkMeetingSchedule {
       ServiceUser? serviceUser = await getServiceUser();
       final String nameGroupCollection = serviceUser!.group;
       DocumentSnapshot doc = await FirebaseFirestore.instance
-          .collection(nameGroupCollection)
-          .doc('namegroup_id')
+          .collection('allgroups')
+          .doc(nameGroupCollection)
           .collection('workMeetingSchedule')
           .doc('schedule')
           .get();
@@ -668,8 +668,8 @@ class ProtocolWorkMeeting {
     final String nameGroupCollection = serviceUser!.group;
     if (serviceUser.type.contains(ServiceName.chairperson)) {
       final collection = FirebaseFirestore.instance
-          .collection(nameGroupCollection)
-          .doc('namegroup_id')
+          .collection('allgroups')
+          .doc(nameGroupCollection)
           .collection('protocolWorkMeeting')
           .doc('protocolData');
 
@@ -707,8 +707,8 @@ class ProtocolWorkMeeting {
       ServiceUser? serviceUser = await getServiceUser();
       final String nameGroupCollection = serviceUser!.group;
       final doc = await FirebaseFirestore.instance
-          .collection(nameGroupCollection)
-          .doc('namegroup_id')
+          .collection('allgroups')
+          .doc(nameGroupCollection)
           .collection('protocolWorkMeeting')
           .doc('protocolData')
           .get();
@@ -734,8 +734,8 @@ class ProtocolWorkMeeting {
     final String nameGroupCollection = serviceUser!.group;
     if (serviceUser.type.contains(ServiceName.chairperson)) {
       final docRef = FirebaseFirestore.instance
-          .collection(nameGroupCollection)
-          .doc('namegroup_id')
+          .collection('allgroups')
+          .doc(nameGroupCollection)
           .collection('protocolWorkMeeting')
           .doc('protocolData');
 
@@ -819,8 +819,8 @@ class ServiceCard {
     final String nameGroupCollection = serviceUser!.group;
     if (serviceUser.type.contains(ServiceName.chairperson)) {
       final collection = FirebaseFirestore.instance
-          .collection(nameGroupCollection)
-          .doc('namegroup_id')
+          .collection('allgroups')
+          .doc(nameGroupCollection)
           .collection('serviceCard')
           .doc('cardsData');
 
@@ -838,8 +838,8 @@ class ServiceCard {
       ServiceUser? serviceUser = await getServiceUser();
       final String nameGroupCollection = serviceUser!.group;
       final doc = await FirebaseFirestore.instance
-          .collection(nameGroupCollection)
-          .doc('namegroup_id')
+          .collection('allgroups')
+          .doc(nameGroupCollection)
           .collection('serviceCard')
           .doc('cardsData')
           .get();
@@ -862,8 +862,8 @@ class ServiceCard {
     final String nameGroupCollection = serviceUser!.group;
     if (serviceUser.type.contains(ServiceName.chairperson)) {
       final docRef = FirebaseFirestore.instance
-          .collection(nameGroupCollection)
-          .doc('namegroup_id')
+          .collection('allgroups')
+          .doc(nameGroupCollection)
           .collection('serviceCard')
           .doc('cardsData');
 
@@ -888,8 +888,8 @@ class ServiceCard {
     final String nameGroupCollection = serviceUser!.group;
     if (serviceUser.type.contains(ServiceName.chairperson)) {
       final docRef = FirebaseFirestore.instance
-          .collection(nameGroupCollection)
-          .doc('namegroup_id')
+          .collection('allgroups')
+          .doc(nameGroupCollection)
           .collection('serviceCard')
           .doc('cardsData');
 
@@ -909,8 +909,8 @@ class ServiceCard {
     final String nameGroupCollection = serviceUser!.group;
     if (serviceUser.type.contains(ServiceName.chairperson)) {
       final docRef = FirebaseFirestore.instance
-          .collection(nameGroupCollection)
-          .doc('namegroup_id')
+          .collection('allgroups')
+          .doc(nameGroupCollection)
           .collection('serviceCard')
           .doc('cardsData');
 
@@ -1018,8 +1018,8 @@ class ProtocolMeeting {
           protocolMeetings.map((meeting) => meeting.toJson()).toList();
 
       FirebaseFirestore.instance
-          .collection(nameGroupCollection)
-          .doc('namegroup_id')
+          .collection('allgroups')
+          .doc(nameGroupCollection)
           .collection('protocolMeetings')
           .doc('meetingsData')
           .set({
@@ -1035,8 +1035,8 @@ class ProtocolMeeting {
       ServiceUser? serviceUser = await getServiceUser();
       final String nameGroupCollection = serviceUser!.group;
       DocumentSnapshot doc = await FirebaseFirestore.instance
-          .collection(nameGroupCollection)
-          .doc('namegroup_id')
+          .collection('allgroups')
+          .doc(nameGroupCollection)
           .collection('protocolMeetings')
           .doc('meetingsData')
           .get();
@@ -1128,8 +1128,8 @@ class SpeakerMeeting {
     if (serviceUser.type.contains(ServiceName.chairperson) ||
         serviceUser.type.contains(ServiceName.speaker)) {
       final firestore = FirebaseFirestore.instance
-          .collection(nameGroupCollection)
-          .doc('namegroup_id');
+          .collection('allgroups')
+          .doc(nameGroupCollection);
       final data = listToJson(meetings);
 
       await firestore
@@ -1145,8 +1145,8 @@ class SpeakerMeeting {
       ServiceUser? serviceUser = await getServiceUser();
       final String nameGroupCollection = serviceUser!.group;
       final firestore = FirebaseFirestore.instance
-          .collection(nameGroupCollection)
-          .doc('namegroup_id');
+          .collection('allgroups')
+          .doc(nameGroupCollection);
 
       if (serviceUser.type.contains(ServiceName.chairperson) ||
           serviceUser.type.contains(ServiceName.speaker)) {
@@ -1180,8 +1180,8 @@ class SpeakerMeeting {
       ServiceUser? serviceUser = await getServiceUser();
       final String nameGroupCollection = serviceUser!.group;
       final firestore = FirebaseFirestore.instance
-          .collection(nameGroupCollection)
-          .doc('namegroup_id');
+          .collection('allgroups')
+          .doc(nameGroupCollection);
       final snapshot = await firestore
           .collection('speakerMeetings')
           .doc('all_meetings')
@@ -1244,8 +1244,8 @@ class Book {
     if (serviceUser.type.contains(ServiceName.chairperson) ||
         serviceUser.type.contains(ServiceName.librarian)) {
       final firestore = FirebaseFirestore.instance
-          .collection(nameGroupCollection)
-          .doc('namegroup_id');
+          .collection('allgroups')
+          .doc(nameGroupCollection);
       final data = listToJson(books);
 
       await firestore.collection('books').doc('all_books').set({'books': data});
@@ -1257,8 +1257,8 @@ class Book {
       ServiceUser? serviceUser = await getServiceUser();
       final String nameGroupCollection = serviceUser!.group;
       final firestore = FirebaseFirestore.instance
-          .collection(nameGroupCollection)
-          .doc('namegroup_id');
+          .collection('allgroups')
+          .doc(nameGroupCollection);
       final snapshot =
           await firestore.collection('books').doc('all_books').get();
 
@@ -1363,7 +1363,6 @@ String getServiceNameTranslation(ServiceName serviceName) {
       return '';
   }
 }
-
 
 ////////// Класс групп ///////////////////////
 

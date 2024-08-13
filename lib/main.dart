@@ -19,8 +19,8 @@ class ServiceProvider extends ChangeNotifier {
       final String nameGroupCollection = serviceUser!.group;
       try {
         DocumentSnapshot? questionsDoc = await FirebaseFirestore.instance
-            .collection(nameGroupCollection)
-            .doc('namegroup_id')
+            .collection('allgroups')
+            .doc(nameGroupCollection)
             .collection('questions')
             .doc('questions')
             .get();
@@ -30,8 +30,8 @@ class ServiceProvider extends ChangeNotifier {
 
         DocumentSnapshot? completedQuestionsDoc = await FirebaseFirestore
             .instance
-            .collection(nameGroupCollection)
-            .doc('namegroup_id')
+            .collection('allgroups')
+            .doc(nameGroupCollection)
             .collection('completedQuestions')
             .doc('completedQuestions')
             .get();
@@ -56,14 +56,14 @@ class ServiceProvider extends ChangeNotifier {
     if (serviceUser.type.contains(ServiceName.chairperson)) {
       try {
         await FirebaseFirestore.instance
-            .collection(nameGroupCollection)
-            .doc('namegroup_id')
+            .collection('allgroups')
+            .doc(nameGroupCollection)
             .collection('questions')
             .doc('questions')
             .set({'question': questions});
         await FirebaseFirestore.instance
-            .collection(nameGroupCollection)
-            .doc('namegroup_id')
+            .collection('allgroups')
+            .doc(nameGroupCollection)
             .collection('completedQuestions')
             .doc('completedQuestions')
             .set({'completedQuestion': completedquetions});
@@ -118,8 +118,8 @@ class TeaProvider extends ChangeNotifier {
       final String nameGroupCollection = serviceUser!.group;
       try {
         DocumentSnapshot? shopDoc = await FirebaseFirestore.instance
-            .collection(nameGroupCollection)
-            .doc('namegroup_id')
+            .collection('allgroups')
+            .doc(nameGroupCollection)
             .collection('shop')
             .doc('shop')
             .get();
@@ -128,8 +128,8 @@ class TeaProvider extends ChangeNotifier {
                 [];
 
         DocumentSnapshot? completeDoc = await FirebaseFirestore.instance
-            .collection(nameGroupCollection)
-            .doc('namegroup_id')
+            .collection('allgroups')
+            .doc(nameGroupCollection)
             .collection('complete')
             .doc('complete')
             .get();
@@ -154,14 +154,14 @@ class TeaProvider extends ChangeNotifier {
         serviceUser.type.contains(ServiceName.tea)) {
       try {
         await FirebaseFirestore.instance
-            .collection(nameGroupCollection)
-            .doc('namegroup_id')
+            .collection('allgroups')
+            .doc(nameGroupCollection)
             .collection('shop')
             .doc('shop')
             .set({'item': shop});
         await FirebaseFirestore.instance
-            .collection(nameGroupCollection)
-            .doc('namegroup_id')
+            .collection('allgroups')
+            .doc(nameGroupCollection)
             .collection('complete')
             .doc('complete')
             .set({'completeItem': complete});
