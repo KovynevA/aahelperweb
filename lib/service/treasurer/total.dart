@@ -50,7 +50,7 @@ class _TotalState extends State<Total> {
             profitGroup.date.isAtSameMomentAs(date1) ||
             profitGroup.date.isAtSameMomentAs(date2);
       }).toList();
-      listProfitGroup.removeLast();
+      //listProfitGroup.removeLast();
       totalProfit = ProfitGroup.totalProfit(listProfitGroup);
       Provider.of<ServiceProvider>(context, listen: false)
           .updateDates(totalProfit);

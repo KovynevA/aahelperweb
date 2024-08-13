@@ -76,7 +76,7 @@ class _WorkMeetingState extends State<WorkMeeting> {
               profitGroup.date.isAtSameMomentAs(date2);
         }).toList();
       });
-      listProfitGroup.removeLast();
+      //listProfitGroup.removeLast();
       totalProfit = ProfitGroup.totalProfit(listProfitGroup);
       _totalFreeCash();
     }
