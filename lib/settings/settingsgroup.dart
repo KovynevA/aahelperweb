@@ -934,7 +934,6 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
                         sizewidth: MediaQuery.of(context).size.width / 2,
                         sizeheight: 40,
                         controller: passwordcontroller,
-                        //  onChanged: (p0) => {},
                       ),
                       const SizedBox(
                         height: 5.0,
@@ -955,6 +954,7 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
                         height: 50,
                         decoration: Decor.decorDropDownButton,
                         child: DropdownButtonFormField(
+                          hint: Text('Выберите группу'),
                           style: AppTextStyle.menutextstyle,
                           value: selectedNameGroup,
                           items: groups.map((String value) {
