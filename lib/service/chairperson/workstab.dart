@@ -135,7 +135,7 @@ class _WorksWidgetState extends State<WorksWidget> {
               ),
             ),
             LimitedBox(
-              maxHeight: MediaQuery.of(context).size.height * 0.3,
+              maxHeight: MediaQuery.of(context).size.height * 0.6,
               child: WorkCards(
                 questions: questions,
                 complitedquetions: complitedquetions,

@@ -34,7 +34,7 @@ class _CardsOfServiceState extends State<CardsOfService> {
   }
 
   void loadServiceuser() async {
-      serviceUser = await getServiceUser();
+    serviceUser = await getServiceUser();
   }
 
   Future<void> _loadCards() async {
@@ -172,8 +172,8 @@ class _CardsOfServiceState extends State<CardsOfService> {
                     children: [
                       Container(
                         margin: const EdgeInsets.all(10.0),
-                        width: 100,
-                        height: 100,
+                        width: MediaQuery.of(context).size.width * 0.25,
+                        height: MediaQuery.of(context).size.height * 0.25,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           image: DecorationImage(
@@ -182,7 +182,7 @@ class _CardsOfServiceState extends State<CardsOfService> {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 16),
+                      const SizedBox(width: 8),
                       Column(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -207,7 +207,8 @@ class _CardsOfServiceState extends State<CardsOfService> {
       ),
       floatingActionButton: CustomFloatingActionButton(
         onPressed: () {
-          if (isAutorization && serviceUser!.type.contains(ServiceName.chairperson)) {
+          if (isAutorization &&
+              serviceUser!.type.contains(ServiceName.chairperson)) {
             _showAddCardModal(context);
           } else {
             infoSnackBar(context, 'Недостаточно прав');

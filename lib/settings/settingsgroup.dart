@@ -254,7 +254,6 @@ class _SettingsGroupState extends State<SettingsGroup> {
 
       if (snapshot.docs.isNotEmpty) {
         for (QueryDocumentSnapshot doc in snapshot.docs) {
-
           firestore
               .collection('allgroups')
               .doc(nameGroupCollection)
@@ -267,7 +266,6 @@ class _SettingsGroupState extends State<SettingsGroup> {
       }
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -443,8 +441,9 @@ class DayOfMonthSelectorDropDown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
+    return Wrap(
+      // mainAxisAlignment: MainAxisAlignment.spaceAround,
+      alignment: WrapAlignment.spaceAround,
       children: [
         const Text(
           'Каждое',
@@ -493,8 +492,9 @@ class WeekSelectorDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
+    return Wrap(
+      //mainAxisAlignment: MainAxisAlignment.spaceAround,
+      alignment: WrapAlignment.spaceAround,
       children: [
         const Text(
           'Каждый ',
@@ -507,8 +507,7 @@ class WeekSelectorDropdown extends StatelessWidget {
             6,
             (index) => DropdownMenuItem(
               value: index + 1,
-              child:
-                  index == 5 ? Text('Последний') : Text((index + 1).toString()),
+              child: index == 5 ? Text('Посл.') : Text((index + 1).toString()),
             ),
           ),
           onChanged: (int? value) {
@@ -695,8 +694,9 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                Wrap(
+                  //mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  alignment: WrapAlignment.spaceAround,
                   children: [
                     Text(
                       'Выберете \n группу',
@@ -751,7 +751,7 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
                   height: 15,
                 ),
                 TextAndTextFieldWidget(
-                    sizewidth: MediaQuery.of(context).size.width * 0.3,
+                    sizewidth: MediaQuery.of(context).size.width * 0.28,
                     text: 'Новая группа',
                     controller: adminGroupController),
               ],

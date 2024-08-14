@@ -16,8 +16,8 @@ class _ProfitState extends State<Profit> {
   int? initialIndex;
   final ScrollController _scrollController = ScrollController();
   List<Deductions> listDeductions = [];
-  late double heightCard;
-  late double widthCard;
+  double? heightCard;
+  double? widthCard;
 
   @override
   void initState() {
@@ -28,8 +28,7 @@ class _ProfitState extends State<Profit> {
 
   @override
   void didChangeDependencies() {
-    heightCard = MediaQuery.of(context).size.height * 0.24;
-    widthCard = MediaQuery.of(context).size.width * 0.9;
+   
     super.didChangeDependencies();
   }
 
@@ -61,7 +60,12 @@ class _ProfitState extends State<Profit> {
     listProfitGroup = [];
     groupMeetingDates = [];
     listProfitGroup = await ProfitGroup.loadProfitGroups() ?? [];
-
+ final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenWidth < 600; // Определяем маленький экран
+    isSmallScreen
+        ? heightCard = MediaQuery.of(context).size.height * 0.33
+        : heightCard = MediaQuery.of(context).size.height * 0.24;
+    widthCard = MediaQuery.of(context).size.width * 0.9;
     setState(() {
       updateMeetingDates();
       //скроллим список до ближайшей даты
@@ -78,7 +82,7 @@ class _ProfitState extends State<Profit> {
   void _scrollToInitialIndex() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollController.animateTo(
-        (initialIndex! - 1) * heightCard,
+        (initialIndex! - 1) * heightCard!,
         duration: const Duration(milliseconds: 500),
         curve: Curves.ease,
       );
@@ -409,7 +413,7 @@ class _FrontOfCardWidgetState extends State<FrontOfCardWidget> {
           borderRadius: BorderRadius.circular(15.0),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(8.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [

@@ -12,30 +12,45 @@ class AdminPanel extends StatefulWidget {
 
 class _AdminPanelState extends State<AdminPanel> {
   ServiceUser? serviceuser;
+  bool isLoading = true;
 
   @override
   void initState() {
-    getServiceUser().then((user) {
-      setState(() {
-        serviceuser = user;
-      });
-    });
+    loadServiceuser();
     super.initState();
+  }
+
+  void loadServiceuser() async {
+    serviceuser = await getServiceUser();
+    setState(() {
+      isLoading = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (isAutorization && serviceuser!.type.contains(ServiceName.chairperson)) {
-      return AdminpanelWidget(
-        serviceUser: serviceuser!,
+    if (isLoading) {
+      return Center(
+        child: CircularProgressIndicator(), // Или другой виджет загрузки
       );
     } else {
-      return const Center(
-        child: Text(
-          'Меню доступно только для Председателя группы',
-          style: AppTextStyle.menutextstyle,
-        ),
-      );
+      if (isAutorization &&
+          serviceuser != null &&
+          serviceuser!.type.contains(ServiceName.chairperson)) {
+        return AdminpanelWidget(
+          serviceUser: serviceuser!,
+        );
+      } else {
+        return Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              'Меню доступно только для Председателя группы',
+              style: AppTextStyle.menutextstyle,
+            ),
+          ),
+        );
+      }
     }
   }
 }
