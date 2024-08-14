@@ -28,7 +28,6 @@ class _ProfitState extends State<Profit> {
 
   @override
   void didChangeDependencies() {
-   
     super.didChangeDependencies();
   }
 
@@ -60,11 +59,11 @@ class _ProfitState extends State<Profit> {
     listProfitGroup = [];
     groupMeetingDates = [];
     listProfitGroup = await ProfitGroup.loadProfitGroups() ?? [];
- final screenWidth = MediaQuery.of(context).size.width;
+    final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < 600; // Определяем маленький экран
     isSmallScreen
         ? heightCard = MediaQuery.of(context).size.height * 0.33
-        : heightCard = MediaQuery.of(context).size.height * 0.24;
+        : heightCard = MediaQuery.of(context).size.height * 0.25;
     widthCard = MediaQuery.of(context).size.width * 0.9;
     setState(() {
       updateMeetingDates();
