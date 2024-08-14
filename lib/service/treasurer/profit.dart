@@ -59,8 +59,8 @@ class _ProfitState extends State<Profit> {
     listProfitGroup = [];
     groupMeetingDates = [];
     listProfitGroup = await ProfitGroup.loadProfitGroups() ?? [];
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isSmallScreen = screenWidth < 600; // Определяем маленький экран
+    final screenheight = MediaQuery.of(context).size.height;
+    final isSmallScreen = screenheight < 800; // Определяем маленький экран
     isSmallScreen
         ? heightCard = MediaQuery.of(context).size.height * 0.33
         : heightCard = MediaQuery.of(context).size.height * 0.25;
