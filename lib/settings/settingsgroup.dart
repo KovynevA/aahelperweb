@@ -224,48 +224,48 @@ class _SettingsGroupState extends State<SettingsGroup> {
   }
 
 // Временная функция переноса
-  void moveData() async {
-    ServiceUser? serviceUser = await getServiceUser();
-    final String nameGroupCollection = serviceUser!.group;
-    final firestore = FirebaseFirestore.instance;
-    DocumentReference namegroupDocRef =
-        firestore.collection(nameGroupCollection).doc('namegroup_id');
+  // void moveData() async {
+  //   ServiceUser? serviceUser = await getServiceUser();
+  //   final String nameGroupCollection = serviceUser!.group;
+  //   final firestore = FirebaseFirestore.instance;
+  //   DocumentReference namegroupDocRef =
+  //       firestore.collection(nameGroupCollection).doc('namegroup_id');
 
-    List<String> collectionNames = [
-      'books',
-      'complete',
-      'completedQuestions',
-      'deductions',
-      'events',
-      'profitGroups',
-      'protocolMeetings',
-      'protocolWorkMeeting',
-      'questions',
-      'serviceCard',
-      'shop',
-      'speakerMeetings',
-      'workMeetingSchedule',
-    ]; // Добавьте сюда остальные названия вложенных коллекций
+  //   List<String> collectionNames = [
+  //     'books',
+  //     'complete',
+  //     'completedQuestions',
+  //     'deductions',
+  //     'events',
+  //     'profitGroups',
+  //     'protocolMeetings',
+  //     'protocolWorkMeeting',
+  //     'questions',
+  //     'serviceCard',
+  //     'shop',
+  //     'speakerMeetings',
+  //     'workMeetingSchedule',
+  //   ]; // Добавьте сюда остальные названия вложенных коллекций
 
-    for (String collectionName in collectionNames) {
-      CollectionReference collectionRef =
-          namegroupDocRef.collection(collectionName);
-      QuerySnapshot snapshot = await collectionRef.get();
+  //   for (String collectionName in collectionNames) {
+  //     CollectionReference collectionRef =
+  //         namegroupDocRef.collection(collectionName);
+  //     QuerySnapshot snapshot = await collectionRef.get();
 
-      if (snapshot.docs.isNotEmpty) {
-        for (QueryDocumentSnapshot doc in snapshot.docs) {
-          firestore
-              .collection('allgroups')
-              .doc(nameGroupCollection)
-              .collection(collectionName)
-              .doc(doc.id)
-              .set(doc.data() as Map<String, dynamic>);
-        }
-      } else {
-        print('No documents found in collection $collectionName');
-      }
-    }
-  }
+  //     if (snapshot.docs.isNotEmpty) {
+  //       for (QueryDocumentSnapshot doc in snapshot.docs) {
+  //         firestore
+  //             .collection('allgroups')
+  //             .doc(nameGroupCollection)
+  //             .collection(collectionName)
+  //             .doc(doc.id)
+  //             .set(doc.data() as Map<String, dynamic>);
+  //       }
+  //     } else {
+  //       print('No documents found in collection $collectionName');
+  //     }
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -420,10 +420,10 @@ class _SettingsGroupState extends State<SettingsGroup> {
                   ),
                 ),
               ),
-              TextButton(
-                onPressed: moveData,
-                child: Text('data'),
-              ),
+              // TextButton(
+              //   onPressed: moveData,
+              //   child: Text('data'),
+              // ),
             ],
           ),
         ),
