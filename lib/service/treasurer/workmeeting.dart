@@ -76,7 +76,10 @@ class _WorkMeetingState extends State<WorkMeeting> {
               profitGroup.date.isAtSameMomentAs(date2);
         }).toList();
       });
-      //listProfitGroup.removeLast();
+      if (compareDate(dates.last, listProfitGroup.last.date)) {
+        listProfitGroup.removeLast();
+      }
+      // print(dates);
       totalProfit = ProfitGroup.totalProfit(listProfitGroup);
       _totalFreeCash();
     }

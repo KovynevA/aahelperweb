@@ -173,6 +173,14 @@ class _TotalState extends State<Total> {
                 TotalProfitCard(
                   listDeductions: listDeductions,
                 ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    '*Отчёт учитывает ТОЛЬКО баланс за выбранный период без остатков с прошлых периодов и резерва',
+                    style: AppTextStyle.spantextstyle,
+                    softWrap: true,
+                  ),
+                ),
               ],
             ),
           );

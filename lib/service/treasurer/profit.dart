@@ -413,41 +413,37 @@ class _FrontOfCardWidgetState extends State<FrontOfCardWidget> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Text(
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
                       '${daysOfWeek[weekday ?? 0]}, $day/$month/$year',
                       style: AppTextStyle.menutextstyle,
                     ),
-                  ),
-                  Expanded(
-                    child: Text(
+                    Text(
                       'Собрано: $profit',
                       style: AppTextStyle.valuesstyle,
                     ),
-                  ),
-                  Expanded(
-                    child: Text(
+                    Text(
                       'Расход: $expensive',
                       style: AppTextStyle.valuesstyle,
                     ),
-                  ),
-                  Expanded(
-                    child: Text(
+                    Text(
                       'Всего за день: ${(profit ?? 0) - (expensive ?? 0)}',
                       style: AppTextStyle.valuesstyle,
                     ),
-                  ),
-                  Expanded(
-                    child: Text(
+                    Text(
                       'Итого в кассе: ${((totalplus ?? 0) + (balance ?? 0) - (totalminus ?? 0)).toStringAsFixed(2)}',
-                      //' ${(balance)?.toStringAsFixed(2)}',
                       style: AppTextStyle.valuesstyle,
                     ),
-                  ),
-                ],
+                    Text(
+                        '*Итог учитывает остаток с последнего рабочего собрания',
+                        style: AppTextStyle.spantextstyle,
+                        softWrap: true),
+                  ],
+                ),
               ),
               Container(
                 width: MediaQuery.of(context).size.width * 0.24,
