@@ -1007,7 +1007,7 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
                         decoration: Decor.decorDropDownButton,
                         child: DropdownButtonFormField(
                           hint: Text('Выберите группу'),
-                          style: AppTextStyle.menutextstyle,
+                          style: AppTextStyle.valuesstyle,
                           value: selectedNameGroup,
                           items: groups.map((String value) {
                             return DropdownMenuItem<String>(
