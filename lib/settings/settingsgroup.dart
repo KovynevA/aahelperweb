@@ -814,7 +814,7 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
       // Обработка ошибок при входе
       debugPrint(e.toString());
       if (mounted) {
-        infoSnackBar(context, 'Вход не выполнен');
+        infoSnackBar(context, 'Вход не выполнен, ${e.toString}');
       }
     }
   }
@@ -836,7 +836,59 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
       });
     } catch (e) {
       debugPrint('Ошибка выхода пользователя${e.toString()}');
+      infoSnackBar(context, 'Ошибка выхода пользователя${e.toString()}');
     }
+  }
+
+  void resetPassword(TextEditingController? emailController) {
+    //TextEditingController? emailController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            'Сброс забытого пароля',
+            style: AppTextStyle.menutextstyle,
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              children: [
+                Text(
+                  'Введите email',
+                  style: AppTextStyle.valuesstyle,
+                ),
+                TextField(
+                  controller: emailController ?? TextEditingController(),
+                ),
+                Text(
+                  'Нажав на кнопку "Изменить", на Вашу почту придет письмо, в котором будет ссылка на изменение пароля. Старый пароль больше действовать не будет!',
+                  softWrap: true,
+                  style: AppTextStyle.minimalsstyle,
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    if (emailController?.text != '') {
+                      await _auth.sendPasswordResetEmail(
+                          email: emailController!.text);
+                      Navigator.of(context).pop;
+                    } else {
+                      infoSnackBar(context, 'Введите свой email');
+                    }
+                  },
+                  child: Text('Сбросить пароль'),
+                  style: AppButtonStyle.dialogButton,
+                ),
+                ElevatedButton(
+                  onPressed: Navigator.of(context).pop,
+                  child: Text('Отмена'),
+                  style: AppButtonStyle.dialogButton,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -950,7 +1002,7 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
                       ),
                       Container(
                         padding: const EdgeInsets.fromLTRB(10, 0, 10, 2),
-                        width: MediaQuery.of(context).size.width / 2,
+                        width: MediaQuery.of(context).size.width / 1.8,
                         height: 50,
                         decoration: Decor.decorDropDownButton,
                         child: DropdownButtonFormField(
@@ -1003,6 +1055,11 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
                   ],
                 ),
               ),
+              Center(
+                  child: TextButton(
+                onPressed: () => resetPassword(logincontroller),
+                child: Text('Сбросить пароль'),
+              )),
             ],
           );
   }
