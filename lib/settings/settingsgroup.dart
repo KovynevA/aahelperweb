@@ -870,7 +870,7 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
                     if (emailController?.text != '') {
                       await _auth.sendPasswordResetEmail(
                           email: emailController!.text);
-                      Navigator.of(context).pop;
+                      Navigator.of(context).pop();
                     } else {
                       infoSnackBar(context, 'Введите свой email');
                     }
