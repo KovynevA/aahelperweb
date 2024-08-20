@@ -2,6 +2,7 @@ import 'dart:collection';
 
 import 'package:aahelper/helper/stylemenu.dart';
 import 'package:aahelper/main.dart';
+import 'package:aahelper/service/calendar/authorization.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -38,15 +39,14 @@ class _ChairEventCalendarState extends State<ChairEventCalendar> {
 
   @override
   void didUpdateWidget(covariant ChairEventCalendar oldWidget) {
-    if (oldWidget.hashCode != widget.hashCode) {
-      updateCalendar();
-    }
     super.didUpdateWidget(oldWidget);
   }
 
   void updateCalendar() {
-    _selectedEvents.value = _getEventsForDay(_selectedDay!);
-    setState(() {});
+    setState(() {
+      _selectedEvents.value = _getEventsForDay(_selectedDay!);
+      _loadEvents();
+    });
   }
 
   // Загрузить календарь событий
@@ -325,138 +325,144 @@ class _ChairEventCalendarState extends State<ChairEventCalendar> {
   Widget build(BuildContext context) {
     Provider.of<ServiceProvider>(context, listen: true);
     _selectedEvents.value = _getEventsForDay(_selectedDay!);
-    return Column(
-      children: [
-        Container(
-          margin: const EdgeInsets.all(10.0),
-          decoration: BoxDecoration(
-            color: AppColor.cardColor,
-            border: Border.all(width: 1.5, color: Colors.brown),
-            borderRadius: BorderRadius.circular(16.0),
-            boxShadow: const [
-              BoxShadow(
-                color: Colors.blueGrey,
-                blurRadius: 8.0,
-                offset: Offset(1.0, 2.0),
-              )
-            ],
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          AuthentificationWidget(
+            updateCallbackSettingPage: updateCalendar,
           ),
-          child: TableCalendar<Event>(
-            rowHeight: 40,
-            locale: 'ru_RU',
-            firstDay: kFirstDay,
-            lastDay: kLastDay,
-            focusedDay: _focusedDay,
-            selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-            calendarFormat: _calendarFormat,
-            eventLoader: _getEventsForDay,
-            startingDayOfWeek: StartingDayOfWeek.monday,
-            availableCalendarFormats: const {
-              CalendarFormat.month: 'Month',
-            },
-            headerStyle: const HeaderStyle(
-              titleTextStyle: AppTextStyle.menutextstyle,
+          Container(
+            margin: const EdgeInsets.all(10.0),
+            decoration: BoxDecoration(
+              color: AppColor.cardColor,
+              border: Border.all(width: 1.5, color: Colors.brown),
+              borderRadius: BorderRadius.circular(16.0),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.blueGrey,
+                  blurRadius: 8.0,
+                  offset: Offset(1.0, 2.0),
+                )
+              ],
             ),
-            daysOfWeekHeight: 20,
-            daysOfWeekStyle: const DaysOfWeekStyle(
-              weekdayStyle: AppTextStyle.valuesstyle,
-              weekendStyle: AppTextStyle.valuesstyle,
-            ),
-            calendarStyle: CalendarStyle(
-              defaultTextStyle: AppTextStyle.spantextstyle,
-              weekendTextStyle: AppTextStyle.spantextstyle,
-              selectedTextStyle: AppTextStyle.valuesstyle,
-              todayTextStyle: AppTextStyle.valuesstyle,
-              outsideDaysVisible: false,
-              markerSize: 10,
-              markerDecoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(width: 2.0, color: Colors.orange),
-                color: Colors.black,
+            child: TableCalendar<Event>(
+              rowHeight: 40,
+              locale: 'ru_RU',
+              firstDay: kFirstDay,
+              lastDay: kLastDay,
+              focusedDay: _focusedDay,
+              selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+              calendarFormat: _calendarFormat,
+              eventLoader: _getEventsForDay,
+              startingDayOfWeek: StartingDayOfWeek.monday,
+              availableCalendarFormats: const {
+                CalendarFormat.month: 'Month',
+              },
+              headerStyle: const HeaderStyle(
+                titleTextStyle: AppTextStyle.menutextstyle,
               ),
-            ),
-            onDaySelected: (selectedDay, focusedDay) {
-              setState(() {
-                _selectedDay = selectedDay;
+              daysOfWeekHeight: 20,
+              daysOfWeekStyle: const DaysOfWeekStyle(
+                weekdayStyle: AppTextStyle.valuesstyle,
+                weekendStyle: AppTextStyle.valuesstyle,
+              ),
+              calendarStyle: CalendarStyle(
+                defaultTextStyle: AppTextStyle.spantextstyle,
+                weekendTextStyle: AppTextStyle.spantextstyle,
+                selectedTextStyle: AppTextStyle.valuesstyle,
+                todayTextStyle: AppTextStyle.valuesstyle,
+                outsideDaysVisible: false,
+                markerSize: 10,
+                markerDecoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(width: 2.0, color: Colors.orange),
+                  color: Colors.black,
+                ),
+              ),
+              onDaySelected: (selectedDay, focusedDay) {
+                setState(() {
+                  _selectedDay = selectedDay;
+                  _focusedDay = focusedDay;
+                });
+                _selectedEvents.value = _getEventsForDay(selectedDay);
+              },
+              onPageChanged: (focusedDay) {
                 _focusedDay = focusedDay;
-              });
-              _selectedEvents.value = _getEventsForDay(selectedDay);
-            },
-            onPageChanged: (focusedDay) {
-              _focusedDay = focusedDay;
-            },
+              },
+            ),
           ),
-        ),
-        Expanded(
-          child: ValueListenableBuilder<List<Event>>(
+          ValueListenableBuilder<List<Event>>(
             valueListenable: _selectedEvents,
             builder: (context, value, _) {
-              return ListView.builder(
-                itemCount: value.length,
-                itemBuilder: (context, index) {
-                  return Dismissible(
-                    key: Key(value[index].title),
-                    onDismissed: (direction) {
-                      if (direction == DismissDirection.endToStart) {
-                        _deleteAllLinkedEvents(
-                            value[index]); // Удалить все связанные события
-                      } else {
-                        _deleteEvent(value[index]); // Удалить одно событие
-                      }
-                    },
-                    background: Container(
-                      color: Colors.red,
-                      alignment: Alignment.centerRight,
-                      padding: const EdgeInsets.only(right: 20.0),
-                      child: const Icon(Icons.delete),
-                    ),
-                    child: GestureDetector(
-                      onLongPress: () {
-                        if (_selectedEvents.value.isNotEmpty) {
-                          _editEvent(_selectedEvents.value[index]);
+              return SizedBox(
+                height: MediaQuery.of(context).size.height - 100,
+                child: ListView.builder(
+                  itemCount: value.length,
+                  itemBuilder: (context, index) {
+                    return Dismissible(
+                      key: Key(value[index].title),
+                      onDismissed: (direction) {
+                        if (direction == DismissDirection.endToStart) {
+                          _deleteAllLinkedEvents(
+                              value[index]); // Удалить все связанные события
+                        } else {
+                          _deleteEvent(value[index]); // Удалить одно событие
                         }
                       },
-                      child: Card(
-                        color: AppColor.cardColor,
-                        margin: const EdgeInsets.symmetric(
-                          horizontal: 10.0,
-                          vertical: 4.0,
-                        ),
-                        child: ListTile(
-                          title: Text(value[index].title),
+                      background: Container(
+                        color: Colors.red,
+                        alignment: Alignment.centerRight,
+                        padding: const EdgeInsets.only(right: 20.0),
+                        child: const Icon(Icons.delete),
+                      ),
+                      child: GestureDetector(
+                        onLongPress: () {
+                          if (_selectedEvents.value.isNotEmpty) {
+                            _editEvent(_selectedEvents.value[index]);
+                          }
+                        },
+                        child: Card(
+                          color: AppColor.cardColor,
+                          margin: const EdgeInsets.symmetric(
+                            horizontal: 10.0,
+                            vertical: 4.0,
+                          ),
+                          child: ListTile(
+                            title: Text(value[index].title),
+                          ),
                         ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               );
             },
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(6.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              CustomFloatingActionButton(
-                  icon: Icons.cleaning_services,
-                  onPressed: () async {
-                    final ServiceUser? serviceUser = await getServiceUser();
-                    if (serviceUser != null &&
-                        serviceUser.type.contains(ServiceName.chairperson)) {
-                      _clearCalendar;
-                    } else {
-                      infoSnackBar(context, 'Недостаточно прав');
-                    }
-                  }),
-              CustomFloatingActionButton(
-                icon: Icons.add_box,
-                onPressed: _addEvent,
-              ),
-            ],
+          Padding(
+            padding: const EdgeInsets.all(6.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                CustomFloatingActionButton(
+                    icon: Icons.cleaning_services,
+                    onPressed: () async {
+                      final ServiceUser? serviceUser = await getServiceUser();
+                      if (serviceUser != null &&
+                          serviceUser.type.contains(ServiceName.chairperson)) {
+                        _clearCalendar;
+                      } else {
+                        infoSnackBar(context, 'Недостаточно прав');
+                      }
+                    }),
+                CustomFloatingActionButton(
+                  icon: Icons.add_box,
+                  onPressed: _addEvent,
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

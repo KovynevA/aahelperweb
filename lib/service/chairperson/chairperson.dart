@@ -2,6 +2,7 @@ import 'package:aahelper/service/chairperson/adminpanel.dart';
 import 'package:aahelper/service/chairperson/servicetab.dart';
 import 'package:aahelper/service/chairperson/workstab.dart';
 import 'package:aahelper/helper/stylemenu.dart';
+import 'package:aahelper/service/chairperson/settingsgroup.dart';
 import 'package:flutter/material.dart';
 
 // Общий виджет Председатель
@@ -17,7 +18,7 @@ class Chairman extends StatefulWidget {
 class _ChairmanState extends State<Chairman>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  List<String> tabname = ['Рабочка', 'Служения', 'Права'];
+  List<String> tabname = ['Рабочка', 'Служения', 'Группа', 'Права'];
 
   @override
   void initState() {
@@ -45,6 +46,7 @@ class _ChairmanState extends State<Chairman>
             child: WorksWidget(),
           ),
           CardsOfService(),
+          SettingsGroup(),
           AdminPanel(),
         ],
       ),

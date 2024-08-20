@@ -8,7 +8,6 @@ import 'package:aahelper/service/speaker/speaker.dart';
 import 'package:aahelper/service/servicewidget.dart';
 import 'package:aahelper/service/tea/tea.dart';
 import 'package:aahelper/service/treasurer/treasurer.dart';
-import 'package:aahelper/settings/settingsgroup.dart';
 import 'package:flutter/material.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -57,11 +56,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ),
             ),
-            TabBarPage(
-                tabWidget: SettingsGroup(
-              title: 'Настройки',
-              callback: updateState,
-            )),
             const TabBarPage(tabWidget: Chairman(title: 'Председатель')),
             const TabBarPage(tabWidget: Treasurer(title: 'Казначей')),
             const TabBarPage(tabWidget: Leading(title: 'Ведущий')),

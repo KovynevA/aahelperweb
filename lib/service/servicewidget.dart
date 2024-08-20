@@ -1,12 +1,10 @@
 import 'package:aahelper/service/chairperson/chairperson.dart';
-import 'package:aahelper/service/findgroup/findgroup.dart';
 import 'package:aahelper/service/leading/leading.dart';
 import 'package:aahelper/service/librarian/librarian.dart';
 import 'package:aahelper/service/speaker/speaker.dart';
 import 'package:aahelper/service/tea/tea.dart';
 import 'package:aahelper/service/treasurer/treasurer.dart';
 import 'package:aahelper/helper/stylemenu.dart';
-import 'package:aahelper/settings/settingsgroup.dart';
 import 'package:flutter/material.dart';
 
 class TabBarPage extends StatelessWidget {
@@ -20,10 +18,6 @@ class TabBarPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     String title = '';
-    if (tabWidget is SettingsGroup) {
-      title = (tabWidget as SettingsGroup)
-          .title; // Получаем параметр title из виджета SettingsGroup
-    }
     if (tabWidget is Chairman) {
       title = (tabWidget as Chairman)
           .title; // Получаем параметр title из виджета Chairman

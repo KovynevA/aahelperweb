@@ -156,8 +156,9 @@ class Event {
 // Сохранить календарь событий в Firestore
   static void saveEventsToFirestore() async {
     ServiceUser? serviceUser = await getServiceUser();
-    final String nameGroupCollection = serviceUser!.group;
-    if (serviceUser.type.contains(ServiceName.chairperson)) {
+
+    if (serviceUser != null && serviceUser.type.contains(ServiceName.chairperson)) {
+    final String nameGroupCollection = serviceUser.group;
       try {
         // очищаем прошлые события из базы
         await FirebaseFirestore.instance
