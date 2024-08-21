@@ -321,6 +321,10 @@ class _SettingsGroupState extends State<SettingsGroup> {
                 },
               ),
             ),
+            GroupInfo(
+              listdeductions: listdeductions,
+              selectedDays: selectedDays,
+            ),
             Align(
               alignment: Alignment.centerRight,
               child: Padding(
@@ -361,10 +365,6 @@ class _SettingsGroupState extends State<SettingsGroup> {
                 ),
               ),
             ),
-            // TextButton(
-            //   onPressed: moveData,
-            //   child: Text('data'),
-            // ),
           ],
         ),
       ),
@@ -475,6 +475,115 @@ class WeekSelectorDropdown extends StatelessWidget {
           style: AppTextStyle.valuesstyle,
         ),
       ],
+    );
+  }
+}
+
+class GroupInfo extends StatefulWidget {
+  final List<String> selectedDays;
+  final List<Deductions> listdeductions;
+  const GroupInfo({
+    super.key,
+    required this.selectedDays,
+    required this.listdeductions,
+  });
+
+  @override
+  State<GroupInfo> createState() => _GroupInfoState();
+}
+
+class _GroupInfoState extends State<GroupInfo> {
+  bool _isExpanded = false;
+  TextEditingController citycontroller = TextEditingController();
+  TextEditingController areacontroller = TextEditingController();
+  TextEditingController metrocontroller = TextEditingController();
+  List<TextEditingController> timingcontroller = [];
+  TextEditingController bigspeakercontroller = TextEditingController();
+  TextEditingController minispeakercontroller = TextEditingController();
+  TextEditingController adresscontroller = TextEditingController();
+  TextEditingController phonecontroller = TextEditingController();
+  TextEditingController emailcontroller = TextEditingController();
+  TextEditingController urlcontroller = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            ExpansionPanelList(
+              dividerColor: Colors.blueGrey,
+              expansionCallback: (int index, bool isExpanded) {
+                setState(() {
+                  // Toggle the expansion state of the panel
+                  _isExpanded = !_isExpanded;
+                });
+              },
+              children: <ExpansionPanel>[
+                ExpansionPanel(
+                  backgroundColor: AppColor.cardColor,
+                  headerBuilder: (BuildContext context, bool isExpanded) {
+                    return ListTile(
+                      title: Center(
+                          child: Text(
+                        'Информация о группе',
+                        style: AppTextStyle.valuesstyle,
+                      )),
+                    );
+                  },
+                  body: Column(
+                    children: [
+                      TextAndTextFieldWidget(
+                        text: 'Город:',
+                        controller: citycontroller,
+                      ),
+                      TextAndTextFieldWidget(
+                        text: 'Район:',
+                        controller: areacontroller,
+                      ),
+                      TextAndTextFieldWidget(
+                        text: 'Метро:',
+                        controller: metrocontroller,
+                      ),
+                      for (var i = 0; i < widget.selectedDays.length - 1;)
+                        TextAndTextFieldWidget(
+                          text: '${widget.selectedDays[i]}',
+                          controller: timingcontroller[i],
+                        ),
+                      TextAndTextFieldWidget(
+                        text: 'Большое спикерское:',
+                        controller: bigspeakercontroller,
+                      ),
+                      TextAndTextFieldWidget(
+                        text: 'Мини-спикерское:',
+                        controller: minispeakercontroller,
+                      ),
+                      TextAndTextFieldWidget(
+                        text: 'Адресс:',
+                        controller: adresscontroller,
+                      ),
+                      TextAndTextFieldWidget(
+                        text: 'Телефон:',
+                        controller: phonecontroller,
+                      ),
+                      TextAndTextFieldWidget(
+                        text: 'Почта:',
+                        controller: emailcontroller,
+                      ),
+                      TextAndTextFieldWidget(
+                        text: 'Сайт:',
+                        controller: urlcontroller,
+                      ),
+                    ],
+                  ),
+                  isExpanded: _isExpanded,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

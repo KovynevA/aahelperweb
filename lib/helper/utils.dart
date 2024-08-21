@@ -157,8 +157,9 @@ class Event {
   static void saveEventsToFirestore() async {
     ServiceUser? serviceUser = await getServiceUser();
 
-    if (serviceUser != null && serviceUser.type.contains(ServiceName.chairperson)) {
-    final String nameGroupCollection = serviceUser.group;
+    if (serviceUser != null &&
+        serviceUser.type.contains(ServiceName.chairperson)) {
+      final String nameGroupCollection = serviceUser.group;
       try {
         // очищаем прошлые события из базы
         await FirebaseFirestore.instance
@@ -1368,30 +1369,35 @@ String getServiceNameTranslation(ServiceName serviceName) {
 ////////// Класс групп ///////////////////////
 
 class GroupsAA {
-  final String name;
-  final String city;
-  final String area;
-  final String? metro;
-  final List<Map<String, String>>? timing;
-  final List<Map<String, String>>? workmeeting;
-  final List<Map<String, String>>? speaker;
-  final String adress;
-  final String? phone;
-  final String? email;
-  final String url;
+  final String name; // Название группы
+  final String city; // Город
+  final String? area; // Район
+  final String? metro; // Метро
+  final List<Map<String, String>>? timing; // Время собрания <selectedday, time>
+  final String?
+      workmeeting; // Рабочее собрание <dayOfweek, numWeekOfMonth>
+  final String?
+      bigspeaker; // Большие спикерские собрания <dayOfweek, numWeekOfMonth>
+  final String?
+      minispeaker; // Мини-спикерские собрания <dayOfweek, numWeekOfMonth>
+  final String adress; // Адрес группы
+  final String? phone; // Телефон группы
+  final String? email; // Почта группы
+  final String? url; // Сайт группы
 
   GroupsAA({
     required this.name,
     required this.city,
-    required this.area,
     required this.adress,
-    required this.url,
+    required this.timing,
+    this.url,
+    this.area,
     this.metro,
     this.phone,
     this.email,
-    this.timing,
     this.workmeeting,
-    this.speaker,
+    this.bigspeaker,
+    this.minispeaker,
   });
 
   factory GroupsAA.fromJson(Map<String, dynamic> json) {
@@ -1405,8 +1411,10 @@ class GroupsAA {
       phone: json['phone'],
       email: json['email'],
       timing: List<Map<String, String>>.from(json['timing']),
-      workmeeting: List<Map<String, String>>.from(json['workmeeting']),
-      speaker: List<Map<String, String>>.from(json['speaker']),
+      workmeeting: json['workmeeting'],
+      bigspeaker: json['bigspeaker'],
+      minispeaker: json['minispeaker'],
+
     );
   }
 
@@ -1418,13 +1426,17 @@ class GroupsAA {
       'metro': metro,
       'timing': timing,
       'workmeeting': workmeeting,
-      'speaker': speaker,
+      'bigspeaker': bigspeaker,
+      'minispeaker': minispeaker,
       'adress': adress,
       'phone': phone,
       'email': email,
       'url': url,
     };
   }
+
+
+
 }
 
 
