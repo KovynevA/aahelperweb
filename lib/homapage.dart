@@ -62,7 +62,7 @@ class _MyHomePageState extends State<MyHomePage> {
             const TabBarPage(tabWidget: Speaker(title: 'Спикерхантер')),
             const TabBarPage(tabWidget: Librarian(title: 'Библиотекарь')),
             const TabBarPage(tabWidget: TeaMan(title: 'Чайханщик')),
-            const TabBarPage(tabWidget: FindGroup(title: 'Найти группу')),
+           // const TabBarPage(tabWidget: FindGroup(title: 'Найти группу')),
           ],
         ),
       ),
