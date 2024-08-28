@@ -61,7 +61,8 @@ class _ProfitState extends State<Profit> {
     listProfitGroup = await ProfitGroup.loadProfitGroups() ?? [];
     final screenheight = MediaQuery.of(context).size.height;
     final screenwidth = MediaQuery.of(context).size.width;
-    final isSmallScreen = screenheight < 790 || screenwidth < 450; // Определяем маленький экран
+    final isSmallScreen =
+        screenheight < 790 || screenwidth < 400; // Определяем маленький экран
     isSmallScreen
         ? heightCard = MediaQuery.of(context).size.height * 0.33
         : heightCard = MediaQuery.of(context).size.height * 0.25;
@@ -558,7 +559,8 @@ class _BackOfCardWidgetState extends State<BackOfCardWidget> {
         if (field.key == '7 традиция нал' ||
             field.key == '7 традиция карта' ||
             field.key == 'литература' ||
-            field.key == 'другое') {
+            field.key == 'другое' ||
+            field.key == 'юбилей') {
           profitFields.add({
             'dropdownValue': field.key,
             'textValue': field.value.toString(),
@@ -627,7 +629,8 @@ class _BackOfCardWidgetState extends State<BackOfCardWidget> {
                                 '7 традиция нал',
                                 '7 традиция карта',
                                 'литература',
-                                'другое'
+                                'другое',
+                                'юбилей'
                               ],
                               value: profitFields[index]['dropdownValue'],
                               onChanged: (String? newValue) {
@@ -787,6 +790,8 @@ class _BackOfCardWidgetState extends State<BackOfCardWidget> {
         _profitGroup.profitliteratura = _doubleparse(field);
       } else if (field['dropdownValue'] == 'другое') {
         _profitGroup.profitother = _doubleparse(field);
+      } else if (field['dropdownValue'] == 'юбилей') {
+        _profitGroup.profitjubiley = _doubleparse(field);
       }
     }
 
@@ -957,6 +962,10 @@ class ProfitTextWidget extends StatelessWidget {
           ),
           Text(
             'Другое: ${profitGroup.profitother ?? 0}',
+            style: AppTextStyle.minimalsstyle,
+          ),
+          Text(
+            'Юбилей: ${profitGroup.profitjubiley ?? 0}',
             style: AppTextStyle.minimalsstyle,
           ),
         ],

@@ -238,6 +238,7 @@ class ProfitGroup {
   double? sevenTraditioncard;
   double? profitliteratura;
   double? profitother;
+  double? profitjubiley;
 
   double? expensiveliteratura;
   double? tea;
@@ -251,6 +252,7 @@ class ProfitGroup {
     this.sevenTraditioncard,
     this.profitliteratura,
     this.profitother,
+    this.profitjubiley,
     this.expensiveliteratura,
     this.tea,
     this.medal,
@@ -265,6 +267,7 @@ class ProfitGroup {
         'sevenTraditioncard': sevenTraditioncard,
         'profitliteratura': profitliteratura,
         'profitother': profitother,
+        'profitjubiley': profitjubiley,
         'expensiveliteratura': expensiveliteratura,
         'tea': tea,
         'medal': medal,
@@ -280,6 +283,7 @@ class ProfitGroup {
       sevenTraditioncard: map['sevenTraditioncard']?.toDouble(),
       profitliteratura: map['profitliteratura']?.toDouble(),
       profitother: map['profitother']?.toDouble(),
+      profitjubiley: map['profitjubiley']?.toDouble(),
       expensiveliteratura: map['expensiveliteratura']?.toDouble(),
       tea: map['tea']?.toDouble(),
       medal: map['medal']?.toDouble(),
@@ -345,6 +349,7 @@ class ProfitGroup {
       '7 традиция карта': sevenTraditioncard,
       'литература': profitliteratura,
       'другое': profitother,
+      'юбилей': profitjubiley,
       'книги': expensiveliteratura,
       'чай': tea,
       'медали': medal,
@@ -358,6 +363,7 @@ class ProfitGroup {
     sevenTraditioncard = null;
     profitliteratura = null;
     profitother = null;
+    profitjubiley = null;
     expensiveliteratura = null;
     tea = null;
     medal = null;
@@ -416,6 +422,10 @@ class ProfitGroup {
             0,
             (previousValue, profitGroup) =>
                 previousValue! + (profitGroup.profitother ?? 0)),
+        profitjubiley: listProfitGroup.fold(
+            0,
+            (previousValue, profitGroup) =>
+                previousValue! + (profitGroup.profitjubiley ?? 0)),
         expensiveliteratura: listProfitGroup.fold(
             0,
             (previousValue, profitGroup) =>
@@ -1374,8 +1384,7 @@ class GroupsAA {
   final String? area; // Район
   final String? metro; // Метро
   final List<Map<String, String>>? timing; // Время собрания <selectedday, time>
-  final String?
-      workmeeting; // Рабочее собрание <dayOfweek, numWeekOfMonth>
+  final String? workmeeting; // Рабочее собрание <dayOfweek, numWeekOfMonth>
   final String?
       bigspeaker; // Большие спикерские собрания <dayOfweek, numWeekOfMonth>
   final String?
@@ -1414,7 +1423,6 @@ class GroupsAA {
       workmeeting: json['workmeeting'],
       bigspeaker: json['bigspeaker'],
       minispeaker: json['minispeaker'],
-
     );
   }
 
@@ -1434,9 +1442,6 @@ class GroupsAA {
       'url': url,
     };
   }
-
-
-
 }
 
 

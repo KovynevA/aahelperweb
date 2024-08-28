@@ -178,9 +178,13 @@ class _WorkMeetingState extends State<WorkMeeting> {
                         style: AppTextStyle.valuesstyle,
                       ),
                       Text(
-                        'Юбилей = ${listDeductions[dates.indexOf(_startDate!) - 1].anniversary ?? 0}',
+                        'Юбилей = ${(listDeductions[dates.indexOf(_startDate!) - 1].anniversary ?? 0) + (totalProfit?.profitjubiley ?? 0)}',
                         style: AppTextStyle.valuesstyle,
                       ),
+                      // Text(
+                      //   'Юбилей = ${listDeductions[dates.indexOf(_startDate!) - 1].anniversary ?? 0}',
+                      //   style: AppTextStyle.valuesstyle,
+                      // ),
                     ],
                   ),
                 ),
@@ -192,13 +196,14 @@ class _WorkMeetingState extends State<WorkMeeting> {
                     style: const TextStyle(
                       color: Colors.red,
                       fontWeight: FontWeight.bold,
-                      fontSize: 20,
+                      fontSize: 16,
                     ),
                   ),
                 ),
                 GetWorkMeetingWidget(
                     indexdeduction: dates.indexOf(_startDate!),
                     totalfreecash: totalfreecash ?? 0,
+                    jubiley: totalProfit?.profitjubiley,
                     listdeductions: listDeductions),
               ],
             ),
@@ -210,12 +215,14 @@ class _WorkMeetingState extends State<WorkMeeting> {
 class GetWorkMeetingWidget extends StatefulWidget {
   final int indexdeduction;
   final double totalfreecash;
+  final double? jubiley;
   final List<Deductions> listdeductions;
   const GetWorkMeetingWidget({
     super.key,
     required this.totalfreecash,
     required this.indexdeduction,
     required this.listdeductions,
+    this.jubiley,
   });
 
   @override
@@ -243,7 +250,7 @@ class _GetWorkMeetingWidgetState extends State<GetWorkMeetingWidget> {
     reserveController = TextEditingController(
         text: (deduction.reserve ?? prevdeduction.reserve ?? 0).toString());
     anniversaryController = TextEditingController(
-        text: (deduction.anniversary ?? prevdeduction.anniversary ?? 0)
+        text: ((widget.jubiley ?? 0) + (prevdeduction.anniversary ?? 0))
             .toString());
     rentController = TextEditingController(
         text: (deduction.rent ?? prevdeduction.rent ?? 0).toString());
@@ -316,11 +323,14 @@ class _GetWorkMeetingWidgetState extends State<GetWorkMeetingWidget> {
     final differencereserv = deduction.reserve != prevdeduction.reserve
         ? (deduction.reserve ?? 0) - (prevdeduction.reserve ?? 0)
         : 0; // иначе разница ноль
+    final differencejubiley = deduction.anniversary != prevdeduction.anniversary
+        ? (deduction.anniversary ?? 0) - (prevdeduction.anniversary ?? 0)
+        : 0;
 
     final total = (widget.totalfreecash) -
         (deduction.rent ?? 0) -
         differencereserv -
-        (deduction.anniversary ?? 0);
+        differencejubiley;
 
     // Если считать не в процентах
     if (!checkboxpercent) {
@@ -362,6 +372,13 @@ class _GetWorkMeetingWidgetState extends State<GetWorkMeetingWidget> {
         ContainerForWorkMeetings(
           child: Column(
             children: [
+              Padding(
+                padding: const EdgeInsets.only(bottom: 6.0),
+                child: const Text(
+                  'Отчисления: ',
+                  style: AppTextStyle.menutextstyle,
+                ),
+              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -488,7 +505,7 @@ class _GetWorkMeetingWidgetState extends State<GetWorkMeetingWidget> {
             style: const TextStyle(
               color: Colors.red,
               fontWeight: FontWeight.bold,
-              fontSize: 20,
+              fontSize: 16,
             ),
           ),
         ),

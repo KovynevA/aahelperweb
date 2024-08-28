@@ -271,20 +271,6 @@ class _TotalProfitCardState extends State<TotalProfitCard> {
               child: ListTile(
                 title: Column(
                   children: [
-                    // Text(
-                    //   'Остаток с прошлой рабочки: ${(balance ?? 0).toStringAsFixed(2)}',
-                    //   style: AppTextStyle.valuesstyle,
-                    // ),
-                    // Text(
-                    //   'Резерв: $reserve',
-                    //   style: AppTextStyle.valuesstyle,
-                    // ),
-                    // anniversary != 0.0
-                    //     ? Text(
-                    //         'Юбилей: $anniversary',
-                    //         style: AppTextStyle.valuesstyle,
-                    //       )
-                    //     : Container(),
                     Text(
                       'Собрано за период: ${_calculateProfit()}',
                       style: AppTextStyle.valuesstyle,
@@ -294,6 +280,10 @@ class _TotalProfitCardState extends State<TotalProfitCard> {
                     ),
                     Text(
                       'Потрачено за период: ${_calculateConsumption()}',
+                      style: AppTextStyle.valuesstyle,
+                    ),
+                    Text(
+                      'Юбилей: ${_totalProfit?.profitjubiley}',
                       style: AppTextStyle.valuesstyle,
                     ),
                   ],
@@ -341,7 +331,7 @@ class _TotalProfitCardState extends State<TotalProfitCard> {
                 style: const TextStyle(
                   color: Colors.red,
                   fontWeight: FontWeight.bold,
-                  fontSize: 20,
+                  fontSize: 16,
                 ),
               ),
             ),
