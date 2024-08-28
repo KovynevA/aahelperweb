@@ -120,12 +120,13 @@ class _AdminpanelWidgetState extends State<AdminpanelWidget> {
             child: Column(
               children: [
                 Container(
-                  width: MediaQuery.of(context).size.width * 0.5,
+                  width: MediaQuery.of(context).size.width * 0.52,
                   padding: const EdgeInsets.fromLTRB(2, 0, 2, 2),
                   // width: MediaQuery.of(context).size.width,
                   height: 50,
                   decoration: Decor.decorDropDownButton,
                   child: DropdownButtonFormField<ServiceUser>(
+                    hint: Text('Выбрать'),
                     style: AppTextStyle.menutextstyle,
                     value: selectedUser,
                     items: listUsers?.map((user) {

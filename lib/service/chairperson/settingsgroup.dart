@@ -5,10 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class SettingsGroup extends StatefulWidget {
-  //final Function() callback;
   const SettingsGroup({
     super.key,
-    //  required this.callback,
   });
 
   @override
@@ -322,8 +320,10 @@ class _SettingsGroupState extends State<SettingsGroup> {
               ),
             ),
             GroupInfo(
+              key: groupInfoKey,
               listdeductions: listdeductions,
               selectedDays: selectedDays,
+              namegroup: serviceUser?.group ?? '',
             ),
             Align(
               alignment: Alignment.centerRight,
@@ -350,6 +350,10 @@ class _SettingsGroupState extends State<SettingsGroup> {
                           // Сохраняем состояние комбобоксов Собраний и РАБОЧИХ собраний в файл
                           workMeetingSchedule!);
                       ProtocolMeeting.saveProtocolMeetings(listprotocolMeeting);
+                      GroupsAA groupAA = groupInfoKey.currentState!
+                          .getGroupsAAFromTextFields();
+                      GroupsAA.saveGroupAA(groupAA);
+
                       setState(() {});
 
                       infoSnackBar(context, 'Данные сохранены');
@@ -479,13 +483,17 @@ class WeekSelectorDropdown extends StatelessWidget {
   }
 }
 
+GlobalKey<_GroupInfoState> groupInfoKey = GlobalKey();
+
 class GroupInfo extends StatefulWidget {
   final List<String> selectedDays;
   final List<Deductions> listdeductions;
+  final String namegroup;
   const GroupInfo({
     super.key,
     required this.selectedDays,
     required this.listdeductions,
+    required this.namegroup,
   });
 
   @override
@@ -504,6 +512,31 @@ class _GroupInfoState extends State<GroupInfo> {
   TextEditingController phonecontroller = TextEditingController();
   TextEditingController emailcontroller = TextEditingController();
   TextEditingController urlcontroller = TextEditingController();
+
+  GroupsAA getGroupsAAFromTextFields() {
+    List<Map<String, String>> timing = [];
+    for (int i = 0; i < widget.selectedDays.length - 1; i++) {
+      timing.add({
+        widget.selectedDays[i]: timingcontroller[i].text,
+      });
+    }
+
+    return GroupsAA(
+      name: widget
+          .namegroup, // Укажите соответствующее поле или получите из текстового поля
+      city: citycontroller.text,
+      area: areacontroller.text,
+      metro: metrocontroller.text,
+      timing: timing,
+      workmeeting: bigspeakercontroller.text,
+      bigspeaker: bigspeakercontroller.text,
+      minispeaker: minispeakercontroller.text,
+      adress: adresscontroller.text,
+      phone: phonecontroller.text,
+      email: emailcontroller.text,
+      url: urlcontroller.text,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -560,7 +593,7 @@ class _GroupInfoState extends State<GroupInfo> {
                         controller: minispeakercontroller,
                       ),
                       TextAndTextFieldWidget(
-                        text: 'Адресс:',
+                        text: 'Адрес:',
                         controller: adresscontroller,
                       ),
                       TextAndTextFieldWidget(
