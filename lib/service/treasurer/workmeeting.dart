@@ -286,7 +286,7 @@ class _GetWorkMeetingWidgetState extends State<GetWorkMeetingWidget> {
         reserveController = TextEditingController(
             text: (deduction.reserve ?? prevdeduction.reserve ?? 0).toString());
         anniversaryController = TextEditingController(
-            text: (deduction.anniversary ?? prevdeduction.anniversary ?? 0)
+            text: ((widget.jubiley ?? 0) + (prevdeduction.anniversary ?? 0))
                 .toString());
         rentController = TextEditingController(
             text: (deduction.rent ?? prevdeduction.rent ?? 0).toString());
@@ -323,14 +323,21 @@ class _GetWorkMeetingWidgetState extends State<GetWorkMeetingWidget> {
     final differencereserv = deduction.reserve != prevdeduction.reserve
         ? (deduction.reserve ?? 0) - (prevdeduction.reserve ?? 0)
         : 0; // иначе разница ноль
-    final differencejubiley = deduction.anniversary != prevdeduction.anniversary
-        ? (deduction.anniversary ?? 0) - (prevdeduction.anniversary ?? 0)
-        : 0;
 
-    final total = (widget.totalfreecash) -
-        (deduction.rent ?? 0) -
-        differencereserv -
-        differencejubiley;
+    // ЮБИЛЕЙ///////
+    final differencejubiley = deduction.anniversary !=
+            ((widget.jubiley ?? 0) + (prevdeduction.anniversary ?? 0))
+        ? (deduction.anniversary ?? 0.0) -
+            ((widget.jubiley ?? 0) + (prevdeduction.anniversary ?? 0))
+        : 0.0;
+    double total = 0.0;
+    differencejubiley == 0.0
+        ? total =
+            (widget.totalfreecash) - (deduction.rent ?? 0) - differencereserv
+        : total = (widget.totalfreecash) -
+            (deduction.rent ?? 0) -
+            differencereserv -
+            differencejubiley;
 
     // Если считать не в процентах
     if (!checkboxpercent) {
@@ -373,10 +380,20 @@ class _GetWorkMeetingWidgetState extends State<GetWorkMeetingWidget> {
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.only(bottom: 6.0),
+                padding: const EdgeInsets.only(bottom: 2.0),
                 child: const Text(
-                  'Отчисления: ',
+                  'Зарезервированные средства: ',
                   style: AppTextStyle.menutextstyle,
+                ),
+              ),
+              const Text(
+                'Изменение суммы резерва или юбилея будет из средств 7 традиции',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Color.fromARGB(255, 105, 11, 4),
+                  fontWeight: FontWeight.bold,
+                  fontStyle: FontStyle.italic,
+                  fontSize: 12,
                 ),
               ),
               Row(
@@ -406,6 +423,13 @@ class _GetWorkMeetingWidgetState extends State<GetWorkMeetingWidget> {
                     controller: anniversaryController,
                   ),
                 ],
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 6.0),
+                child: const Text(
+                  'Отчисления: ',
+                  style: AppTextStyle.menutextstyle,
+                ),
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
