@@ -523,7 +523,7 @@ class _GroupInfoState extends State<GroupInfo> {
 
     return GroupsAA(
       name: widget
-          .namegroup, // Укажите соответствующее поле или получите из текстового поля
+          .namegroup, 
       city: citycontroller.text,
       area: areacontroller.text,
       metro: metrocontroller.text,
