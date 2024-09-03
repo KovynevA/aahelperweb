@@ -321,8 +321,7 @@ class _SettingsGroupState extends State<SettingsGroup> {
             ),
             GroupInfo(
               key: groupInfoKey,
-              listdeductions: listdeductions,
-              selectedDays: selectedDays,
+              shedule: workMeetingSchedule,
               namegroup: serviceUser?.group ?? '',
             ),
             Align(
@@ -486,13 +485,11 @@ class WeekSelectorDropdown extends StatelessWidget {
 GlobalKey<_GroupInfoState> groupInfoKey = GlobalKey();
 
 class GroupInfo extends StatefulWidget {
-  final List<String> selectedDays;
-  final List<Deductions> listdeductions;
+  final WorkMeetingSchedule? shedule;
   final String namegroup;
   const GroupInfo({
     super.key,
-    required this.selectedDays,
-    required this.listdeductions,
+    required this.shedule,
     required this.namegroup,
   });
 
@@ -512,29 +509,81 @@ class _GroupInfoState extends State<GroupInfo> {
   TextEditingController phonecontroller = TextEditingController();
   TextEditingController emailcontroller = TextEditingController();
   TextEditingController urlcontroller = TextEditingController();
+  TextEditingController additionalInfocontroller = TextEditingController();
+  GroupsAA? groupInfo;
+
+  @override
+  void initState() {
+    loadInfoGroup();
+    fillFormFields();
+    super.initState();
+  }
+
+  void fillFormFields() {
+    citycontroller.text = groupInfo?.city ?? '';
+    areacontroller.text = groupInfo?.area ?? '';
+    metrocontroller.text = groupInfo?.metro ?? '';
+    bigspeakercontroller.text = groupInfo?.bigspeaker ?? '';
+    minispeakercontroller.text = groupInfo?.minispeaker ?? '';
+    adresscontroller.text = groupInfo?.adress ?? '';
+    phonecontroller.text = groupInfo?.phone ?? '';
+    emailcontroller.text = groupInfo?.email ?? '';
+    urlcontroller.text = groupInfo?.url ?? '';
+    additionalInfocontroller.text = groupInfo?.additionalInfo ?? '';
+
+    if (groupInfo?.timing != null) {
+      for (var timing in groupInfo!.timing!) {
+        timingcontroller.add(TextEditingController(text: timing.values.first));
+      }
+    } else {
+      if (widget.shedule?.selectedDays != null) {
+        for (var day in widget.shedule!.selectedDays) {
+          timingcontroller.add(TextEditingController());
+        }
+      }
+    }
+  }
+
+  void loadInfoGroup() async {
+    groupInfo = await GroupsAA.loadGroupAA();
+  }
 
   GroupsAA getGroupsAAFromTextFields() {
-    List<Map<String, String>> timing = [];
-    for (int i = 0; i < widget.selectedDays.length - 1; i++) {
-      timing.add({
-        widget.selectedDays[i]: timingcontroller[i].text,
-      });
-    }
+    //  List<Map<String, String>> timing = [];
+    // if (widget.shedule?.selectedDays != null) {
+    //   for (int i = 0; i < widget.shedule!.selectedDays.length - 1; i++) {
+    //     timing.add({
+    //       widget.shedule!.selectedDays[i]: timingcontroller[i].text,
+    //     });
+    //   }
+    // }
 
+    String wotkmeeting = '';
+
+    if (widget.shedule != null) {
+      widget.shedule!.checkboxstatus!
+          ? wotkmeeting =
+              'Каждый ${widget.shedule?.numOfDay} ${widget.shedule?.numWeekOfMonth} месяца'
+          : wotkmeeting = 'Каждое ${widget.shedule?.dayOfMonth} число месяца';
+    }
     return GroupsAA(
-      name: widget
-          .namegroup, 
+      name: widget.namegroup,
       city: citycontroller.text,
       area: areacontroller.text,
       metro: metrocontroller.text,
-      timing: timing,
-      workmeeting: bigspeakercontroller.text,
+      timing: timingcontroller.isNotEmpty
+          ? timingcontroller
+              .map((controller) => {controller.text: 'time'})
+              .toList()
+          : null,
+      workmeeting: wotkmeeting,
       bigspeaker: bigspeakercontroller.text,
       minispeaker: minispeakercontroller.text,
       adress: adresscontroller.text,
       phone: phonecontroller.text,
       email: emailcontroller.text,
       url: urlcontroller.text,
+      additionalInfo: additionalInfocontroller.text,
     );
   }
 
@@ -549,7 +598,6 @@ class _GroupInfoState extends State<GroupInfo> {
               dividerColor: Colors.blueGrey,
               expansionCallback: (int index, bool isExpanded) {
                 setState(() {
-                  // Toggle the expansion state of the panel
                   _isExpanded = !_isExpanded;
                 });
               },
@@ -579,11 +627,14 @@ class _GroupInfoState extends State<GroupInfo> {
                         text: 'Метро:',
                         controller: metrocontroller,
                       ),
-                      for (var i = 0; i < widget.selectedDays.length - 1;)
-                        TextAndTextFieldWidget(
-                          text: '${widget.selectedDays[i]}',
-                          controller: timingcontroller[i],
-                        ),
+                      if (timingcontroller.isNotEmpty)
+                        for (int i = 0; i < timingcontroller.length; i++)
+                          TextField(
+                            controller: timingcontroller[i],
+                            decoration: InputDecoration(
+                                labelText:
+                                    'Timing for ${widget.shedule?.selectedDays[i]}'),
+                          ),
                       TextAndTextFieldWidget(
                         text: 'Большое спикерское:',
                         controller: bigspeakercontroller,

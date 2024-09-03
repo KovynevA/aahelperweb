@@ -558,7 +558,7 @@ class WorkMeetingSchedule {
   int? numOfDay; // номер дня недели РАБОЧЕГО собрания
   List<String> selectedDays; // список выбранных дней собрания группы
   int?
-      dayOfMonth; // номер недели в месяце РАБОЧЕГО собрания, если собрание определенного числа месяца
+      dayOfMonth; // номер дня в месяце РАБОЧЕГО собрания, если собрание определенного числа месяца
   bool? checkboxstatus;
 
   WorkMeetingSchedule({
@@ -1393,6 +1393,7 @@ class GroupsAA {
   final String? phone; // Телефон группы
   final String? email; // Почта группы
   final String? url; // Сайт группы
+  final String? additionalInfo;
 
   GroupsAA({
     required this.name,
@@ -1407,6 +1408,7 @@ class GroupsAA {
     this.workmeeting,
     this.bigspeaker,
     this.minispeaker,
+    this.additionalInfo, 
   });
 
   factory GroupsAA.fromJson(Map<String, dynamic> json) {
@@ -1423,6 +1425,7 @@ class GroupsAA {
       workmeeting: json['workmeeting'],
       bigspeaker: json['bigspeaker'],
       minispeaker: json['minispeaker'],
+      additionalInfo: json['additionalInfo'],
     );
   }
 
@@ -1440,6 +1443,7 @@ class GroupsAA {
       'phone': phone,
       'email': email,
       'url': url,
+      'additionalInfo': additionalInfo,
     };
   }
 
@@ -1455,79 +1459,25 @@ class GroupsAA {
     await groupInfoCollection.doc('info').set(groupAA.toMap());
   }
 
-Future<GroupsAA?> loadGroupAA() async {
-  final serviceUser = await getServiceUser();
-  final String nameGroupCollection = serviceUser!.group;
+  static Future<GroupsAA?> loadGroupAA() async {
+    final serviceUser = await getServiceUser();
+    final String nameGroupCollection = serviceUser!.group;
 
-  final DocumentSnapshot groupDoc = await FirebaseFirestore.instance
-      .collection('allgroups')
-      .doc(nameGroupCollection)
-      .collection('groupInfo')
-      .doc('info')
-      .get();
+    final DocumentSnapshot groupDoc = await FirebaseFirestore.instance
+        .collection('allgroups')
+        .doc(nameGroupCollection)
+        .collection('groupInfo')
+        .doc('info')
+        .get();
 
-  if (groupDoc.exists) {
-    return GroupsAA.fromJson(groupDoc.data() as Map<String, dynamic>);
-  } else {
-    return null;
+    if (groupDoc.exists) {
+      return GroupsAA.fromJson(groupDoc.data() as Map<String, dynamic>);
+    } else {
+      return null;
+    }
   }
 }
 
-
-
-}
-
-
-//  static void saveProtocolMeetings(
-//       List<ProtocolMeeting> protocolMeetings) async {
-//     ServiceUser? serviceUser = await getServiceUser();
-//     final String nameGroupCollection = serviceUser!.group;
-//     if (serviceUser.type.contains(ServiceName.chairperson) ||
-//         serviceUser.type.contains(ServiceName.leading)) {
-//       List<Map<String, dynamic>> data =
-//           protocolMeetings.map((meeting) => meeting.toJson()).toList();
-
-//       FirebaseFirestore.instance
-//           .collection('allgroups')
-//           .doc(nameGroupCollection)
-//           .collection('protocolMeetings')
-//           .doc('meetingsData')
-//           .set({
-//         'data': data,
-//       });
-//     }
-//   }
-
-// Загрузка протокола собрания
-  // static Future<List<ProtocolMeeting>?> loadProtocolMeetings() async {
-  //   List<ProtocolMeeting> protocolMeetings = [];
-  //   if (isAutorization) {
-  //     ServiceUser? serviceUser = await getServiceUser();
-  //     final String nameGroupCollection = serviceUser!.group;
-  //     DocumentSnapshot doc = await FirebaseFirestore.instance
-  //         .collection('allgroups')
-  //         .doc(nameGroupCollection)
-  //         .collection('protocolMeetings')
-  //         .doc('meetingsData')
-  //         .get();
-
-  //     if (doc.exists) {
-  //       Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
-
-  //       if (data != null && data.containsKey('data')) {
-  //         List<dynamic> jsonData = data['data'];
-
-  //         protocolMeetings =
-  //             jsonData.map((json) => ProtocolMeeting.fromJSon(json)).toList();
-  //       }
-  //       return protocolMeetings;
-  //     } else {
-  //       return null;
-  //     }
-  //   } else {
-  //     return null;
-  //   }
-  // }
 
 // Функция транслитерации русских букв в латинские
 // String transliterate(String input) {
