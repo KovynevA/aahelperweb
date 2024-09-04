@@ -116,8 +116,6 @@ class _SettingsGroupState extends State<SettingsGroup> {
     // Не забудьте сортировать список после добавления новых элементов
     profitGroup.sort((a, b) => a.date.compareTo(b.date));
     listprotocolMeeting.sort((a, b) => a.date.compareTo(b.date));
-    // Provider.of<ServiceProvider>(context, listen: false)
-    //     .updateListProfit(profitGroup);
     addEventsForWorksMeetings(); // Добавляем Новые Рабочие собрания
   }
 
@@ -511,14 +509,33 @@ class _GroupInfoState extends State<GroupInfo> {
   TextEditingController urlcontroller = TextEditingController();
   TextEditingController additionalInfocontroller = TextEditingController();
   GroupsAA? groupInfo;
+  WorkMeetingSchedule? _schedule;
 
   @override
   void initState() {
     loadInfoGroup();
     fillFormFields();
+    _schedule = widget.shedule;
     super.initState();
   }
 
+  void loadInfoGroup() async {
+    groupInfo = await GroupsAA.loadGroupAA();
+    setState(() {});
+  }
+
+  @override
+  void didUpdateWidget(covariant GroupInfo oldWidget) {
+    if (oldWidget.shedule != widget.shedule) {
+      setState(() {
+        _schedule = widget.shedule;
+        fillFormFields();
+      });
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+// Загрузка полей
   void fillFormFields() {
     citycontroller.text = groupInfo?.city ?? '';
     areacontroller.text = groupInfo?.area ?? '';
@@ -533,49 +550,48 @@ class _GroupInfoState extends State<GroupInfo> {
 
     if (groupInfo?.timing != null) {
       for (var timing in groupInfo!.timing!) {
-        timingcontroller.add(TextEditingController(text: timing.values.first));
+        timingcontroller.add(TextEditingController(text: timing['time']));
       }
     } else {
-      if (widget.shedule?.selectedDays != null) {
-        for (var day in widget.shedule!.selectedDays) {
+      if (_schedule?.selectedDays != null) {
+        for (var day in _schedule!.selectedDays) {
           timingcontroller.add(TextEditingController());
         }
       }
     }
   }
 
-  void loadInfoGroup() async {
-    groupInfo = await GroupsAA.loadGroupAA();
-  }
-
+// Сохранение значений полей
   GroupsAA getGroupsAAFromTextFields() {
-    //  List<Map<String, String>> timing = [];
-    // if (widget.shedule?.selectedDays != null) {
-    //   for (int i = 0; i < widget.shedule!.selectedDays.length - 1; i++) {
-    //     timing.add({
-    //       widget.shedule!.selectedDays[i]: timingcontroller[i].text,
-    //     });
-    //   }
-    // }
-
     String wotkmeeting = '';
 
     if (widget.shedule != null) {
       widget.shedule!.checkboxstatus!
           ? wotkmeeting =
-              'Каждый ${widget.shedule?.numOfDay} ${widget.shedule?.numWeekOfMonth} месяца'
-          : wotkmeeting = 'Каждое ${widget.shedule?.dayOfMonth} число месяца';
+              'Каждый ${_schedule?.numOfDay} ${daysOfWeek[_schedule!.numWeekOfMonth!]} месяца'
+          : wotkmeeting = 'Каждое ${_schedule!.dayOfMonth} число месяца';
     }
+
+    List<Map<String, String>> timing = [];
+
+// Проверяем, что размерности списков совпадают
+    if (timingcontroller.length == _schedule?.selectedDays.length) {
+      for (int i = 0; i < timingcontroller.length; i++) {
+        String time = timingcontroller[i].text;
+        String day = _schedule!.selectedDays[i];
+
+        timing.add({'time': time, 'day': day});
+      }
+    } else {
+      print('Размерности списков не совпадают');
+    }
+    timingcontroller.clear();
     return GroupsAA(
       name: widget.namegroup,
       city: citycontroller.text,
       area: areacontroller.text,
       metro: metrocontroller.text,
-      timing: timingcontroller.isNotEmpty
-          ? timingcontroller
-              .map((controller) => {controller.text: 'time'})
-              .toList()
-          : null,
+      timing: timing,
       workmeeting: wotkmeeting,
       bigspeaker: bigspeakercontroller.text,
       minispeaker: minispeakercontroller.text,
@@ -585,6 +601,25 @@ class _GroupInfoState extends State<GroupInfo> {
       url: urlcontroller.text,
       additionalInfo: additionalInfocontroller.text,
     );
+  }
+
+  @override
+  void dispose() {
+    citycontroller.dispose();
+    areacontroller.dispose();
+    metrocontroller.dispose();
+    timingcontroller.forEach((controller) {
+      controller.dispose();
+    });
+    timingcontroller.clear();
+    bigspeakercontroller.dispose();
+    minispeakercontroller.dispose();
+    adresscontroller.dispose();
+    phonecontroller.dispose();
+    emailcontroller.dispose();
+    urlcontroller.dispose();
+    additionalInfocontroller.dispose();
+    super.dispose();
   }
 
   @override
@@ -609,12 +644,17 @@ class _GroupInfoState extends State<GroupInfo> {
                       title: Center(
                           child: Text(
                         'Информация о группе',
-                        style: AppTextStyle.valuesstyle,
+                        style: AppTextStyle.menutextstyle,
                       )),
                     );
                   },
                   body: Column(
                     children: [
+                      Text(
+                        'Местоположение:',
+                        style: AppTextStyle.valuesstyle,
+                        textAlign: TextAlign.center,
+                      ),
                       TextAndTextFieldWidget(
                         text: 'Город:',
                         controller: citycontroller,
@@ -627,14 +667,26 @@ class _GroupInfoState extends State<GroupInfo> {
                         text: 'Метро:',
                         controller: metrocontroller,
                       ),
-                      if (timingcontroller.isNotEmpty)
-                        for (int i = 0; i < timingcontroller.length; i++)
-                          TextField(
+                      TextAndTextFieldWidget(
+                        text: 'Адрес:',
+                        controller: adresscontroller,
+                      ),
+                      Text(
+                        'Время собраний:',
+                        style: AppTextStyle.valuesstyle,
+                        textAlign: TextAlign.center,
+                      ),
+                      if (_schedule?.selectedDays != null)
+                        for (int i = 0; i < _schedule!.selectedDays.length; i++)
+                          TextAndTextFieldWidget(
                             controller: timingcontroller[i],
-                            decoration: InputDecoration(
-                                labelText:
-                                    'Timing for ${widget.shedule?.selectedDays[i]}'),
+                            text: '${_schedule?.selectedDays[i]}',
                           ),
+                      Text(
+                        'Дополнительно:',
+                        style: AppTextStyle.valuesstyle,
+                        textAlign: TextAlign.center,
+                      ),
                       TextAndTextFieldWidget(
                         text: 'Большое спикерское:',
                         controller: bigspeakercontroller,
@@ -642,10 +694,6 @@ class _GroupInfoState extends State<GroupInfo> {
                       TextAndTextFieldWidget(
                         text: 'Мини-спикерское:',
                         controller: minispeakercontroller,
-                      ),
-                      TextAndTextFieldWidget(
-                        text: 'Адрес:',
-                        controller: adresscontroller,
                       ),
                       TextAndTextFieldWidget(
                         text: 'Телефон:',
@@ -658,6 +706,10 @@ class _GroupInfoState extends State<GroupInfo> {
                       TextAndTextFieldWidget(
                         text: 'Сайт:',
                         controller: urlcontroller,
+                      ),
+                      TextAndTextFieldWidget(
+                        text: 'Доп.информация:',
+                        controller: additionalInfocontroller,
                       ),
                     ],
                   ),

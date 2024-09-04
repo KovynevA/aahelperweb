@@ -42,9 +42,7 @@ class _ChairmanState extends State<Chairman>
       body: TabBarView(
         controller: _tabController,
         children: const [
-          Center(
-            child: WorksWidget(),
-          ),
+          WorksWidget(),
           CardsOfService(),
           SettingsGroup(),
           AdminPanel(),

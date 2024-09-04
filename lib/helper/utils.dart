@@ -593,6 +593,10 @@ class WorkMeetingSchedule {
   static void saveWorkMeetingSchedule(WorkMeetingSchedule schedule) async {
     ServiceUser? serviceUser = await getServiceUser();
     final String nameGroupCollection = serviceUser!.group;
+    // Сортировка дней недели по возрастанию
+    schedule.selectedDays.sort((a, b) {
+      return daysOfWeek.indexOf(a).compareTo(daysOfWeek.indexOf(b));
+    });
     if (serviceUser.type.contains(ServiceName.chairperson)) {
       FirebaseFirestore.instance
           .collection('allgroups')
@@ -1408,10 +1412,15 @@ class GroupsAA {
     this.workmeeting,
     this.bigspeaker,
     this.minispeaker,
-    this.additionalInfo, 
+    this.additionalInfo,
   });
 
   factory GroupsAA.fromJson(Map<String, dynamic> json) {
+    List<Map<String, String>> timings =
+        (json['timing'] as List<dynamic>).map((item) {
+      return Map<String, String>.from(item as Map<String, dynamic>);
+    }).toList();
+
     return GroupsAA(
       name: json['name'],
       city: json['city'],
@@ -1421,7 +1430,7 @@ class GroupsAA {
       metro: json['metro'],
       phone: json['phone'],
       email: json['email'],
-      timing: List<Map<String, String>>.from(json['timing']),
+      timing: timings,
       workmeeting: json['workmeeting'],
       bigspeaker: json['bigspeaker'],
       minispeaker: json['minispeaker'],
@@ -1429,7 +1438,7 @@ class GroupsAA {
     );
   }
 
-  Map<String, dynamic> toMap() {
+   Map<String, dynamic> toMap() {
     return {
       'name': name,
       'city': city,
