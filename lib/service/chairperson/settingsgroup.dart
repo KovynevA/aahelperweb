@@ -513,15 +513,15 @@ class _GroupInfoState extends State<GroupInfo> {
 
   @override
   void initState() {
-    loadInfoGroup();
+       _schedule = widget.shedule;
     fillFormFields();
-    _schedule = widget.shedule;
+
     super.initState();
   }
 
-  void loadInfoGroup() async {
-    groupInfo = await GroupsAA.loadGroupAA();
-    setState(() {});
+  Future<GroupsAA?> loadInfoGroup() async {
+groupInfo = await GroupsAA.loadGroupAA();
+    return groupInfo;
   }
 
   @override
@@ -624,102 +624,216 @@ class _GroupInfoState extends State<GroupInfo> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            ExpansionPanelList(
-              dividerColor: Colors.blueGrey,
-              expansionCallback: (int index, bool isExpanded) {
-                setState(() {
-                  _isExpanded = !_isExpanded;
-                });
-              },
-              children: <ExpansionPanel>[
-                ExpansionPanel(
-                  backgroundColor: AppColor.cardColor,
-                  headerBuilder: (BuildContext context, bool isExpanded) {
-                    return ListTile(
-                      title: Center(
-                          child: Text(
-                        'Информация о группе',
-                        style: AppTextStyle.menutextstyle,
-                      )),
-                    );
+        _schedule = widget.shedule;
+    return FutureBuilder<GroupsAA?>(
+      future: loadInfoGroup(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+        return Center(child: CircularProgressIndicator());
+      } else if (snapshot.hasError) {
+        return Center(child: Text('Ошибка загрузки данных'));
+      } else {
+        if (snapshot.hasData) {
+          groupInfo = snapshot.data;
+          fillFormFields();
+        return SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              children: [
+                ExpansionPanelList(
+                  dividerColor: Colors.blueGrey,
+                  expansionCallback: (int index, bool isExpanded) {
+                    setState(() {
+                      _isExpanded = !_isExpanded;
+                    });
                   },
-                  body: Column(
-                    children: [
-                      Text(
-                        'Местоположение:',
-                        style: AppTextStyle.valuesstyle,
-                        textAlign: TextAlign.center,
-                      ),
-                      AnimatedTextAndTextFieldWidget(
-                        text: 'Город:',
-                        controller: citycontroller,
-                      ),
-                      AnimatedTextAndTextFieldWidget(
-                        text: 'Район:',
-                        controller: areacontroller,
-                      ),
-                      AnimatedTextAndTextFieldWidget(
-                        text: 'Метро:',
-                        controller: metrocontroller,
-                      ),
-                      AnimatedTextAndTextFieldWidget(
-                        text: 'Адрес:',
-                        controller: adresscontroller,
-                      ),
-                      Text(
-                        'Время собраний:',
-                        style: AppTextStyle.valuesstyle,
-                        textAlign: TextAlign.center,
-                      ),
-                      if (_schedule?.selectedDays != null)
-                        for (int i = 0; i < _schedule!.selectedDays.length; i++)
-                          TextAndTextFieldWidget(
-                            controller: timingcontroller[i],
-                            text: '${_schedule?.selectedDays[i]}',
+                  children: <ExpansionPanel>[
+                    ExpansionPanel(
+                      backgroundColor: AppColor.cardColor,
+                      headerBuilder: (BuildContext context, bool isExpanded) {
+                        return ListTile(
+                          title: Center(
+                              child: Text(
+                            'Информация о группе',
+                            style: AppTextStyle.menutextstyle,
+                          )),
+                        );
+                      },
+                      body: Column(
+                        children: [
+                          Text(
+                            'Местоположение:',
+                            style: AppTextStyle.valuesstyle,
+                            textAlign: TextAlign.center,
                           ),
-                      Text(
-                        'Дополнительно:',
-                        style: AppTextStyle.valuesstyle,
-                        textAlign: TextAlign.center,
+                          AnimatedTextAndTextFieldWidget(
+                            text: 'Город:',
+                            controller: citycontroller,
+                          ),
+                          AnimatedTextAndTextFieldWidget(
+                            text: 'Район:',
+                            controller: areacontroller,
+                          ),
+                          AnimatedTextAndTextFieldWidget(
+                            text: 'Метро:',
+                            controller: metrocontroller,
+                          ),
+                          AnimatedTextAndTextFieldWidget(
+                            text: 'Адрес:',
+                            controller: adresscontroller,
+                          ),
+                          Text(
+                            'Время собраний:',
+                            style: AppTextStyle.valuesstyle,
+                            textAlign: TextAlign.center,
+                          ),
+                          if (_schedule?.selectedDays != null)
+                            for (int i = 0; i < _schedule!.selectedDays.length; i++)
+                              TextAndTextFieldWidget(
+                                controller: timingcontroller[i],
+                                text: '${_schedule?.selectedDays[i]}',
+                              ),
+                          Text(
+                            'Дополнительно:',
+                            style: AppTextStyle.valuesstyle,
+                            textAlign: TextAlign.center,
+                          ),
+                          AnimatedTextAndTextFieldWidget(
+                            text: 'Большое спикерское:',
+                            controller: bigspeakercontroller,
+                          ),
+                          AnimatedTextAndTextFieldWidget(
+                            text: 'Мини-спикерское:',
+                            controller: minispeakercontroller,
+                          ),
+                          AnimatedTextAndTextFieldWidget(
+                            text: 'Телефон:',
+                            controller: phonecontroller,
+                          ),
+                          AnimatedTextAndTextFieldWidget(
+                            text: 'Почта:',
+                            controller: emailcontroller,
+                          ),
+                          AnimatedTextAndTextFieldWidget(
+                            text: 'Сайт:',
+                            controller: urlcontroller,
+                          ),
+                          AnimatedTextAndTextFieldWidget(
+                            text: 'Доп.информация:',
+                            controller: additionalInfocontroller,
+                          ),
+                        ],
                       ),
-                      AnimatedTextAndTextFieldWidget(
-                        text: 'Большое спикерское:',
-                        controller: bigspeakercontroller,
-                      ),
-                      AnimatedTextAndTextFieldWidget(
-                        text: 'Мини-спикерское:',
-                        controller: minispeakercontroller,
-                      ),
-                      AnimatedTextAndTextFieldWidget(
-                        text: 'Телефон:',
-                        controller: phonecontroller,
-                      ),
-                      AnimatedTextAndTextFieldWidget(
-                        text: 'Почта:',
-                        controller: emailcontroller,
-                      ),
-                      AnimatedTextAndTextFieldWidget(
-                        text: 'Сайт:',
-                        controller: urlcontroller,
-                      ),
-                      AnimatedTextAndTextFieldWidget(
-                        text: 'Доп.информация:',
-                        controller: additionalInfocontroller,
-                      ),
-                    ],
-                  ),
-                  isExpanded: _isExpanded,
+                      isExpanded: _isExpanded,
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+        } else {
+          return SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              children: [
+                ExpansionPanelList(
+                  dividerColor: Colors.blueGrey,
+                  expansionCallback: (int index, bool isExpanded) {
+                    setState(() {
+                      _isExpanded = !_isExpanded;
+                    });
+                  },
+                  children: <ExpansionPanel>[
+                    ExpansionPanel(
+                      backgroundColor: AppColor.cardColor,
+                      headerBuilder: (BuildContext context, bool isExpanded) {
+                        return ListTile(
+                          title: Center(
+                              child: Text(
+                            'Информация о группе',
+                            style: AppTextStyle.menutextstyle,
+                          )),
+                        );
+                      },
+                      body: Column(
+                        children: [
+                          Text(
+                            'Местоположение:',
+                            style: AppTextStyle.valuesstyle,
+                            textAlign: TextAlign.center,
+                          ),
+                          AnimatedTextAndTextFieldWidget(
+                            text: 'Город:',
+                            controller: citycontroller,
+                          ),
+                          AnimatedTextAndTextFieldWidget(
+                            text: 'Район:',
+                            controller: areacontroller,
+                          ),
+                          AnimatedTextAndTextFieldWidget(
+                            text: 'Метро:',
+                            controller: metrocontroller,
+                          ),
+                          AnimatedTextAndTextFieldWidget(
+                            text: 'Адрес:',
+                            controller: adresscontroller,
+                          ),
+                          Text(
+                            'Время собраний:',
+                            style: AppTextStyle.valuesstyle,
+                            textAlign: TextAlign.center,
+                          ),
+                          if (_schedule?.selectedDays != null)
+                            for (int i = 0; i < _schedule!.selectedDays.length; i++)
+                              TextAndTextFieldWidget(
+                                controller: timingcontroller[i],
+                                text: '${_schedule?.selectedDays[i]}',
+                              ),
+                          Text(
+                            'Дополнительно:',
+                            style: AppTextStyle.valuesstyle,
+                            textAlign: TextAlign.center,
+                          ),
+                          AnimatedTextAndTextFieldWidget(
+                            text: 'Большое спикерское:',
+                            controller: bigspeakercontroller,
+                          ),
+                          AnimatedTextAndTextFieldWidget(
+                            text: 'Мини-спикерское:',
+                            controller: minispeakercontroller,
+                          ),
+                          AnimatedTextAndTextFieldWidget(
+                            text: 'Телефон:',
+                            controller: phonecontroller,
+                          ),
+                          AnimatedTextAndTextFieldWidget(
+                            text: 'Почта:',
+                            controller: emailcontroller,
+                          ),
+                          AnimatedTextAndTextFieldWidget(
+                            text: 'Сайт:',
+                            controller: urlcontroller,
+                          ),
+                          AnimatedTextAndTextFieldWidget(
+                            text: 'Доп.информация:',
+                            controller: additionalInfocontroller,
+                          ),
+                        ],
+                      ),
+                      isExpanded: _isExpanded,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+        }
+      }
+      },
     );
   }
 }
