@@ -655,19 +655,19 @@ class _GroupInfoState extends State<GroupInfo> {
                         style: AppTextStyle.valuesstyle,
                         textAlign: TextAlign.center,
                       ),
-                      TextAndTextFieldWidget(
+                      AnimatedTextAndTextFieldWidget(
                         text: 'Город:',
                         controller: citycontroller,
                       ),
-                      TextAndTextFieldWidget(
+                      AnimatedTextAndTextFieldWidget(
                         text: 'Район:',
                         controller: areacontroller,
                       ),
-                      TextAndTextFieldWidget(
+                      AnimatedTextAndTextFieldWidget(
                         text: 'Метро:',
                         controller: metrocontroller,
                       ),
-                      TextAndTextFieldWidget(
+                      AnimatedTextAndTextFieldWidget(
                         text: 'Адрес:',
                         controller: adresscontroller,
                       ),
@@ -687,27 +687,27 @@ class _GroupInfoState extends State<GroupInfo> {
                         style: AppTextStyle.valuesstyle,
                         textAlign: TextAlign.center,
                       ),
-                      TextAndTextFieldWidget(
+                      AnimatedTextAndTextFieldWidget(
                         text: 'Большое спикерское:',
                         controller: bigspeakercontroller,
                       ),
-                      TextAndTextFieldWidget(
+                      AnimatedTextAndTextFieldWidget(
                         text: 'Мини-спикерское:',
                         controller: minispeakercontroller,
                       ),
-                      TextAndTextFieldWidget(
+                      AnimatedTextAndTextFieldWidget(
                         text: 'Телефон:',
                         controller: phonecontroller,
                       ),
-                      TextAndTextFieldWidget(
+                      AnimatedTextAndTextFieldWidget(
                         text: 'Почта:',
                         controller: emailcontroller,
                       ),
-                      TextAndTextFieldWidget(
+                      AnimatedTextAndTextFieldWidget(
                         text: 'Сайт:',
                         controller: urlcontroller,
                       ),
-                      TextAndTextFieldWidget(
+                      AnimatedTextAndTextFieldWidget(
                         text: 'Доп.информация:',
                         controller: additionalInfocontroller,
                       ),

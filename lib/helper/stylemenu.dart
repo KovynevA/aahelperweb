@@ -80,33 +80,41 @@ class _AnimatedTextAndTextFieldWidgetState
       padding: const EdgeInsets.all(10.0),
       child: AnimatedContainer(
         height: _isTextFieldFocused
-            ? MediaQuery.of(context).size.height * 0.1
-            : MediaQuery.of(context).size.height * 0.05,
+            ? MediaQuery.of(context).size.height * 0.12
+            : MediaQuery.of(context).size.height * 0.07,
         duration: const Duration(milliseconds: 200),
-        child: Stack(
+        child: Row(
           children: [
             Align(
               alignment: Alignment.centerLeft,
-              child: Text(
-                widget.text,
-                style: AppTextStyle.menutextstyle,
+              child: Container(
+              width: MediaQuery.of(context).size.width * 0.28,
+              height: MediaQuery.of(context).size.height * 0.9,
+                child: Text(
+                  widget.text,
+                  softWrap: true,
+                  maxLines: null,
+                  //overflow: TextOverflow.ellipsis,
+                  style: AppTextStyle.valuesstyle,
+                ),
               ),
             ),
-            Positioned.fill(
-              child: Align(
-                alignment: _isTextFieldFocused
-                    ? Alignment.center
-                    : Alignment.centerRight,
+            // Positioned.fill(
+            //   child: Align(
+            //     alignment: _isTextFieldFocused
+            //         ? Alignment.center
+            //         : Alignment.centerRight,
+            Expanded(
                 child: AnimatedTextFieldStyleWidget(
                   decoration: Decor.decorTextField,
                   sizeheight: MediaQuery.of(context).size.height * 0.5,
-                  sizewidth: MediaQuery.of(context).size.width * 0.30,
+                  sizewidth: MediaQuery.of(context).size.width * 0.60,
                   controller: widget.controller,
                   //onChanged: widget.onChanged,
                   onFocusChanged: _handleTextFieldFocusChange,
                 ),
               ),
-            ),
+            //),
           ],
         ),
       ),
