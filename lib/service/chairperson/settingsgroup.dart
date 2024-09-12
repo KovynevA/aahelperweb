@@ -513,9 +513,13 @@ class _GroupInfoState extends State<GroupInfo> {
 
   @override
   void initState() {
-    loadInfoGroup();
-       _schedule = widget.shedule;
-    fillFormFields();
+    loadInfoGroup().then((value) {
+      setState(() {
+           _schedule = widget.shedule;
+    fillFormFields();    
+      });
+    });
+
 
     super.initState();
   }
