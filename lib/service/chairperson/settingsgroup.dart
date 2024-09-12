@@ -513,6 +513,7 @@ class _GroupInfoState extends State<GroupInfo> {
 
   @override
   void initState() {
+    loadInfoGroup();
        _schedule = widget.shedule;
     fillFormFields();
 
@@ -537,6 +538,7 @@ groupInfo = await GroupsAA.loadGroupAA();
 
 // Загрузка полей
   void fillFormFields() {
+    timingcontroller.clear();
     citycontroller.text = groupInfo?.city ?? '';
     areacontroller.text = groupInfo?.area ?? '';
     metrocontroller.text = groupInfo?.metro ?? '';

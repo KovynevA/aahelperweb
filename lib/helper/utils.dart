@@ -134,17 +134,15 @@ class Event {
 
         Map<String, dynamic>? data = snapshot.data();
 
-        if (data != null) {
-          data.forEach((key, value) {
-            DateTime date =
-                DateTime.fromMillisecondsSinceEpoch(int.tryParse(key) ?? 0);
-            List<Event> events = (value as List<dynamic>)
-                .map((e) => Event.fromMap(e as Map<String, dynamic>))
-                .toList();
-            kEvents[date] = events;
-          });
-        }
-      } catch (e) {
+        data?.forEach((key, value) {
+          DateTime date =
+              DateTime.fromMillisecondsSinceEpoch(int.tryParse(key) ?? 0);
+          List<Event> events = (value as List<dynamic>)
+              .map((e) => Event.fromMap(e as Map<String, dynamic>))
+              .toList();
+          kEvents[date] = events;
+        });
+            } catch (e) {
         // Обработка ошибок при загрузке
         debugPrint('Ошибка при загрузке событий из Firestore: $e');
       }
