@@ -279,7 +279,16 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
         }
       }
       loadQuestionsForWorkMeeting();
-    } catch (e) {
+    } 
+    on FirebaseAuthException catch (e) {
+    // Обработка ошибок при входе
+    if (e.code == 'network-request-failed') {
+      infoSnackBar(context, 'Ошибка сети: проверьте подключение и повторите попытку');
+    } else {
+      infoSnackBar(context, 'Ошибка при входе: ${e.message}');
+    }
+  }
+    catch (e) {
       // Обработка ошибок при входе
       debugPrint(e.toString());
       if (mounted) {
