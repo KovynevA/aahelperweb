@@ -32,11 +32,11 @@ class _WorksWidgetState extends State<WorksWidget> {
   void loadDeductions() async {
     List<Deductions> listDeductions = await Deductions.loadDeductions();
     if (listDeductions.isNotEmpty) {
-      // setState(() {
+       setState(() {
         // даты для комбобокса со всеми рабочками до сегодня
         dates = getDatesFromDeductions(listDeductions);
         //selectedDate = dates?.last ?? kToday;
-      // });
+       });
     }
   }
 

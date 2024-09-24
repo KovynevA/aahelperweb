@@ -138,7 +138,7 @@ class _SettingsGroupState extends State<SettingsGroup> {
   // В список событий Добавить рабочие собрания и заполнить пустой лист всех
   //рабочих собраний
   void addEventsForWorksMeetings() {
-    listdeductions.clear(); // Очищаем переменную
+    // listdeductions.clear(); // Очищаем переменную
     // Если отчентный период по номеру дня и номеру недели
     if (numDayNumWeekCheckbox) {
       // Получаем номер недели в месяце и день недели текущей даты

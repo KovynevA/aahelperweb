@@ -66,7 +66,8 @@ class _WorkMeetingState extends State<WorkMeeting> {
   }
 
 // Загрузить отчет по запрошенным датам
-  void loadProfitData(DateTime date2, DateTime date1) {
+  void loadProfitData(DateTime date2, DateTime date1) async {
+        WorkMeetingSchedule? shedule = await WorkMeetingSchedule.loadWorkMeetingSchedule() ?? null;
     if (loadedData != null) {
       setState(() {
         listProfitGroup = loadedData!.where((profitGroup) {
@@ -76,10 +77,15 @@ class _WorkMeetingState extends State<WorkMeeting> {
               profitGroup.date.isAtSameMomentAs(date2);
         }).toList();
       });
-      if (compareDate(dates.last, listProfitGroup.last.date)) {
+      // Удаляем последний день, если рабочки каждый день_недели номер_месяца
+      if (shedule?.checkboxstatus == true) {
         listProfitGroup.removeLast();
       }
-      // print(dates);
+// Если рабочка совпадает с днём расчетного периода, то тоже удаляем последний день (он войдет в следующий расчетный период)
+      if (shedule?.checkboxstatus == false && shedule?.dayOfMonth ==listProfitGroup.last.date.day)
+      {
+        listProfitGroup.removeLast();
+      }
       totalProfit = ProfitGroup.totalProfit(listProfitGroup);
       _totalFreeCash();
     }
@@ -231,7 +237,7 @@ class GetWorkMeetingWidget extends StatefulWidget {
 
 class _GetWorkMeetingWidgetState extends State<GetWorkMeetingWidget> {
   TextEditingController reserveController = TextEditingController();
-  TextEditingController anniversaryController = TextEditingController();
+  TextEditingController otherController = TextEditingController();
   TextEditingController rentController = TextEditingController();
   TextEditingController rcController = TextEditingController();
   TextEditingController rsoController = TextEditingController();
@@ -240,6 +246,7 @@ class _GetWorkMeetingWidgetState extends State<GetWorkMeetingWidget> {
   late Deductions deduction;
   late Deductions prevdeduction;
   bool checkboxpercent = false;
+  bool checkboxanniversary = false;
   ServiceUser? serviceuser;
 
   @override
@@ -249,9 +256,8 @@ class _GetWorkMeetingWidgetState extends State<GetWorkMeetingWidget> {
     prevdeduction = widget.listdeductions[widget.indexdeduction - 1];
     reserveController = TextEditingController(
         text: (deduction.reserve ?? prevdeduction.reserve ?? 0).toString());
-    anniversaryController = TextEditingController(
-        text: ((widget.jubiley ?? 0) + (prevdeduction.anniversary ?? 0))
-            .toString());
+    otherController = TextEditingController(
+        text: 0.0.toString());
     rentController = TextEditingController(
         text: (deduction.rent ?? prevdeduction.rent ?? 0).toString());
     rcController =
@@ -268,7 +274,7 @@ class _GetWorkMeetingWidgetState extends State<GetWorkMeetingWidget> {
   @override
   void dispose() {
     reserveController.dispose();
-    anniversaryController.dispose();
+    otherController.dispose();
     rentController.dispose();
     rcController.dispose();
     rsoController.dispose();
@@ -285,9 +291,8 @@ class _GetWorkMeetingWidgetState extends State<GetWorkMeetingWidget> {
         prevdeduction = widget.listdeductions[widget.indexdeduction - 1];
         reserveController = TextEditingController(
             text: (deduction.reserve ?? prevdeduction.reserve ?? 0).toString());
-        anniversaryController = TextEditingController(
-            text: ((widget.jubiley ?? 0) + (prevdeduction.anniversary ?? 0))
-                .toString());
+        otherController = TextEditingController(
+            text: 0.0.toString());
         rentController = TextEditingController(
             text: (deduction.rent ?? prevdeduction.rent ?? 0).toString());
         rcController =
@@ -315,29 +320,24 @@ class _GetWorkMeetingWidgetState extends State<GetWorkMeetingWidget> {
     deduction.reserve = double.parse(
         reserveController.text != '' ? reserveController.text : '0');
     deduction.anniversary = double.parse(
-        anniversaryController.text != '' ? anniversaryController.text : '0');
+        otherController.text != '' ? otherController.text : '0');
     deduction.rent =
         double.parse(rentController.text != '' ? rentController.text : '0');
+
+    double total = 0.0;
 
     //Если резерв прошлого месяца не равен установленному резерву, то считаем разницу
     final differencereserv = deduction.reserve != prevdeduction.reserve
         ? (deduction.reserve ?? 0) - (prevdeduction.reserve ?? 0)
         : 0; // иначе разница ноль
 
-    // ЮБИЛЕЙ///////
-    final differencejubiley = deduction.anniversary !=
-            ((widget.jubiley ?? 0) + (prevdeduction.anniversary ?? 0))
-        ? (deduction.anniversary ?? 0.0) -
-            ((widget.jubiley ?? 0) + (prevdeduction.anniversary ?? 0))
-        : 0.0;
-    double total = 0.0;
-    differencejubiley == 0.0
-        ? total =
-            (widget.totalfreecash) - (deduction.rent ?? 0) - differencereserv
-        : total = (widget.totalfreecash) -
-            (deduction.rent ?? 0) -
-            differencereserv -
-            differencejubiley;
+        total = (widget.totalfreecash) - (deduction.rent ?? 0)  - double.parse(otherController.text) - differencereserv;
+ 
+   if  (checkboxanniversary) {
+deduction.anniversary = 0.0;
+   } else {
+    deduction.anniversary = (prevdeduction.anniversary ?? 0.0) +  (widget.jubiley ?? 0.0);
+   }
 
     // Если считать не в процентах
     if (!checkboxpercent) {
@@ -396,6 +396,9 @@ class _GetWorkMeetingWidgetState extends State<GetWorkMeetingWidget> {
                   fontSize: 12,
                 ),
               ),
+              SizedBox(
+                height: 6.0,
+              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -410,26 +413,30 @@ class _GetWorkMeetingWidgetState extends State<GetWorkMeetingWidget> {
                   ),
                 ],
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Юбилей: ',
-                    style: AppTextStyle.valuesstyle,
-                  ),
-                  TextFieldStyleWidget(
-                    decoration: Decor.decorTextField,
-                    sizeheight: 30,
-                    controller: anniversaryController,
-                  ),
-                ],
-              ),
+             
               Padding(
-                padding: const EdgeInsets.only(bottom: 6.0),
+                padding: const EdgeInsets.symmetric(vertical: 6.0),
                 child: const Text(
                   'Отчисления: ',
                   style: AppTextStyle.menutextstyle,
                 ),
+              ),
+               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Обнулить юбилей? ',
+                    style: AppTextStyle.valuesstyle,
+                  ),
+                  Checkbox(
+                    value: checkboxanniversary,
+                    onChanged: (bool? newvalue) {
+                      setState(() {
+                        checkboxanniversary = newvalue!;
+                      });
+                    },
+                  ),
+                ],
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -445,6 +452,21 @@ class _GetWorkMeetingWidgetState extends State<GetWorkMeetingWidget> {
                   ),
                 ],
               ),
+                Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Другое: ',
+                    style: AppTextStyle.valuesstyle,
+                  ),
+                  TextFieldStyleWidget(
+                    decoration: Decor.decorTextField,
+                    sizeheight: 30,
+                    controller: otherController,
+                  ),
+                ],
+              ),
+              
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
