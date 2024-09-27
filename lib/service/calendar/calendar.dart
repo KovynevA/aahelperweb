@@ -9,10 +9,8 @@ import 'package:table_calendar/table_calendar.dart';
 import '../../helper/utils.dart';
 
 class ChairEventCalendar extends StatefulWidget {
-  final void Function() updateStateCalendar;
   const ChairEventCalendar({
     super.key,
-    required this.updateStateCalendar,
   });
 
   @override
@@ -35,11 +33,6 @@ class _ChairEventCalendarState extends State<ChairEventCalendar> {
       _loadEvents();
     });
     super.initState();
-  }
-
-  @override
-  void didUpdateWidget(covariant ChairEventCalendar oldWidget) {
-    super.didUpdateWidget(oldWidget);
   }
 
   void updateCalendar() {
@@ -249,7 +242,7 @@ class _ChairEventCalendarState extends State<ChairEventCalendar> {
   }
 
 // Очистить календарь от событий
-  void _clearCalendar() async {
+  void _clearCalendar() {
     setState(() {
       kEvents.clear();
       _selectedEvents.value = [];
@@ -323,146 +316,150 @@ class _ChairEventCalendarState extends State<ChairEventCalendar> {
 
   @override
   Widget build(BuildContext context) {
-    Provider.of<ServiceProvider>(context, listen: true);
     _selectedEvents.value = _getEventsForDay(_selectedDay!);
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          AuthentificationWidget(
-            updateCallbackSettingPage: updateCalendar,
-          ),
-          Container(
-            margin: const EdgeInsets.all(10.0),
-            decoration: BoxDecoration(
-              color: AppColor.cardColor,
-              border: Border.all(width: 1.5, color: Colors.brown),
-              borderRadius: BorderRadius.circular(16.0),
-              boxShadow: const [
-                BoxShadow(
-                  color: Colors.blueGrey,
-                  blurRadius: 8.0,
-                  offset: Offset(1.0, 2.0),
-                )
-              ],
-            ),
-            child: TableCalendar<Event>(
-              rowHeight: 40,
-              locale: 'ru_RU',
-              firstDay: kFirstDay,
-              lastDay: kLastDay,
-              focusedDay: _focusedDay,
-              selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-              calendarFormat: _calendarFormat,
-              eventLoader: _getEventsForDay,
-              startingDayOfWeek: StartingDayOfWeek.monday,
-              availableCalendarFormats: const {
-                CalendarFormat.month: 'Month',
-              },
-              headerStyle: const HeaderStyle(
-                titleTextStyle: AppTextStyle.menutextstyle,
+    return Stack(
+      children: [
+        SingleChildScrollView(
+          child: Column(
+            children: [
+              AuthentificationWidget(
+                updateCallbackSettingPage: updateCalendar,
               ),
-              daysOfWeekHeight: 20,
-              daysOfWeekStyle: const DaysOfWeekStyle(
-                weekdayStyle: AppTextStyle.valuesstyle,
-                weekendStyle: AppTextStyle.valuesstyle,
-              ),
-              calendarStyle: CalendarStyle(
-                defaultTextStyle: AppTextStyle.spantextstyle,
-                weekendTextStyle: AppTextStyle.spantextstyle,
-                selectedTextStyle: AppTextStyle.valuesstyle,
-                todayTextStyle: AppTextStyle.valuesstyle,
-                outsideDaysVisible: false,
-                markerSize: 10,
-                markerDecoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(width: 2.0, color: Colors.orange),
-                  color: Colors.black,
+              Container(
+                margin: const EdgeInsets.all(10.0),
+                decoration: BoxDecoration(
+                  color: AppColor.cardColor,
+                  border: Border.all(width: 1.5, color: Colors.brown),
+                  borderRadius: BorderRadius.circular(16.0),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Colors.blueGrey,
+                      blurRadius: 8.0,
+                      offset: Offset(1.0, 2.0),
+                    )
+                  ],
                 ),
-              ),
-              onDaySelected: (selectedDay, focusedDay) {
-                setState(() {
-                  _selectedDay = selectedDay;
-                  _focusedDay = focusedDay;
-                });
-                _selectedEvents.value = _getEventsForDay(selectedDay);
-              },
-              onPageChanged: (focusedDay) {
-                _focusedDay = focusedDay;
-              },
-            ),
-          ),
-          ValueListenableBuilder<List<Event>>(
-            valueListenable: _selectedEvents,
-            builder: (context, value, _) {
-              return SizedBox(
-                height: MediaQuery.of(context).size.height - 100,
-                child: ListView.builder(
-                  itemCount: value.length,
-                  itemBuilder: (context, index) {
-                    return Dismissible(
-                      key: Key(value[index].title),
-                      onDismissed: (direction) {
-                        if (direction == DismissDirection.endToStart) {
-                          _deleteAllLinkedEvents(
-                              value[index]); // Удалить все связанные события
-                        } else {
-                          _deleteEvent(value[index]); // Удалить одно событие
-                        }
-                      },
-                      background: Container(
-                        color: Colors.red,
-                        alignment: Alignment.centerRight,
-                        padding: const EdgeInsets.only(right: 20.0),
-                        child: const Icon(Icons.delete),
-                      ),
-                      child: GestureDetector(
-                        onLongPress: () {
-                          if (_selectedEvents.value.isNotEmpty) {
-                            _editEvent(_selectedEvents.value[index]);
-                          }
-                        },
-                        child: Card(
-                          color: AppColor.cardColor,
-                          margin: const EdgeInsets.symmetric(
-                            horizontal: 10.0,
-                            vertical: 4.0,
-                          ),
-                          child: ListTile(
-                            title: Text(value[index].title),
-                          ),
-                        ),
-                      ),
-                    );
+                child: TableCalendar<Event>(
+                  rowHeight: 40,
+                  locale: 'ru_RU',
+                  firstDay: kFirstDay,
+                  lastDay: kLastDay,
+                  focusedDay: _focusedDay,
+                  selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+                  calendarFormat: _calendarFormat,
+                  eventLoader: _getEventsForDay,
+                  startingDayOfWeek: StartingDayOfWeek.monday,
+                  availableCalendarFormats: const {
+                    CalendarFormat.month: 'Month',
+                  },
+                  headerStyle: const HeaderStyle(
+                    titleTextStyle: AppTextStyle.menutextstyle,
+                  ),
+                  daysOfWeekHeight: 20,
+                  daysOfWeekStyle: const DaysOfWeekStyle(
+                    weekdayStyle: AppTextStyle.valuesstyle,
+                    weekendStyle: AppTextStyle.valuesstyle,
+                  ),
+                  calendarStyle: CalendarStyle(
+                    defaultTextStyle: AppTextStyle.spantextstyle,
+                    weekendTextStyle: AppTextStyle.spantextstyle,
+                    selectedTextStyle: AppTextStyle.valuesstyle,
+                    todayTextStyle: AppTextStyle.valuesstyle,
+                    outsideDaysVisible: false,
+                    markerSize: 10,
+                    markerDecoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(width: 2.0, color: Colors.orange),
+                      color: Colors.black,
+                    ),
+                  ),
+                  onDaySelected: (selectedDay, focusedDay) {
+                    setState(() {
+                      _selectedDay = selectedDay;
+                      _focusedDay = focusedDay;
+                    });
+                    _selectedEvents.value = _getEventsForDay(selectedDay);
+                  },
+                  onPageChanged: (focusedDay) {
+                    _focusedDay = focusedDay;
                   },
                 ),
-              );
-            },
+              ),
+              ValueListenableBuilder<List<Event>>(
+                valueListenable: _selectedEvents,
+                builder: (context, value, _) {
+                  return SizedBox(
+                    height: MediaQuery.of(context).size.height - 150,
+                    child: ListView.builder(
+                      itemCount: value.length,
+                      itemBuilder: (context, index) {
+                        return Dismissible(
+                          key: Key(value[index].title),
+                          onDismissed: (direction) {
+                            if (direction == DismissDirection.endToStart) {
+                              _deleteAllLinkedEvents(value[
+                                  index]); // Удалить все связанные события
+                            } else {
+                              _deleteEvent(
+                                  value[index]); // Удалить одно событие
+                            }
+                          },
+                          background: Container(
+                            color: Colors.red,
+                            alignment: Alignment.centerRight,
+                            padding: const EdgeInsets.only(right: 20.0),
+                            child: const Icon(Icons.delete),
+                          ),
+                          child: GestureDetector(
+                            onLongPress: () {
+                              if (_selectedEvents.value.isNotEmpty) {
+                                _editEvent(_selectedEvents.value[index]);
+                              }
+                            },
+                            child: Card(
+                              color: AppColor.cardColor,
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 10.0,
+                                vertical: 4.0,
+                              ),
+                              child: ListTile(
+                                title: Text(value[index].title),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
-          Padding(
-            padding: const EdgeInsets.all(6.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                CustomFloatingActionButton(
-                    icon: Icons.cleaning_services,
-                    onPressed: () async {
-                      final ServiceUser? serviceUser = await getServiceUser();
-                      if (serviceUser != null &&
-                          serviceUser.type.contains(ServiceName.chairperson)) {
-                        _clearCalendar;
-                      } else {
-                        infoSnackBar(context, 'Недостаточно прав');
-                      }
-                    }),
-                CustomFloatingActionButton(
-                  icon: Icons.add_box,
-                  onPressed: _addEvent,
-                ),
-              ],
-            ),
+        ),
+        Positioned(
+          bottom: 16.0,
+          left: 16.0,
+          child: CustomFloatingActionButton(
+              icon: Icons.cleaning_services,
+              onPressed: () async {
+                final ServiceUser? serviceUser = await getServiceUser();
+                if (serviceUser != null &&
+                    serviceUser.type.contains(ServiceName.chairperson)) {
+                  _clearCalendar();
+                } else {
+                  infoSnackBar(context, 'Недостаточно прав');
+                }
+              }),
+        ),
+        Positioned(
+          bottom: 16.0,
+          right: 16.0,
+          child: CustomFloatingActionButton(
+            icon: Icons.add_box,
+            onPressed: _addEvent,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

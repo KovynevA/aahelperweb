@@ -23,10 +23,6 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
   }
 
-  void updateState() {
-    setState(() {});
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -66,9 +62,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
       ),
-      body: ChairEventCalendar(
-        updateStateCalendar: updateState,
-      ),
+      body: ChairEventCalendar(),
       backgroundColor: AppColor.backgroundColor,
     );
   }

@@ -88,8 +88,8 @@ class _AnimatedTextAndTextFieldWidgetState
             Align(
               alignment: Alignment.centerLeft,
               child: Container(
-              width: MediaQuery.of(context).size.width * 0.28,
-              height: MediaQuery.of(context).size.height * 0.9,
+                width: MediaQuery.of(context).size.width * 0.28,
+                height: MediaQuery.of(context).size.height * 0.9,
                 child: Text(
                   widget.text,
                   softWrap: true,
@@ -105,15 +105,15 @@ class _AnimatedTextAndTextFieldWidgetState
             //         ? Alignment.center
             //         : Alignment.centerRight,
             Expanded(
-                child: AnimatedTextFieldStyleWidget(
-                  decoration: Decor.decorTextField,
-                  sizeheight: MediaQuery.of(context).size.height * 0.5,
-                  sizewidth: MediaQuery.of(context).size.width * 0.60,
-                  controller: widget.controller,
-                  //onChanged: widget.onChanged,
-                  onFocusChanged: _handleTextFieldFocusChange,
-                ),
+              child: AnimatedTextFieldStyleWidget(
+                decoration: Decor.decorTextField,
+                sizeheight: MediaQuery.of(context).size.height * 0.5,
+                sizewidth: MediaQuery.of(context).size.width * 0.60,
+                controller: widget.controller,
+                //onChanged: widget.onChanged,
+                onFocusChanged: _handleTextFieldFocusChange,
               ),
+            ),
             //),
           ],
         ),
@@ -295,6 +295,8 @@ class CustomFloatingActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return FloatingActionButton(
       heroTag: UniqueKey(),
+      backgroundColor: AppColor.defaultColor.withOpacity(0.5),
+      mini: true,
       onPressed: onPressed,
       child: Icon(icon),
     );

@@ -359,26 +359,33 @@ class _FrontOfCardWidgetState extends State<FrontOfCardWidget> {
         (totalProfit?.medal ?? 0) +
         (totalProfit?.postmail ?? 0) +
         (totalProfit?.expensiveother ?? 0);
+
+    print(
+        '${totalProfit?.date} : ${((totalplus ?? 0) + (balance ?? 0) - (totalminus ?? 0)).toStringAsFixed(2)}');
   }
 
 // Поиск первой ближайшей даты из списка к заданной дате
   void getFirstDate() {
     DateTime currentDate = widget.listProfitGroup[widget.index].date;
     Deductions? nearestDeduction;
-    for (var i = 0; i < widget.listDeductions.length - 1; i++) {
-      Deductions deduction = widget.listDeductions[i];
-      if (deduction.date.isBefore(currentDate) ||
-          deduction.date.isAtSameMomentAs(currentDate)) {
-        if (nearestDeduction == null ||
-            deduction.date.isAfter(nearestDeduction.date)) {
-          nearestDeduction = deduction;
-        }
+    for (Deductions deduction in widget.listDeductions) {
+      if (deduction.date.isBefore(currentDate) &&
+          (nearestDeduction == null ||
+              deduction.date.isAfter(nearestDeduction.date))) {
+        nearestDeduction = deduction;
+        balance = nearestDeduction.balance;
+      }
+      if (compareDate(deduction.date, currentDate)) {
+        nearestDeduction = deduction;
+        balance = deduction.balance;
+        break;
       }
     }
-    balance = nearestDeduction?.balance;
 
     DateTime startDate = nearestDeduction?.date ?? currentDate;
-    getTotalProfit(startDate, currentDate);
+    DateTime endDate = currentDate;
+
+    getTotalProfit(startDate, endDate);
   }
 
   // Загрузить отчет по запрошенным датам

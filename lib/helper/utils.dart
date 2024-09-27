@@ -142,7 +142,7 @@ class Event {
               .toList();
           kEvents[date] = events;
         });
-            } catch (e) {
+      } catch (e) {
         // Обработка ошибок при загрузке
         debugPrint('Ошибка при загрузке событий из Firestore: $e');
       }
@@ -159,13 +159,13 @@ class Event {
         serviceUser.type.contains(ServiceName.chairperson)) {
       final String nameGroupCollection = serviceUser.group;
       try {
-        // очищаем прошлые события из базы
-        await FirebaseFirestore.instance
-            .collection('allgroups')
-            .doc(nameGroupCollection)
-            .collection('events')
-            .doc('eventsData')
-            .delete();
+        // // очищаем прошлые события из базы
+        // await FirebaseFirestore.instance
+        //     .collection('allgroups')
+        //     .doc(nameGroupCollection)
+        //     .collection('events')
+        //     .doc('eventsData')
+        //     .delete();
 
         Map<String, dynamic> eventsMap = {};
         kEvents.forEach((key, value) {
@@ -1436,7 +1436,7 @@ class GroupsAA {
     );
   }
 
-   Map<String, dynamic> toMap() {
+  Map<String, dynamic> toMap() {
     return {
       'name': name,
       'city': city,
@@ -1485,19 +1485,21 @@ class GroupsAA {
   }
 
 // Поиск группы
- static Future<List<GroupsAA>> searchGroups({
+  static Future<List<GroupsAA>> searchGroups({
     String? name,
     String? area,
     String? metro,
     String? dayOfWeek,
     String? numWeekOfMonth,
   }) async {
-    QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('allgroups').get();
+    QuerySnapshot querySnapshot =
+        await FirebaseFirestore.instance.collection('allgroups').get();
 
     List<GroupsAA> groups = [];
 
     for (var groupDoc in querySnapshot.docs) {
-      QuerySnapshot groupInfoSnapshot = await groupDoc.reference.collection('groupInfo').get();
+      QuerySnapshot groupInfoSnapshot =
+          await groupDoc.reference.collection('groupInfo').get();
 
       for (var infoDoc in groupInfoSnapshot.docs) {
         Map<String, dynamic> data = infoDoc.data() as Map<String, dynamic>;
@@ -1505,9 +1507,11 @@ class GroupsAA {
         if ((name == null || data['name'] == name) &&
             (area == null || data['area'] == area) &&
             (metro == null || data['metro'] == metro) &&
-            (dayOfWeek == null || numWeekOfMonth == null ||
+            (dayOfWeek == null ||
+                numWeekOfMonth == null ||
                 (data['timing'] as List<dynamic>).any((timing) =>
-                    timing['day'] == dayOfWeek && timing['time'] == numWeekOfMonth))) {
+                    timing['day'] == dayOfWeek &&
+                    timing['time'] == numWeekOfMonth))) {
           groups.add(GroupsAA.fromJson(data));
         }
       }
@@ -1515,7 +1519,6 @@ class GroupsAA {
 
     return groups;
   }
-
 }
 
 

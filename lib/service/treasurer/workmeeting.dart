@@ -565,6 +565,7 @@ deduction.anniversary = 0.0;
                     widget.listdeductions[widget.indexdeduction] = deduction;
                     Deductions.saveDeductions(widget.listdeductions);
                     checkboxpercent = false;
+                    checkboxanniversary = false;
                     infoSnackBar(context, 'Рабочее собрание сохранено');
                   })
                 : infoSnackBar(context, 'Недостаточно прав');

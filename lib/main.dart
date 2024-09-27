@@ -12,6 +12,14 @@ class ServiceProvider extends ChangeNotifier {
   List<String> completedquetions = [];
   ProfitGroup? totalProfit;
   String speakerData = '';
+  bool _updateData = false;
+
+  bool get updateData => _updateData;
+
+  void updateState(bool trueData) {
+    _updateData = trueData;
+    notifyListeners();
+  }
 
   Future<void> loadData() async {
     if (isAutorization) {
@@ -100,7 +108,7 @@ class ServiceProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-    // Метод для обновления данных о спикере
+  // Метод для обновления данных о спикере
   void updateSpeakerData(String newData) {
     speakerData = newData;
     notifyListeners();
