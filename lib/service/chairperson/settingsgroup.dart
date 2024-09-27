@@ -36,7 +36,12 @@ class _SettingsGroupState extends State<SettingsGroup> {
     getMeetingShedule();
     loadServiceuser();
     loadprofitGroup();
+    loadlistdeductions();
     super.initState();
+  }
+
+  void loadlistdeductions() async {
+    listdeductions = await Deductions.loadDeductions();
   }
 
   void loadServiceuser() async {
@@ -339,12 +344,12 @@ class _SettingsGroupState extends State<SettingsGroup> {
                           dayOfMonth: dayOfMonth,
                           checkboxstatus: numDayNumWeekCheckbox);
                       loadprofitGroup();
+                      Deductions.saveDeductions(listdeductions);
                       addMeetingEvents(); // Добавляем Новые собрания группы
                       Event
                           .saveEventsToFirestore(); // Сохранем все события в файл
                       ProfitGroup.saveProfitGroups(
                           profitGroup); // Сохраняем пустой лист с графиком всех собраний в файл
-                      Deductions.saveDeductions(listdeductions);
                       WorkMeetingSchedule.saveWorkMeetingSchedule(
                           // Сохраняем состояние комбобоксов Собраний и РАБОЧИХ собраний в файл
                           workMeetingSchedule!);
