@@ -1483,42 +1483,6 @@ class GroupsAA {
       return null;
     }
   }
-
-// Поиск группы
-  static Future<List<GroupsAA>> searchGroups({
-    String? name,
-    String? area,
-    String? metro,
-    String? dayOfWeek,
-    String? numWeekOfMonth,
-  }) async {
-    QuerySnapshot querySnapshot =
-        await FirebaseFirestore.instance.collection('allgroups').get();
-
-    List<GroupsAA> groups = [];
-
-    for (var groupDoc in querySnapshot.docs) {
-      QuerySnapshot groupInfoSnapshot =
-          await groupDoc.reference.collection('groupInfo').get();
-
-      for (var infoDoc in groupInfoSnapshot.docs) {
-        Map<String, dynamic> data = infoDoc.data() as Map<String, dynamic>;
-
-        if ((name == null || data['name'] == name) &&
-            (area == null || data['area'] == area) &&
-            (metro == null || data['metro'] == metro) &&
-            (dayOfWeek == null ||
-                numWeekOfMonth == null ||
-                (data['timing'] as List<dynamic>).any((timing) =>
-                    timing['day'] == dayOfWeek &&
-                    timing['time'] == numWeekOfMonth))) {
-          groups.add(GroupsAA.fromJson(data));
-        }
-      }
-    }
-
-    return groups;
-  }
 }
 
 

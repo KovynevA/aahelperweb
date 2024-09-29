@@ -567,7 +567,8 @@ class _GroupInfoState extends State<GroupInfo> {
       }
     } else {
       if (_schedule?.selectedDays != null) {
-        for (var day in _schedule!.selectedDays) {
+        // _ - означает, что переменная не будет использоваться
+        for (var _ in _schedule!.selectedDays) {
           timingcontroller.add(TextEditingController());
         }
       }
