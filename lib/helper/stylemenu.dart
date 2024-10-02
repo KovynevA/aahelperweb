@@ -377,9 +377,9 @@ abstract class AppColor {
 }
 
 abstract class Decor {
-  static const decorDropDownButton = BoxDecoration(
+  static final decorDropDownButton = BoxDecoration(
     gradient: LinearGradient(colors: [
-      AppColor.deleteCardColor,
+      AppColor.cardColor,
       AppColor.backgroundColor,
     ]),
     boxShadow: <BoxShadow>[
@@ -387,6 +387,10 @@ abstract class Decor {
           color: Color.fromRGBO(0, 0, 0, 0.57), //shadow for button
           blurRadius: 0) //blur radius of shadow
     ],
+    border: Border.all(
+      width: 2.0,
+      color: AppColor.deleteCardColor,
+    ),
   );
 
   static final decorTextField = BoxDecoration(
