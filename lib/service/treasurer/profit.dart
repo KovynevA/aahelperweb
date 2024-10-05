@@ -359,9 +359,6 @@ class _FrontOfCardWidgetState extends State<FrontOfCardWidget> {
         (totalProfit?.medal ?? 0) +
         (totalProfit?.postmail ?? 0) +
         (totalProfit?.expensiveother ?? 0);
-
-    print(
-        '${totalProfit?.date} : ${((totalplus ?? 0) + (balance ?? 0) - (totalminus ?? 0)).toStringAsFixed(2)}');
   }
 
 // Поиск первой ближайшей даты из списка к заданной дате

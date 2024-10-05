@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'package:aahelper/service/findgroup/findpage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -47,6 +48,7 @@ List<String> daysOfWeek = [
   'Сб',
   'Вс',
 ];
+
 // SnackBar внизу экрана
 void infoSnackBar(BuildContext context, String text) {
   final snackBar = SnackBar(
@@ -1484,6 +1486,197 @@ class GroupsAA {
     }
   }
 }
+
+// Класс поиска и фильтрации по группам
+class GroupSearchService {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+// Поиск по имени
+  Future<List<GroupsAA>> searchGroupByName(String name) async {
+    List<GroupsAA> groups = [];
+    var groupDoc = await _firestore.collection('allgroups').doc(name).get();
+    if (groupDoc.exists) {
+      var groupInfoDoc =
+          await groupDoc.reference.collection('groupInfo').doc('info').get();
+      if (groupInfoDoc.exists) {
+        var data = groupInfoDoc.data();
+        groups.add(GroupsAA.fromJson(data as Map<String, dynamic>));
+      }
+    }
+    return groups;
+  }
+
+  // Поиск по району
+  Future<List<GroupsAA>> searchGroupsByArea(String area) async {
+    QuerySnapshot querySnapshot =
+        await _firestore.collection('allgroups').get();
+
+    List<GroupsAA> groups = [];
+
+    for (var doc in querySnapshot.docs) {
+      var groupInfoDoc =
+          await doc.reference.collection('groupInfo').doc('info').get();
+      if (groupInfoDoc.exists) {
+        var data = groupInfoDoc.data();
+        if (data?['area'] == area) {
+          groups.add(GroupsAA.fromJson(data as Map<String, dynamic>));
+        }
+      }
+    }
+    return groups;
+  }
+
+// Поиск по метро
+  Future<List<GroupsAA>> searchGroupsByMetro(String metro) async {
+    QuerySnapshot querySnapshot =
+        await _firestore.collection('allgroups').get();
+
+    List<GroupsAA> groups = [];
+
+    for (var doc in querySnapshot.docs) {
+      var groupInfoDoc =
+          await doc.reference.collection('groupInfo').doc('info').get();
+      if (groupInfoDoc.exists) {
+        var data = groupInfoDoc.data();
+        if (data?['metro'] == metro) {
+          groups.add(GroupsAA.fromJson(data as Map<String, dynamic>));
+        }
+      }
+    }
+    return groups;
+  }
+
+  // Фильтр по...
+  Future<List<GroupsAA>> filterGroups(String prefix, String filter) async {
+    List<GroupsAA> groups = [];
+    QuerySnapshot querySnapshot =
+        await _firestore.collection('allgroups').get();
+
+    for (var doc in querySnapshot.docs) {
+      var groupInfoQuerySnapshot = await doc.reference
+          .collection('groupInfo')
+          .where(filter,
+              isGreaterThanOrEqualTo:
+                  prefix) // Имя должно быть больше или равно префиксу
+          .where(filter,
+              isLessThan: getNextCharacter(
+                  prefix)) // Имя должно быть меньше, чем следующий символ после префикса в алфавитном порядке
+          .get();
+
+      for (var groupInfoDoc in groupInfoQuerySnapshot.docs) {
+        var data = groupInfoDoc.data();
+        if (data[filter]
+            .toString()
+            .toLowerCase()
+            .startsWith(prefix.toLowerCase())) {
+          groups.add(GroupsAA.fromJson(data));
+        }
+      }
+    }
+
+    return groups;
+  }
+
+  // Вспомогательная функция для получения следующего символа в алфавите
+  String getNextCharacter(String input) {
+    if (input.isEmpty) {
+      return 'я'; // Если ввод пустой, возвращаем последний символ в русском алфавите
+    }
+    final lastChar = input.runes.last;
+    if (lastChar == 1105) {
+      return String.fromCharCode(
+          1025); // Если последний символ - "е", возвращаем "ё"
+    } else if (lastChar == 1071) {
+      return String.fromCharCode(
+          1072); // Если последний символ - "я", возвращаем "а"
+    } else {
+      return String.fromCharCode(lastChar +
+          1); // В остальных случаях возвращаем следующий символ в алфавите
+    }
+  }
+
+// Вычленить время в мапе найденной группы
+  String formatTiming(List<Map<String, String>>? timing) {
+    if (timing != null && timing.isNotEmpty) {
+      String result = '';
+      for (var item in timing) {
+        result += '${item.values.last}: ${item.values.first}\n';
+      }
+      return result;
+    }
+    return 'Не указано';
+  }
+
+  /////////////////////////// ВРЕМЯ////////////////////////////////////////////
+
+  List<GroupsAA> filterGroupsByTime(Today timePeriod, List<GroupsAA> groups) {
+    Set<GroupsAA> filteredGroups = {};
+    for (var group in groups) {
+      if (group.timing != null) {
+        for (var timegroup in group.timing!) {
+          if (timePeriod == Today.morning &&
+              isTimeInMorning(timegroup.values.first)) {
+            filteredGroups.add(group);
+          } else if (timePeriod == Today.afternoon &&
+              isTimeInDay(timegroup.values.first)) {
+            filteredGroups.add(group);
+          } else if (timePeriod == Today.evening &&
+              isTimeInEvening(timegroup.values.first)) {
+            filteredGroups.add(group);
+          }
+        }
+      }
+    }
+    return filteredGroups.toList();
+  }
+
+  List<GroupsAA> filterGroupsByToday(List<GroupsAA> groups) {
+    Set<GroupsAA> filteredGroups = {};
+    for (var group in groups) {
+      if (group.timing != null) {
+        for (var timegroup in group.timing!) {
+          if (isDayToday(timegroup.values.last)) {
+            filteredGroups.add(group);
+          }
+        }
+      }
+    }
+    return filteredGroups.toList();
+  }
+
+// Вспомогательная функция сравнения текущего дня с заданным днем из daysOfweek
+  bool isDayToday(String day) {
+    int todayindex = kToday.weekday - 1;
+
+    return daysOfWeek[todayindex] == day;
+  }
+
+// Вспомогательная функция для проверки времени на принадлежность к утру (06:00 - 12:00)
+  bool isTimeInMorning(String time) {
+    // Преобразуем строку времени в часы и минуты
+    int hours = int.parse(time.split(':')[0]);
+
+    return hours >= 6 && hours < 12;
+  }
+
+// Вспомогательная функция для проверки времени на принадлежность к дню (12:00 - 17:00)
+  bool isTimeInDay(String time) {
+    // Преобразуем строку времени в часы и минуты
+    int hours = int.parse(time.split(':')[0]);
+
+    return hours >= 12 && hours < 17;
+  }
+
+// Вспомогательная функция для проверки времени на принадлежность к вечеру (17:00 - 24:00)
+  bool isTimeInEvening(String time) {
+    // Преобразуем строку времени в часы и минуты
+    int hours = int.parse(time.split(':')[0]);
+    return hours >= 17 ||
+        hours <
+            6; // Вечернее время начинается после 17:00 и до 24:00, а также с полуночи до 6:00
+  }
+}
+
 
 
 // Функция транслитерации русских букв в латинские
