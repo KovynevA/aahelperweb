@@ -1,3 +1,4 @@
+import 'package:aahelper/helper/firebase_config.dart';
 import 'package:aahelper/helper/utils.dart';
 import 'package:aahelper/homapage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -205,11 +206,12 @@ class TeaProvider extends ChangeNotifier {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
-      options: const FirebaseOptions(
-          apiKey: 'AIzaSyAoSfbpWVPME6dDrNRg7-eUmU9BvZXd7dU',
-          appId: '1:488423234708:web:bb25c7fec069eb6263e881',
-          messagingSenderId: '488423234708',
-          projectId: 'aahelper-8c4b4'));
+      options: FirebaseOptions(
+    apiKey: FirebaseConfig.apiKey,
+    appId: FirebaseConfig.appId,
+    messagingSenderId: FirebaseConfig.messagingSenderId,
+    projectId: FirebaseConfig.projectId,
+  ));
 
   initializeDateFormatting('ru_RU', null).then((_) {
     runApp(const MyApp());
