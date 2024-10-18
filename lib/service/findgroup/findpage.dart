@@ -1,6 +1,5 @@
 import 'package:aahelper/helper/stylemenu.dart';
 import 'package:aahelper/helper/utils.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class FindPage extends StatelessWidget {
@@ -76,18 +75,6 @@ class _GroupSearchScreenState extends State<GroupSearchScreen> {
             findController.text, 'adress');
       }
     }
-    // else {
-    //   QuerySnapshot querySnapshot =
-    //       await _firestore.collection('allgroups').get();
-    //   for (var doc in querySnapshot.docs) {
-    //     var groupInfoDoc =
-    //         await doc.reference.collection('groupInfo').doc('info').get();
-    //     if (groupInfoDoc.exists) {
-    //       var data = groupInfoDoc.data();
-    //       groups.add(GroupsAA.fromJson(data as Map<String, dynamic>));
-    //     }
-    //   }
-    // }
     if (groups != []) {
       groups = await groupSearchService.filterGroupsByTime(todayTime, groups);
       if (isToday) {
@@ -244,7 +231,6 @@ class _GroupSearchScreenState extends State<GroupSearchScreen> {
                       List<GroupsAA> groups = snapshot.data!;
                       return ListView.builder(
                         shrinkWrap: true,
-                        // physics: NeverScrollableScrollPhysics(),
                         itemCount: groups.length,
                         itemBuilder: (context, index) {
                           return ListTile(

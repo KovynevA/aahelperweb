@@ -1,11 +1,27 @@
 import 'package:aahelper/helper/stylemenu.dart';
 import 'package:aahelper/helper/utils.dart';
+import 'package:aahelper/service/librarian/medal.dart';
 import 'package:flutter/material.dart';
 
-class Librarian extends StatelessWidget {
+class Librarian extends StatefulWidget {
+  final String title;
+
   const Librarian({super.key, required this.title});
 
-  final String title;
+  @override
+  State<Librarian> createState() => _LibrarianState();
+}
+
+class _LibrarianState extends State<Librarian>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  List<String> tabname = ['Литература', 'Медали'];
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: tabname.length, vsync: this);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -13,10 +29,27 @@ class Librarian extends StatelessWidget {
       backgroundColor: AppColor.backgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.lightBlueAccent,
-        title: Text(title),
+        title: Text(widget.title),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: List.generate(
+              _tabController.length, (index) => Tab(text: tabname[index])),
+        ),
       ),
-      body: const LibrarianWidget(),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          LibrarianWidget(),
+          MedalWidget(),
+        ],
+      ),
     );
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 }
 

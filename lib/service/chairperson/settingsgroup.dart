@@ -653,7 +653,6 @@ class _GroupInfoState extends State<GroupInfo> {
         } else if (snapshot.hasError) {
           return Center(child: Text('Ошибка загрузки данных'));
         } else {
-          // if (snapshot.hasData) {
           groupInfo = snapshot.data;
           // fillFormFields();
           return SingleChildScrollView(

@@ -1290,7 +1290,72 @@ class Book {
   }
 }
 
-// Класс зарегистрированных юзеров
+/////////////*************Класс Медалей **********////////////
+class Medal {
+  String title;
+  int quantity;
+
+  Medal(this.title, this.quantity);
+
+  factory Medal.fromMap(Map<String, dynamic> map) {
+    return Medal(map['title'], map['quantity']);
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'title': title,
+      'quantity': quantity,
+    };
+  }
+
+  static List<Medal> listFromJson(List<dynamic> json) {
+    return json.map((medal) => Medal.fromMap(medal)).toList();
+  }
+
+  static List<Map<String, dynamic>> listToJson(List<Medal> medals) {
+    return medals.map((medal) => medal.toMap()).toList();
+  }
+
+  static Future<void> saveMedalsToFirestore(List<Medal> medals) async {
+    ServiceUser? serviceUser = await getServiceUser();
+    final String nameGroupCollection = serviceUser!.group;
+    if (serviceUser.type.contains(ServiceName.chairperson) ||
+        serviceUser.type.contains(ServiceName.librarian)) {
+      final firestore = FirebaseFirestore.instance
+          .collection('allgroups')
+          .doc(nameGroupCollection);
+      final data = listToJson(medals);
+
+      await firestore
+          .collection('medals')
+          .doc('all_medals')
+          .set({'medals': data});
+    }
+  }
+
+  static Future<List<Medal>?> loadMedalsFromFirestore() async {
+    if (isAutorization) {
+      ServiceUser? serviceUser = await getServiceUser();
+      final String nameGroupCollection = serviceUser!.group;
+      final firestore = FirebaseFirestore.instance
+          .collection('allgroups')
+          .doc(nameGroupCollection);
+      final snapshot =
+          await firestore.collection('medals').doc('all_medals').get();
+
+      if (snapshot.exists) {
+        final data = snapshot.data()!['medals'];
+        return listFromJson(List<Map<String, dynamic>>.from(data));
+      } else {
+        return null;
+      }
+    } else {
+      return null;
+    }
+  }
+}
+
+/////////////*********** */ Класс зарегистрированных юзеров**********///////////
 class ServiceUser {
   final String uid;
   final String email;
