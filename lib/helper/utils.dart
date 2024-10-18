@@ -1418,7 +1418,11 @@ class GroupsAA {
   factory GroupsAA.fromJson(Map<String, dynamic> json) {
     List<Map<String, String>> timings =
         (json['timing'] as List<dynamic>).map((item) {
-      return Map<String, String>.from(item as Map<String, dynamic>);
+      return {
+        'day': item['day'].toString(),
+        'time': item['time'].toString(),
+      };
+      // Map<String, String>.from(item);
     }).toList();
 
     return GroupsAA(
@@ -1553,15 +1557,8 @@ class GroupSearchService {
         await _firestore.collection('allgroups').get();
 
     for (var doc in querySnapshot.docs) {
-      var groupInfoQuerySnapshot = await doc.reference
-          .collection('groupInfo')
-          .where(filter,
-              isGreaterThanOrEqualTo:
-                  prefix) // Имя должно быть больше или равно префиксу
-          .where(filter,
-              isLessThan: getNextCharacter(
-                  prefix)) // Имя должно быть меньше, чем следующий символ после префикса в алфавитном порядке
-          .get();
+      var groupInfoQuerySnapshot =
+          await doc.reference.collection('groupInfo').get();
 
       for (var groupInfoDoc in groupInfoQuerySnapshot.docs) {
         var data = groupInfoDoc.data();
@@ -1577,12 +1574,35 @@ class GroupSearchService {
     return groups;
   }
 
+  // Фильтр по адресу - не по первым буквам, а содержащий буквы
+  Future<List<GroupsAA>> filterGroupsbyAdres(
+      String prefix, String filter) async {
+    List<GroupsAA> groups = [];
+    QuerySnapshot querySnapshot =
+        await _firestore.collection('allgroups').get();
+
+    for (var doc in querySnapshot.docs) {
+      var groupInfoQuerySnapshot =
+          await doc.reference.collection('groupInfo').get();
+
+      for (var groupInfoDoc in groupInfoQuerySnapshot.docs) {
+        var data = groupInfoDoc.data();
+        var fieldValue = data[filter].toString().toLowerCase();
+        if (fieldValue.contains(prefix.toLowerCase())) {
+          groups.add(GroupsAA.fromJson(data));
+        }
+      }
+    }
+
+    return groups;
+  }
+
   // Вспомогательная функция для получения следующего символа в алфавите
   String getNextCharacter(String input) {
     if (input.isEmpty) {
       return 'я'; // Если ввод пустой, возвращаем последний символ в русском алфавите
     }
-    final lastChar = input.runes.last;
+    final lastChar = input.codeUnitAt(input.length - 1);
     if (lastChar == 1105) {
       return String.fromCharCode(
           1025); // Если последний символ - "е", возвращаем "ё"
@@ -1609,19 +1629,20 @@ class GroupSearchService {
 
   /////////////////////////// ВРЕМЯ////////////////////////////////////////////
 
-  List<GroupsAA> filterGroupsByTime(Today timePeriod, List<GroupsAA> groups) {
+  Future<List<GroupsAA>> filterGroupsByTime(
+      Today timePeriod, List<GroupsAA> groups) async {
     Set<GroupsAA> filteredGroups = {};
     for (var group in groups) {
       if (group.timing != null) {
         for (var timegroup in group.timing!) {
           if (timePeriod == Today.morning &&
-              isTimeInMorning(timegroup.values.first)) {
+              isTimeInMorning(timegroup.values.last)) {
             filteredGroups.add(group);
           } else if (timePeriod == Today.afternoon &&
-              isTimeInDay(timegroup.values.first)) {
+              isTimeInDay(timegroup.values.last)) {
             filteredGroups.add(group);
           } else if (timePeriod == Today.evening &&
-              isTimeInEvening(timegroup.values.first)) {
+              isTimeInEvening(timegroup.values.last)) {
             filteredGroups.add(group);
           }
         }
@@ -1635,7 +1656,7 @@ class GroupSearchService {
     for (var group in groups) {
       if (group.timing != null) {
         for (var timegroup in group.timing!) {
-          if (isDayToday(timegroup.values.last)) {
+          if (isDayToday(timegroup.values.first)) {
             filteredGroups.add(group);
           }
         }
