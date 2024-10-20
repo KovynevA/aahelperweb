@@ -22,7 +22,7 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
   String? selectedNameGroup;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   ServiceUser? serviceuser;
-  String admingroup = 'Вешняки';
+  String admingroup = 'Выберите группу';
   TextEditingController adminGroupController = TextEditingController();
   List<String> groups = [];
   StateSetter? dialogStateSetter;
@@ -92,7 +92,7 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
     if (logincontroller.text.isNotEmpty &&
         passwordcontroller.text.isNotEmpty &&
         nameleading.text.isNotEmpty &&
-        selectedNameGroup != 'Выберете группу') {
+        selectedNameGroup != 'Выберите группу') {
       try {
         await _auth.createUserWithEmailAndPassword(
           email: logincontroller.text,
@@ -162,36 +162,26 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Wrap(
-                  //mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  alignment: WrapAlignment.spaceAround,
-                  children: [
-                    Text(
-                      'Выберете \n группу',
-                      style: AppTextStyle.menutextstyle,
-                    ),
-                    Container(
-                      padding: const EdgeInsets.fromLTRB(10, 0, 10, 2),
-                      decoration: Decor.decorDropDownButton,
-                      child: DropdownButton<String>(
-                        value: admingroup,
-                        items: groups.map((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(
-                              value,
-                              style: AppTextStyle.valuesstyle,
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: (String? newvalue) {
-                          setState(() {
-                            admingroup = newvalue!;
-                          });
-                        },
-                      ),
-                    ),
-                  ],
+                Container(
+                  padding: const EdgeInsets.fromLTRB(10, 0, 10, 2),
+                  decoration: Decor.decorDropDownButton,
+                  child: DropdownButton<String>(
+                    value: admingroup,
+                    items: groups.map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(
+                          value,
+                          style: AppTextStyle.valuesstyle,
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (String? newvalue) {
+                      setState(() {
+                        admingroup = newvalue!;
+                      });
+                    },
+                  ),
                 ),
                 SizedBox(
                   height: 15,
@@ -219,10 +209,12 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
                 SizedBox(
                   height: 15,
                 ),
-                TextAndTextFieldWidget(
-                    sizewidth: MediaQuery.of(context).size.width * 0.28,
-                    text: 'Новая группа',
-                    controller: adminGroupController),
+                AnimatedTextFieldStyleWidget(
+                  sizeheight: 40,
+                  sizewidth: MediaQuery.of(context).size.width * 0.28,
+                  text: 'Новая группа',
+                  controller: adminGroupController,
+                ),
               ],
             ),
             actions: <Widget>[
@@ -279,16 +271,15 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
         }
       }
       loadQuestionsForWorkMeeting();
-    } 
-    on FirebaseAuthException catch (e) {
-    // Обработка ошибок при входе
-    if (e.code == 'network-request-failed') {
-      infoSnackBar(context, 'Ошибка сети: проверьте подключение и повторите попытку');
-    } else {
-      infoSnackBar(context, 'Ошибка при входе: ${e.message}');
-    }
-  }
-    catch (e) {
+    } on FirebaseAuthException catch (e) {
+      // Обработка ошибок при входе
+      if (e.code == 'network-request-failed') {
+        infoSnackBar(
+            context, 'Ошибка сети: проверьте подключение и повторите попытку');
+      } else {
+        infoSnackBar(context, 'Ошибка при входе: ${e.message}');
+      }
+    } catch (e) {
       // Обработка ошибок при входе
       debugPrint(e.toString());
       if (mounted) {
@@ -410,102 +401,74 @@ class _AuthentificationWidgetState extends State<AuthentificationWidget> {
           )
         : Column(
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  const Column(
-                    children: [
-                      Text(
-                        'Почта:',
-                        style: AppTextStyle.menutextstyle,
-                      ),
-                      SizedBox(
-                        height: 20.0,
-                      ),
-                      Text(
-                        'Пароль:',
-                        style: AppTextStyle.menutextstyle,
-                      ),
-                      SizedBox(
-                        height: 20.0,
-                      ),
-                      Text(
-                        'Ваше имя:',
-                        style: AppTextStyle.menutextstyle,
-                      ),
-                      SizedBox(
-                        height: 20.0,
-                      ),
-                      Text(
-                        'Группа АА:',
-                        style: AppTextStyle.menutextstyle,
-                      ),
-                    ],
+              const SizedBox(
+                height: 5.0,
+              ),
+              TextFieldStyleWidget(
+                decoration: Decor.decorTextField,
+                sizewidth: MediaQuery.of(context).size.width * 0.8,
+                sizeheight: 50,
+                controller: logincontroller,
+                text: 'Введите email',
+                //  onChanged: (p0) => {},
+              ),
+              const SizedBox(
+                height: 5.0,
+              ),
+              TextFieldStyleWidget(
+                decoration: Decor.decorTextField,
+                sizewidth: MediaQuery.of(context).size.width * 0.8,
+                sizeheight: 50,
+                controller: passwordcontroller,
+                text: 'Введите пароль',
+              ),
+              const SizedBox(
+                height: 5.0,
+              ),
+              TextFieldStyleWidget(
+                decoration: Decor.decorTextField,
+                sizewidth: MediaQuery.of(context).size.width * 0.8,
+                sizeheight: 50,
+                controller: nameleading,
+                text: 'Введите имя',
+                // onChanged: (p0) => {},
+              ),
+              const SizedBox(
+                height: 5.0,
+              ),
+              Container(
+                padding: const EdgeInsets.fromLTRB(10, 0, 10, 4),
+                width: MediaQuery.of(context).size.width * 0.8,
+                height: 50,
+                decoration: Decor.decorDropDownButton,
+                child: DropdownButtonFormField(
+                  dropdownColor: AppColor.cardColor,
+                  menuMaxHeight: MediaQuery.of(context).size.height * 0.5,
+                  decoration: InputDecoration(
+                    enabledBorder:
+                        UnderlineInputBorder(borderSide: BorderSide.none),
+                    focusedBorder:
+                        UnderlineInputBorder(borderSide: BorderSide.none),
                   ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const SizedBox(
-                        height: 5.0,
+                  hint: Text('Выберите группу'),
+                  style: AppTextStyle.valuesstyle,
+                  value: selectedNameGroup,
+                  items: groups.map((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(
+                        value,
+                        style: AppTextStyle.valuesstyle,
+                        textAlign: TextAlign.center,
                       ),
-                      TextFieldStyleWidget(
-                        decoration: Decor.decorTextField,
-                        sizewidth: MediaQuery.of(context).size.width / 2,
-                        sizeheight: 40,
-                        controller: logincontroller,
-                        //  onChanged: (p0) => {},
-                      ),
-                      const SizedBox(
-                        height: 5.0,
-                      ),
-                      TextFieldStyleWidget(
-                        decoration: Decor.decorTextField,
-                        sizewidth: MediaQuery.of(context).size.width / 2,
-                        sizeheight: 40,
-                        controller: passwordcontroller,
-                      ),
-                      const SizedBox(
-                        height: 5.0,
-                      ),
-                      TextFieldStyleWidget(
-                        decoration: Decor.decorTextField,
-                        sizewidth: MediaQuery.of(context).size.width / 2,
-                        sizeheight: 40,
-                        controller: nameleading,
-                        // onChanged: (p0) => {},
-                      ),
-                      const SizedBox(
-                        height: 5.0,
-                      ),
-                      Container(
-                        padding: const EdgeInsets.fromLTRB(10, 0, 10, 2),
-                        width: MediaQuery.of(context).size.width / 1.8,
-                        height: 50,
-                        decoration: Decor.decorDropDownButton,
-                        child: DropdownButtonFormField(
-                          hint: Text('Выберите группу'),
-                          style: AppTextStyle.valuesstyle,
-                          value: selectedNameGroup,
-                          items: groups.map((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(
-                                value,
-                                style: AppTextStyle.valuesstyle,
-                                textAlign: TextAlign.center,
-                              ),
-                            );
-                          }).toList(),
-                          onChanged: (String? value) {
-                            setState(() {
-                              selectedNameGroup = value!;
-                            });
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                    );
+                  }).toList(),
+                  onChanged: (String? value) {
+                    setState(() {
+                      selectedNameGroup = value!;
+                    });
+                  },
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.only(top: 18.0),

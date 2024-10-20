@@ -105,79 +105,81 @@ class _AdminpanelWidgetState extends State<AdminpanelWidget> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(14.0),
+      padding: const EdgeInsets.all(10.0),
       child: Column(
         children: [
-          const Padding(
-            padding: EdgeInsets.all(6.0),
-            child: Text(
-              'Назначить служения:',
-              style: AppTextStyle.menutextstyle,
-            ),
+          Text(
+            'Назначить служения:',
+            style: AppTextStyle.menutextstyle,
           ),
-          Padding(
-            padding: const EdgeInsets.only(top: 16.0),
-            child: Column(
-              children: [
-                Container(
-                  width: MediaQuery.of(context).size.width * 0.52,
-                  padding: const EdgeInsets.fromLTRB(2, 0, 2, 2),
-                  // width: MediaQuery.of(context).size.width,
-                  height: 50,
-                  decoration: Decor.decorDropDownButton,
-                  child: DropdownButtonFormField<ServiceUser>(
-                    hint: Text('Выбрать'),
-                    style: AppTextStyle.menutextstyle,
-                    value: selectedUser,
-                    items: listUsers?.map((user) {
-                      return DropdownMenuItem<ServiceUser>(
-                        value: user,
-                        child: Text(
-                          user.email,
-                          style: AppTextStyle.valuesstyle,
-                          textAlign: TextAlign.center,
-                        ),
-                      );
-                    }).toList(),
-                    onChanged: (ServiceUser? value) {
-                      setState(() {
-                        selectedEmailUser = value?.email;
-                        selectedUser = value;
-                        selectedTypeUser = value?.type;
-                      });
-                    },
+          SizedBox(
+            height: 10.0,
+          ),
+          Column(
+            children: [
+              Container(
+                width: MediaQuery.of(context).size.width * 0.8,
+                padding: const EdgeInsets.fromLTRB(2, 0, 2, 2),
+                height: 50,
+                decoration: Decor.decorDropDownButton,
+                child: DropdownButtonFormField<ServiceUser>(
+                  dropdownColor: AppColor.cardColor,
+                  hint: Text('Выбрать'),
+                  style: AppTextStyle.valuesstyle,
+                  value: selectedUser,
+                  decoration: InputDecoration(
+                    contentPadding: EdgeInsets.only(left: 8.0),
+                    border: UnderlineInputBorder(borderSide: BorderSide.none),
+                    focusedBorder:
+                        UnderlineInputBorder(borderSide: BorderSide.none),
                   ),
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                Wrap(
-                  spacing: 8.0,
-                  // игорируем admin, чтоб не попал в кнопки назначения прав
-                  children: ServiceName.values
-                      .where((serviceName) => serviceName != ServiceName.admin)
-                      .map((serviceName) {
-                    return FilterChip(
-                      label: Text(
-                        getServiceNameTranslation(serviceName),
+                  items: listUsers?.map((user) {
+                    return DropdownMenuItem<ServiceUser>(
+                      value: user,
+                      child: Text(
+                        user.email,
                         style: AppTextStyle.valuesstyle,
+                        textAlign: TextAlign.center,
                       ),
-                      selected:
-                          selectedTypeUser?.contains(serviceName) ?? false,
-                      onSelected: (selected) {
-                        setState(() {
-                          if (selected) {
-                            selectedTypeUser?.add(serviceName);
-                          } else {
-                            selectedTypeUser?.remove(serviceName);
-                          }
-                        });
-                      },
                     );
                   }).toList(),
+                  onChanged: (ServiceUser? value) {
+                    setState(() {
+                      selectedEmailUser = value?.email;
+                      selectedUser = value;
+                      selectedTypeUser = value?.type;
+                    });
+                  },
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              Wrap(
+                spacing: 8.0,
+                // игорируем admin, чтоб не попал в кнопки назначения прав
+                children: ServiceName.values
+                    .where((serviceName) => serviceName != ServiceName.admin)
+                    .map((serviceName) {
+                  return FilterChip(
+                    label: Text(
+                      getServiceNameTranslation(serviceName),
+                      style: AppTextStyle.valuesstyle,
+                    ),
+                    selected: selectedTypeUser?.contains(serviceName) ?? false,
+                    onSelected: (selected) {
+                      setState(() {
+                        if (selected) {
+                          selectedTypeUser?.add(serviceName);
+                        } else {
+                          selectedTypeUser?.remove(serviceName);
+                        }
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+            ],
           ),
           Padding(
             padding: const EdgeInsets.all(20.0),

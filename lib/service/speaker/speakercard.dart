@@ -372,29 +372,63 @@ class _AddSpeakerForSelectedDateState extends State<AddSpeakerForSelectedDate> {
             elevation: 5.0,
             child: Column(
               children: [
-                AnimatedTextAndTextFieldWidget(
+                SizedBox(
+                  height: 15,
+                ),
+                AnimatedTextFieldStyleWidget(
                   text: 'Имя:',
                   controller: nameSpeakerController!,
+                  sizeheight: 50,
+                  sizewidth: MediaQuery.of(context).size.width * 0.8,
+                  decoration: Decor.decorTextField,
+                ),
+                SizedBox(
+                  height: 15,
                 ),
                 GestureDetector(
                   onDoubleTap: () {
                     _launchPhoneApp(phoneeSpeakerController!.text);
                   },
-                  child: AnimatedTextAndTextFieldWidget(
-                      text: 'Телефон спикера:',
-                      controller: phoneeSpeakerController!),
+                  child: AnimatedTextFieldStyleWidget(
+                    text: 'Телефон спикера:',
+                    controller: phoneeSpeakerController!,
+                    sizeheight: 50,
+                    sizewidth: MediaQuery.of(context).size.width * 0.8,
+                    decoration: Decor.decorTextField,
+                  ),
                 ),
-                AnimatedTextAndTextFieldWidget(
+                SizedBox(
+                  height: 15,
+                ),
+                AnimatedTextFieldStyleWidget(
                   text: 'Домашняя группа:',
                   controller: homegroupController!,
+                  sizeheight: 50,
+                  sizewidth: MediaQuery.of(context).size.width * 0.8,
+                  decoration: Decor.decorTextField,
                 ),
-                AnimatedTextAndTextFieldWidget(
+                SizedBox(
+                  height: 15,
+                ),
+                AnimatedTextFieldStyleWidget(
                   text: 'Срок трезвости:',
+                  sizeheight: 50,
                   controller: sobrietyPeriodrController!,
+                  sizewidth: MediaQuery.of(context).size.width * 0.8,
+                  decoration: Decor.decorTextField,
                 ),
-                AnimatedTextAndTextFieldWidget(
+                SizedBox(
+                  height: 15,
+                ),
+                AnimatedTextFieldStyleWidget(
                   text: 'Тема:',
                   controller: themeController!,
+                  sizeheight: 50,
+                  sizewidth: MediaQuery.of(context).size.width * 0.8,
+                  decoration: Decor.decorTextField,
+                ),
+                SizedBox(
+                  height: 15,
                 ),
               ],
             ),

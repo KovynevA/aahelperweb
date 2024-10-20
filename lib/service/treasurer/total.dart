@@ -40,10 +40,10 @@ class _TotalState extends State<Total> {
     }
   }
 
-
 // Загрузить отчет по запрошенным датам
   void loadProfitData(DateTime date1, DateTime date2) async {
-        WorkMeetingSchedule? shedule = await WorkMeetingSchedule.loadWorkMeetingSchedule() ?? null;
+    WorkMeetingSchedule? shedule =
+        await WorkMeetingSchedule.loadWorkMeetingSchedule() ?? null;
     List<ProfitGroup> loadedData = await ProfitGroup.loadProfitGroups() ?? [];
     setState(() {
       listProfitGroup = loadedData.where((profitGroup) {
@@ -52,13 +52,13 @@ class _TotalState extends State<Total> {
             profitGroup.date.isAtSameMomentAs(date1) ||
             profitGroup.date.isAtSameMomentAs(date2);
       }).toList();
-       // Удаляем последний день, если рабочки каждый день_недели номер_месяца
+      // Удаляем последний день, если рабочки каждый день_недели номер_месяца
       if (shedule?.checkboxstatus == true) {
         listProfitGroup.removeLast();
       }
 // Если рабочка совпадает с днём расчетного периода, то тоже удаляем последний день (он войдет в следующий расчетный период)
-      if (shedule?.checkboxstatus == false && shedule?.dayOfMonth ==listProfitGroup.last.date.day)
-      {
+      if (shedule?.checkboxstatus == false &&
+          shedule?.dayOfMonth == listProfitGroup.last.date.day) {
         listProfitGroup.removeLast();
       }
       totalProfit = ProfitGroup.totalProfit(listProfitGroup);
@@ -124,6 +124,8 @@ class _TotalState extends State<Total> {
                       style: AppTextStyle.menutextstyle,
                     ),
                     DropdownButton<DateTime>(
+                      dropdownColor: AppColor.cardColor,
+                      underline: Container(),
                       hint: Text(_formatDate(_startDate!)),
                       value: _startDate,
                       onChanged: (DateTime? newValue) {
@@ -153,6 +155,8 @@ class _TotalState extends State<Total> {
                       style: AppTextStyle.menutextstyle,
                     ),
                     DropdownButton<DateTime>(
+                      dropdownColor: AppColor.cardColor,
+                      underline: Container(),
                       hint: Text(_formatDate(_endDate!)),
                       value: _endDate,
                       onChanged: (DateTime? newValue) {

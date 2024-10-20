@@ -686,21 +686,33 @@ class _GroupInfoState extends State<GroupInfo> {
                               style: AppTextStyle.menutextstyle,
                               textAlign: TextAlign.center,
                             ),
-                            AnimatedTextAndTextFieldWidget(
+                            AnimatedTextFieldStyleWidget(
                               text: 'Город:',
                               controller: citycontroller,
+                              sizeheight: 50,
+                              sizewidth:
+                                  MediaQuery.of(context).size.width * 0.8,
                             ),
-                            AnimatedTextAndTextFieldWidget(
+                            AnimatedTextFieldStyleWidget(
                               text: 'Район:',
                               controller: areacontroller,
+                              sizeheight: 50,
+                              sizewidth:
+                                  MediaQuery.of(context).size.width * 0.8,
                             ),
-                            AnimatedTextAndTextFieldWidget(
+                            AnimatedTextFieldStyleWidget(
                               text: 'Метро:',
                               controller: metrocontroller,
+                              sizeheight: 50,
+                              sizewidth:
+                                  MediaQuery.of(context).size.width * 0.8,
                             ),
-                            AnimatedTextAndTextFieldWidget(
+                            AnimatedTextFieldStyleWidget(
                               text: 'Адрес:',
                               controller: adresscontroller,
+                              sizeheight: 50,
+                              sizewidth:
+                                  MediaQuery.of(context).size.width * 0.8,
                             ),
                             Text(
                               'Время собраний:',
@@ -711,38 +723,59 @@ class _GroupInfoState extends State<GroupInfo> {
                               for (int i = 0;
                                   i < _schedule!.selectedDays.length;
                                   i++)
-                                TextAndTextFieldWidget(
+                                TextFieldStyleWidget(
                                   controller: timingcontroller[i],
                                   text: '${_schedule?.selectedDays[i]}',
+                                  sizewidth:
+                                      MediaQuery.of(context).size.width * 0.5,
+                                  sizeheight: 50,
                                 ),
                             Text(
                               'Дополнительно:',
                               style: AppTextStyle.menutextstyle,
                               textAlign: TextAlign.center,
                             ),
-                            AnimatedTextAndTextFieldWidget(
+                            AnimatedTextFieldStyleWidget(
                               text: 'Большое спикерское:',
                               controller: bigspeakercontroller,
+                              sizeheight: 50,
+                              sizewidth:
+                                  MediaQuery.of(context).size.width * 0.8,
                             ),
-                            AnimatedTextAndTextFieldWidget(
+                            AnimatedTextFieldStyleWidget(
                               text: 'Мини-спикерское:',
                               controller: minispeakercontroller,
+                              sizeheight: 50,
+                              sizewidth:
+                                  MediaQuery.of(context).size.width * 0.8,
                             ),
-                            AnimatedTextAndTextFieldWidget(
+                            AnimatedTextFieldStyleWidget(
                               text: 'Телефон:',
                               controller: phonecontroller,
+                              sizeheight: 50,
+                              sizewidth:
+                                  MediaQuery.of(context).size.width * 0.8,
                             ),
-                            AnimatedTextAndTextFieldWidget(
+                            AnimatedTextFieldStyleWidget(
                               text: 'Почта:',
                               controller: emailcontroller,
+                              sizeheight: 50,
+                              sizewidth:
+                                  MediaQuery.of(context).size.width * 0.8,
                             ),
-                            AnimatedTextAndTextFieldWidget(
+                            AnimatedTextFieldStyleWidget(
                               text: 'Сайт:',
                               controller: urlcontroller,
+                              sizeheight: 50,
+                              sizewidth:
+                                  MediaQuery.of(context).size.width * 0.8,
                             ),
-                            AnimatedTextAndTextFieldWidget(
+                            AnimatedTextFieldStyleWidget(
                               text: 'Доп.информация:',
                               controller: additionalInfocontroller,
+                              sizeheight: 50,
+                              sizewidth:
+                                  MediaQuery.of(context).size.width * 0.8,
                             ),
                           ],
                         ),

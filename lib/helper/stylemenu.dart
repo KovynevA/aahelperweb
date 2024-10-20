@@ -7,6 +7,7 @@ class TextFieldStyleWidget extends StatelessWidget {
   final double sizewidth;
   final double sizeheight;
   final Decoration? decoration;
+  final String? text;
   const TextFieldStyleWidget({
     super.key,
     this.onChanged,
@@ -14,6 +15,7 @@ class TextFieldStyleWidget extends StatelessWidget {
     this.sizeheight = 50,
     this.sizewidth = 105,
     this.decoration,
+    this.text,
   });
 
   @override
@@ -39,83 +41,11 @@ class TextFieldStyleWidget extends StatelessWidget {
         onChanged: onChanged,
         style: AppTextStyle.valuesstyle,
         textAlign: TextAlign.center,
-        decoration: const InputDecoration(
+        decoration: InputDecoration(
+          labelText: text,
+          labelStyle: AppTextStyle.valuesstyle,
           border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(vertical: 2.0),
-        ),
-      ),
-    );
-  }
-}
-
-// Виджет ТЕКСТ + Поле ввода текста
-class AnimatedTextAndTextFieldWidget extends StatefulWidget {
-  final String text;
-  final TextEditingController controller;
-
-  const AnimatedTextAndTextFieldWidget({
-    super.key,
-    required this.text,
-    required this.controller,
-  });
-
-  @override
-  State<AnimatedTextAndTextFieldWidget> createState() =>
-      _AnimatedTextAndTextFieldWidgetState();
-}
-
-class _AnimatedTextAndTextFieldWidgetState
-    extends State<AnimatedTextAndTextFieldWidget> {
-  bool _isTextFieldFocused = false;
-
-  void _handleTextFieldFocusChange(bool hasFocus) {
-    setState(() {
-      _isTextFieldFocused = hasFocus;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(10.0),
-      child: AnimatedContainer(
-        height: _isTextFieldFocused
-            ? MediaQuery.of(context).size.height * 0.12
-            : MediaQuery.of(context).size.height * 0.07,
-        duration: const Duration(milliseconds: 200),
-        child: Row(
-          children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Container(
-                width: MediaQuery.of(context).size.width * 0.28,
-                height: MediaQuery.of(context).size.height * 0.9,
-                child: Text(
-                  widget.text,
-                  softWrap: true,
-                  maxLines: null,
-                  //overflow: TextOverflow.ellipsis,
-                  style: AppTextStyle.valuesstyle,
-                ),
-              ),
-            ),
-            // Positioned.fill(
-            //   child: Align(
-            //     alignment: _isTextFieldFocused
-            //         ? Alignment.center
-            //         : Alignment.centerRight,
-            Expanded(
-              child: AnimatedTextFieldStyleWidget(
-                decoration: Decor.decorTextField,
-                sizeheight: MediaQuery.of(context).size.height * 0.5,
-                sizewidth: MediaQuery.of(context).size.width * 0.60,
-                controller: widget.controller,
-                //onChanged: widget.onChanged,
-                onFocusChanged: _handleTextFieldFocusChange,
-              ),
-            ),
-            //),
-          ],
+          contentPadding: EdgeInsets.fromLTRB(8.0, 2.0, 0, 2.0),
         ),
       ),
     );
@@ -130,6 +60,7 @@ class AnimatedTextFieldStyleWidget extends StatefulWidget {
   final double? sizewidth;
   final double? sizeheight;
   final Decoration? decoration;
+  final String? text;
 
   const AnimatedTextFieldStyleWidget({
     super.key,
@@ -139,6 +70,7 @@ class AnimatedTextFieldStyleWidget extends StatefulWidget {
     this.sizeheight,
     this.sizewidth,
     this.decoration,
+    this.text,
   });
 
   @override
@@ -188,9 +120,11 @@ class _AnimatedTextFieldStyleWidgetState
           onChanged: widget.onChanged,
           style: AppTextStyle.valuesstyle,
           textAlign: TextAlign.center,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
+            labelText: widget.text,
+            labelStyle: AppTextStyle.spantextstyle,
             border: InputBorder.none,
-            contentPadding: EdgeInsets.symmetric(vertical: 2.0),
+            contentPadding: EdgeInsets.fromLTRB(8.0, 2.0, 0, 2.0),
           ),
         ),
       ),
@@ -218,9 +152,15 @@ class TreasureDropdownButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
-      decoration: decoration ?? const BoxDecoration(),
+      decoration: decoration ??
+          const BoxDecoration(
+            border: Border.fromBorderSide(BorderSide.none),
+          ),
       child: DropdownButton<String>(
-        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+        underline: Container(),
+        menuMaxHeight: MediaQuery.of(context).size.height * 0.5,
+        dropdownColor: AppColor.cardColor,
+        padding: const EdgeInsets.symmetric(horizontal: 8.0),
         value: value,
         items: items.map<DropdownMenuItem<String>>((String value) {
           return DropdownMenuItem<String>(
@@ -232,49 +172,6 @@ class TreasureDropdownButton extends StatelessWidget {
           );
         }).toList(),
         onChanged: onChanged,
-      ),
-    );
-  }
-}
-
-//Стиль карточек текст и поле ввода
-class TextAndTextFieldWidget extends StatelessWidget {
-  final String text;
-  final TextEditingController controller;
-  final double? sizeheight;
-  final double? sizewidth;
-  const TextAndTextFieldWidget(
-      {super.key,
-      required this.text,
-      required this.controller,
-      this.sizeheight,
-      this.sizewidth});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(10.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          SizedBox(
-            width: MediaQuery.of(context).size.width * 0.3,
-            child: Text(
-              text,
-              style: AppTextStyle.menutextstyle,
-            ),
-          ),
-          SizedBox(
-            width: sizewidth ?? MediaQuery.of(context).size.width * 0.5,
-            child: TextFieldStyleWidget(
-              decoration: Decor.decorTextField,
-              sizeheight:
-                  sizeheight ?? MediaQuery.of(context).size.height * 0.05,
-              sizewidth: sizewidth ?? MediaQuery.of(context).size.width * 0.3,
-              controller: controller,
-            ),
-          ),
-        ],
       ),
     );
   }
