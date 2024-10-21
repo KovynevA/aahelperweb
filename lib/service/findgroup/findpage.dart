@@ -35,6 +35,7 @@ class _GroupSearchScreenState extends State<GroupSearchScreen> {
   TimePeriod todayTime = TimePeriod.evening;
   bool isToday = true;
   List<GroupsAA> groups = [];
+  String previousText = '';
 
   static const List<String> list = <String>[
     'Имени',
@@ -63,6 +64,13 @@ class _GroupSearchScreenState extends State<GroupSearchScreen> {
       filterGroups = [];
     }
     if (findController.text.isNotEmpty) {
+      if (isAddingCharacter(findController.text, previousText)) {
+        groups = groups;
+      } else if (isRemovingOrChangingCharacter(
+          findController.text, previousText)) {
+        groups = [];
+        filterGroups = [];
+      }
       if (selectedFindValue == list[0]) {
         groups = await groupSearchService.filterGroups(
             findController.text, 'name', groups);
@@ -84,7 +92,29 @@ class _GroupSearchScreenState extends State<GroupSearchScreen> {
         isToday,
       ); // утро, день, вечер
     }
+    previousText =
+        findController.text; // Сохраняем текущий текст для следующего сравнения
     return filterGroups;
+  }
+
+  bool isAddingCharacter(String currentText, String previousText) {
+    // Функция для проверки, был ли добавлен символ
+    return currentText.length > previousText.length;
+  }
+
+  bool isRemovingOrChangingCharacter(String currentText, String previousText) {
+    // Функция для проверки, был ли удален или изменен символ
+    if (currentText.length < previousText.length) {
+      return true; // Если длина текущего текста меньше предыдущего, символ был удален
+    } else {
+      // Проверяем каждый символ для определения, был ли изменен символ
+      for (int i = 0; i < previousText.length; i++) {
+        if (i >= currentText.length || currentText[i] != previousText[i]) {
+          return true;
+        }
+      }
+      return false;
+    }
   }
 
   @override

@@ -1567,7 +1567,6 @@ class GroupSearchService {
   // Фильтр по...
   Future<List<GroupsAA>> filterGroups(
       String prefix, String filter, List<GroupsAA> groups) async {
-    List<GroupsAA> filteredGroups = [];
     if (groups.isEmpty) {
       QuerySnapshot querySnapshot =
           await _firestore.collection('allgroups').get();
@@ -1582,20 +1581,24 @@ class GroupSearchService {
               .toString()
               .toLowerCase()
               .startsWith(prefix.toLowerCase())) {
-            filteredGroups.add(GroupsAA.fromJson(data));
+            groups.add(GroupsAA.fromJson(data));
           }
         }
       }
     } else {
-      filteredGroups = groups
-          .where((group) => group
-              .toMap()[filter]
-              .toString()
-              .toLowerCase()
-              .startsWith(prefix.toLowerCase()))
-          .toList();
+      List<GroupsAA> newgroups = [];
+      for (var group in groups) {
+        var data = group.toMap();
+        if (data[filter]
+            .toString()
+            .toLowerCase()
+            .startsWith(prefix.toLowerCase())) {
+          newgroups.add(GroupsAA.fromJson(data));
+        }
+      }
+      groups = newgroups;
     }
-    return filteredGroups;
+    return groups;
   }
 
   // Фильтр по адресу - не по первым буквам, а содержащий буквы
@@ -1678,6 +1681,7 @@ class GroupSearchService {
     }
     return filteredGroups.toList();
   }
+
 
 // Вспомогательная функция сравнения текущего дня с заданным днем из daysOfweek
   bool isDayToday(String day) {
