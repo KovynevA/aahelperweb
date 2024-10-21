@@ -1556,93 +1556,51 @@ class GroupsAA {
   }
 }
 
-// Класс поиска и фильтрации по группам
+enum TimePeriod { morning, afternoon, evening }
+
+enum DayOfWeek { today, notToday }
+
+///////******* Класс поиска и фильтрации по группам ********/////////////
 class GroupSearchService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-// Поиск по имени
-  Future<List<GroupsAA>> searchGroupByName(String name) async {
-    List<GroupsAA> groups = [];
-    var groupDoc = await _firestore.collection('allgroups').doc(name).get();
-    if (groupDoc.exists) {
-      var groupInfoDoc =
-          await groupDoc.reference.collection('groupInfo').doc('info').get();
-      if (groupInfoDoc.exists) {
-        var data = groupInfoDoc.data();
-        groups.add(GroupsAA.fromJson(data as Map<String, dynamic>));
-      }
-    }
-    return groups;
-  }
-
-  // Поиск по району
-  Future<List<GroupsAA>> searchGroupsByArea(String area) async {
-    QuerySnapshot querySnapshot =
-        await _firestore.collection('allgroups').get();
-
-    List<GroupsAA> groups = [];
-
-    for (var doc in querySnapshot.docs) {
-      var groupInfoDoc =
-          await doc.reference.collection('groupInfo').doc('info').get();
-      if (groupInfoDoc.exists) {
-        var data = groupInfoDoc.data();
-        if (data?['area'] == area) {
-          groups.add(GroupsAA.fromJson(data as Map<String, dynamic>));
-        }
-      }
-    }
-    return groups;
-  }
-
-// Поиск по метро
-  Future<List<GroupsAA>> searchGroupsByMetro(String metro) async {
-    QuerySnapshot querySnapshot =
-        await _firestore.collection('allgroups').get();
-
-    List<GroupsAA> groups = [];
-
-    for (var doc in querySnapshot.docs) {
-      var groupInfoDoc =
-          await doc.reference.collection('groupInfo').doc('info').get();
-      if (groupInfoDoc.exists) {
-        var data = groupInfoDoc.data();
-        if (data?['metro'] == metro) {
-          groups.add(GroupsAA.fromJson(data as Map<String, dynamic>));
-        }
-      }
-    }
-    return groups;
-  }
-
   // Фильтр по...
-  Future<List<GroupsAA>> filterGroups(String prefix, String filter) async {
-    List<GroupsAA> groups = [];
-    QuerySnapshot querySnapshot =
-        await _firestore.collection('allgroups').get();
+  Future<List<GroupsAA>> filterGroups(
+      String prefix, String filter, List<GroupsAA> groups) async {
+    List<GroupsAA> filteredGroups = [];
+    if (groups.isEmpty) {
+      QuerySnapshot querySnapshot =
+          await _firestore.collection('allgroups').get();
 
-    for (var doc in querySnapshot.docs) {
-      var groupInfoQuerySnapshot =
-          await doc.reference.collection('groupInfo').get();
+      for (var doc in querySnapshot.docs) {
+        var groupInfoQuerySnapshot =
+            await doc.reference.collection('groupInfo').get();
 
-      for (var groupInfoDoc in groupInfoQuerySnapshot.docs) {
-        var data = groupInfoDoc.data();
-        if (data[filter]
-            .toString()
-            .toLowerCase()
-            .startsWith(prefix.toLowerCase())) {
-          groups.add(GroupsAA.fromJson(data));
+        for (var groupInfoDoc in groupInfoQuerySnapshot.docs) {
+          var data = groupInfoDoc.data();
+          if (data[filter]
+              .toString()
+              .toLowerCase()
+              .startsWith(prefix.toLowerCase())) {
+            filteredGroups.add(GroupsAA.fromJson(data));
+          }
         }
       }
+    } else {
+      filteredGroups = groups
+          .where((group) => group
+              .toMap()[filter]
+              .toString()
+              .toLowerCase()
+              .startsWith(prefix.toLowerCase()))
+          .toList();
     }
-
-    return groups;
+    return filteredGroups;
   }
 
   // Фильтр по адресу - не по первым буквам, а содержащий буквы
   Future<List<GroupsAA>> filterGroupsbyAdres(
-      String prefix, String filter) async {
-    List<GroupsAA> groups = [];
+      String prefix, String filter, List<GroupsAA> groups) async {
     QuerySnapshot querySnapshot =
         await _firestore.collection('allgroups').get();
 
@@ -1662,24 +1620,6 @@ class GroupSearchService {
     return groups;
   }
 
-  // Вспомогательная функция для получения следующего символа в алфавите
-  String getNextCharacter(String input) {
-    if (input.isEmpty) {
-      return 'я'; // Если ввод пустой, возвращаем последний символ в русском алфавите
-    }
-    final lastChar = input.codeUnitAt(input.length - 1);
-    if (lastChar == 1105) {
-      return String.fromCharCode(
-          1025); // Если последний символ - "е", возвращаем "ё"
-    } else if (lastChar == 1071) {
-      return String.fromCharCode(
-          1072); // Если последний символ - "я", возвращаем "а"
-    } else {
-      return String.fromCharCode(lastChar +
-          1); // В остальных случаях возвращаем следующий символ в алфавите
-    }
-  }
-
 // Вычленить время в мапе найденной группы
   String formatTiming(List<Map<String, String>>? timing) {
     if (timing != null && timing.isNotEmpty) {
@@ -1695,34 +1635,43 @@ class GroupSearchService {
   /////////////////////////// ВРЕМЯ////////////////////////////////////////////
 
   Future<List<GroupsAA>> filterGroupsByTime(
-      Today timePeriod, List<GroupsAA> groups) async {
+      TimePeriod timePeriod, List<GroupsAA> groups, bool isToday) async {
     Set<GroupsAA> filteredGroups = {};
+    // Идем по всем группам
     for (var group in groups) {
+      // Т.е. тайминг это лист, то проверяем каждый тайминг
       if (group.timing != null) {
         for (var timegroup in group.timing!) {
-          if (timePeriod == Today.morning &&
-              isTimeInMorning(timegroup.values.last)) {
-            filteredGroups.add(group);
-          } else if (timePeriod == Today.afternoon &&
-              isTimeInDay(timegroup.values.last)) {
-            filteredGroups.add(group);
-          } else if (timePeriod == Today.evening &&
-              isTimeInEvening(timegroup.values.last)) {
-            filteredGroups.add(group);
+          // Если стоит галка фильтровать "На сегодня"
+          if (isToday) {
+            // то проверяем на совпадение текущего дня в тайминге с сегодняшним днем
+            if (isDayToday(timegroup.values.first)) {
+              // если совпал день, то фильтруем по Утро/день/вечер
+              if (timePeriod == TimePeriod.morning &&
+                  isTimeInMorning(timegroup.values.last)) {
+                filteredGroups.add(group);
+              } else if (timePeriod == TimePeriod.afternoon &&
+                  isTimeInDay(timegroup.values.last)) {
+                filteredGroups.add(group);
+              } else if (timePeriod == TimePeriod.evening &&
+                  isTimeInEvening(timegroup.values.last)) {
+                filteredGroups.add(group);
+              }
+            }
           }
-        }
-      }
-    }
-    return filteredGroups.toList();
-  }
-
-  List<GroupsAA> filterGroupsByToday(List<GroupsAA> groups) {
-    Set<GroupsAA> filteredGroups = {};
-    for (var group in groups) {
-      if (group.timing != null) {
-        for (var timegroup in group.timing!) {
-          if (isDayToday(timegroup.values.first)) {
-            filteredGroups.add(group);
+          // Если галка фильтровать "На сегодня" не стоит, то просто проверяем
+          // по фильтру утро/день/вечер
+          else {
+            if (timePeriod == TimePeriod.morning &&
+                isTimeInMorning(timegroup.values.last)) {
+              filteredGroups.add(group);
+            } else if (timePeriod == TimePeriod.afternoon &&
+                isTimeInDay(timegroup.values.last)) {
+              filteredGroups.add(group);
+            } else if (timePeriod == TimePeriod.evening &&
+                isTimeInEvening(timegroup.values.last)) {
+              filteredGroups.add(group);
+            }
           }
         }
       }
@@ -1762,8 +1711,6 @@ class GroupSearchService {
             6; // Вечернее время начинается после 17:00 и до 24:00, а также с полуночи до 6:00
   }
 }
-
-
 
 // Функция транслитерации русских букв в латинские
 // String transliterate(String input) {

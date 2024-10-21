@@ -24,8 +24,6 @@ class FindPage extends StatelessWidget {
   }
 }
 
-enum Today { morning, afternoon, evening }
-
 class GroupSearchScreen extends StatefulWidget {
   @override
   State<GroupSearchScreen> createState() => _GroupSearchScreenState();
@@ -34,8 +32,9 @@ class GroupSearchScreen extends StatefulWidget {
 class _GroupSearchScreenState extends State<GroupSearchScreen> {
   final GroupSearchService groupSearchService = GroupSearchService();
   final TextEditingController findController = TextEditingController();
-  Today todayTime = Today.evening;
+  TimePeriod todayTime = TimePeriod.evening;
   bool isToday = true;
+  List<GroupsAA> groups = [];
 
   static const List<String> list = <String>[
     'Имени',
@@ -58,30 +57,34 @@ class _GroupSearchScreenState extends State<GroupSearchScreen> {
   }
 
   Future<List<GroupsAA>> selectedFindFunction(String selectedFindValue) async {
-    //final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-    List<GroupsAA> groups = [];
+    List<GroupsAA> filterGroups = [];
+    if (findController.text == '') {
+      groups = [];
+      filterGroups = [];
+    }
     if (findController.text.isNotEmpty) {
       if (selectedFindValue == list[0]) {
-        groups =
-            await groupSearchService.filterGroups(findController.text, 'name');
+        groups = await groupSearchService.filterGroups(
+            findController.text, 'name', groups);
       } else if (selectedFindValue == list[1]) {
-        groups =
-            await groupSearchService.filterGroups(findController.text, 'area');
+        groups = await groupSearchService.filterGroups(
+            findController.text, 'area', groups);
       } else if (selectedFindValue == list[2]) {
-        groups =
-            await groupSearchService.filterGroups(findController.text, 'metro');
+        groups = await groupSearchService.filterGroups(
+            findController.text, 'metro', groups);
       } else {
         groups = await groupSearchService.filterGroupsbyAdres(
-            findController.text, 'adress');
+            findController.text, 'adress', groups);
       }
     }
     if (groups != []) {
-      groups = await groupSearchService.filterGroupsByTime(todayTime, groups);
-      if (isToday) {
-        groups = groupSearchService.filterGroupsByToday(groups);
-      }
+      filterGroups = await groupSearchService.filterGroupsByTime(
+        todayTime,
+        groups,
+        isToday,
+      ); // утро, день, вечер
     }
-    return groups;
+    return filterGroups;
   }
 
   @override
@@ -172,32 +175,32 @@ class _GroupSearchScreenState extends State<GroupSearchScreen> {
         ),
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: SegmentedButton<Today>(
+          child: SegmentedButton<TimePeriod>(
             style: SegmentedButton.styleFrom(
               backgroundColor: AppColor.defaultColor,
               foregroundColor: Colors.red,
               selectedForegroundColor: Colors.white,
               selectedBackgroundColor: Colors.green,
             ),
-            segments: <ButtonSegment<Today>>[
-              ButtonSegment<Today>(
-                value: Today.morning,
+            segments: <ButtonSegment<TimePeriod>>[
+              ButtonSegment<TimePeriod>(
+                value: TimePeriod.morning,
                 label: Text(
                   'Утро',
                   style: AppTextStyle.valuesstyle,
                 ),
                 icon: Icon(Icons.sunny),
               ),
-              ButtonSegment<Today>(
-                value: Today.afternoon,
+              ButtonSegment<TimePeriod>(
+                value: TimePeriod.afternoon,
                 label: Text(
                   'День',
                   style: AppTextStyle.valuesstyle,
                 ),
                 icon: Icon(Icons.lunch_dining),
               ),
-              ButtonSegment<Today>(
-                value: Today.evening,
+              ButtonSegment<TimePeriod>(
+                value: TimePeriod.evening,
                 label: Text(
                   'Вечер',
                   style: AppTextStyle.valuesstyle,
@@ -205,8 +208,8 @@ class _GroupSearchScreenState extends State<GroupSearchScreen> {
                 icon: Icon(Icons.bed),
               ),
             ],
-            selected: <Today>{todayTime},
-            onSelectionChanged: (Set<Today> newSelection) {
+            selected: <TimePeriod>{todayTime},
+            onSelectionChanged: (Set<TimePeriod> newSelection) {
               setState(() {
                 todayTime = newSelection.first;
               });
@@ -217,46 +220,46 @@ class _GroupSearchScreenState extends State<GroupSearchScreen> {
           margin: EdgeInsets.all(8.0),
           height: MediaQuery.of(context).size.height - 370,
           decoration: Decor.decorTextField,
-          child: findController.text != ''
-              ? FutureBuilder<List<GroupsAA>>(
-                  future: selectedFindFunction(dropdownValue),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(child: CircularProgressIndicator());
-                    } else if (snapshot.hasError) {
-                      return Center(child: Text('Ошибка: ${snapshot.error}'));
-                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return Center(child: Text('Нет данных'));
-                    } else {
-                      List<GroupsAA> groups = snapshot.data!;
-                      return ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: groups.length,
-                        itemBuilder: (context, index) {
-                          return ListTile(
-                            title: Text(
-                              groups[index].name,
-                              style: AppTextStyle.valuesstyle,
-                            ),
-                            subtitle: Column(
-                              children: [
-                                Text(
-                                  'Адрес: ${groups[index].adress}',
-                                  style: AppTextStyle.spantextstyle,
-                                ),
-                                Text(
-                                  'Время работы: ${groupSearchService.formatTiming(groups[index].timing)}',
-                                  style: AppTextStyle.minimalsstyle,
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      );
-                    }
+          child: //findController.text != '' ?
+              FutureBuilder<List<GroupsAA>>(
+            future: selectedFindFunction(dropdownValue),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return Center(child: Text('Ошибка: ${snapshot.error}'));
+              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return Center(child: Text('Нет данных'));
+              } else {
+                List<GroupsAA> groups = snapshot.data!;
+                return ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: groups.length,
+                  itemBuilder: (context, index) {
+                    return ListTile(
+                      title: Text(
+                        groups[index].name,
+                        style: AppTextStyle.valuesstyle,
+                      ),
+                      subtitle: Column(
+                        children: [
+                          Text(
+                            'Адрес: ${groups[index].adress}',
+                            style: AppTextStyle.spantextstyle,
+                          ),
+                          Text(
+                            'Время работы: ${groupSearchService.formatTiming(groups[index].timing)}',
+                            style: AppTextStyle.minimalsstyle,
+                          ),
+                        ],
+                      ),
+                    );
                   },
-                )
-              : Container(),
+                );
+              }
+            },
+          ),
+          //  : Container(),
         ),
       ],
     );
